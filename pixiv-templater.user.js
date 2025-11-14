@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Pixiv Upload Templater
 // @namespace    http://tampermonkey.net/
-// @version      1.2.0
+// @version      1.2.2
 // @description  Auto-fill Pixiv upload page with predefined templates (com atalhos personalizáveis!)
 // @author       You
 // @match        *://www.pixiv.net/illustration/create*
@@ -351,6 +351,10 @@ function addTag(tagName) {
 // INTERFACE DO USUÁRIO
 // ============================
 
+// Variáveis de estado dos modos
+let deleteMode = false;
+let selectedTemplates = [];
+
 function createUI() {
   GM_addStyle(`
         #pixiv-templater {
@@ -426,6 +430,7 @@ function createUI() {
             font-weight: 400;
             letter-spacing: 0.5px;
             margin-left: auto;
+            margin-right: 16px;
         }
 
         .header-settings-btn {
@@ -561,18 +566,16 @@ function createUI() {
         }
 
         .template-actions {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
             margin-top: 16px;
             padding-top: 16px;
             border-top: 2px solid #f0f0f0;
-            flex-wrap: wrap;
             position: relative;
         }
 
         .action-btn {
-            flex: 1;
-            min-width: 140px;
             padding: 12px 16px;
             background: white;
             border: 2px solid #ddd;
@@ -648,6 +651,13 @@ function createUI() {
             font-size: 14px;
             color: #24292e;
             border-bottom: 1px solid #f0f0f0;
+            background: white;
+        }
+
+        .settings-menu-item.active {
+            background: #e8f5ff;
+            color: #0096fa;
+            font-weight: 600;
         }
 
         .settings-menu-item:last-child {
@@ -672,7 +682,7 @@ function createUI() {
             height: 100%;
             background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(4px);
-            z-index: 10001;
+            z-index: 999999;
             display: none;
             align-items: center;
             justify-content: center;
@@ -884,6 +894,26 @@ function createUI() {
         .template-item-actions {
             display: flex;
             gap: 8px;
+            align-items: center;
+        }
+
+        .template-item.delete-mode {
+            cursor: pointer;
+        }
+
+        .template-item.delete-mode:hover {
+            border-color: #dc3545;
+            background: linear-gradient(135deg, #fff8f8 0%, #fff0f0 100%);
+        }
+
+        .template-item.selected {
+            border-color: #dc3545 !important;
+            background: linear-gradient(135deg, #ffe8ea 0%, #ffd5d8 100%) !important;
+        }
+
+        .template-item.delete-mode.selected {
+            border-color: #dc3545 !important;
+            background: linear-gradient(135deg, #ffcdd2 0%, #ffb3ba 100%) !important;
         }
 
         .btn-icon {
@@ -1115,6 +1145,10 @@ function createUI() {
                 border-bottom-color: #444;
             }
 
+            .settings-menu-item {
+                background: #1e1e1e;
+            }
+
             .settings-menu-item:hover {
                 background: #1a3a4a;
                 color: #58a6ff;
@@ -1122,6 +1156,11 @@ function createUI() {
 
             .settings-menu-item:active {
                 background: #0d2433;
+            }
+
+            .settings-menu-item.active {
+                background: #1a3a4a;
+                color: #58a6ff;
             }
 
             .modal-content {
@@ -1186,6 +1225,21 @@ function createUI() {
 
             .template-item:hover {
                 background: #1a3a4a;
+            }
+
+            .template-item.delete-mode:hover {
+                border-color: #ff6b6b;
+                background: linear-gradient(135deg, #2d1a1a 0%, #221010 100%);
+            }
+
+            .template-item.selected {
+                border-color: #ff6b6b !important;
+                background: linear-gradient(135deg, #3d1a1a 0%, #2d1010 100%) !important;
+            }
+
+            .template-item.delete-mode.selected {
+                border-color: #ff6b6b !important;
+                background: linear-gradient(135deg, #4d2020 0%, #3d1818 100%) !important;
             }
 
             .btn-icon {
@@ -1367,6 +1421,9 @@ function createUI() {
                             </div>
                             <div class="settings-menu-item" id="shortcuts-config">
                                 ⌨️ Configurar Atalhos
+                            </div>
+                            <div class="settings-menu-item" id="delete-mode-toggle">
+                                🗑 Deletar Templates
                             </div>
                         </div>
                     </div>
@@ -1816,6 +1873,14 @@ function createUI() {
   let editingTemplateName = null;
 
   function editTemplate(name, template) {
+    const $modal = $("#template-modal");
+
+    if ($modal.length === 0) {
+      console.error("[Templater] ERRO: Modal não encontrado no DOM!");
+      alert("Erro: Modal de edição não encontrado. Tente recarregar a página.");
+      return;
+    }
+
     editingTemplateName = name;
     currentTags = [...template.tags];
 
@@ -1843,26 +1908,21 @@ function createUI() {
 
     renderTags();
     $("#template-age-rating").trigger("change");
-    $("#template-modal").addClass("active");
+
+    // Open modal - direct DOM manipulation for maximum compatibility
+    const modalElement = $modal[0];
+    modalElement.style.display = "flex";
+    modalElement.style.visibility = "visible";
+    modalElement.style.opacity = "1";
+    modalElement.style.zIndex = "999999";
+    modalElement.style.position = "fixed";
+    modalElement.style.top = "0";
+    modalElement.style.left = "0";
+    modalElement.style.width = "100%";
+    modalElement.style.height = "100%";
+
+    $modal.addClass("active");
   }
-
-  // Event delegation para botões de editar e deletar (depois de declarar editTemplate)
-  $(document).on("click", ".btn-icon.edit", function (e) {
-    e.stopPropagation();
-    const name = $(this).attr("data-template-name");
-    const templates = loadTemplates();
-    if (templates[name]) {
-      console.log("[Templater] Editando template:", name);
-      editTemplate(name, templates[name]);
-    }
-  });
-
-  $(document).on("click", ".btn-icon.delete", function (e) {
-    e.stopPropagation();
-    const name = $(this).attr("data-template-name");
-    console.log("[Templater] Deletando template:", name);
-    deleteTemplate(name);
-  });
 
   function renderTags() {
     const $container = $("#tag-container");
@@ -1919,12 +1979,27 @@ function createUI() {
     $("#template-form")[0].reset();
     renderTags();
     $("#template-age-rating").trigger("change");
-    $("#template-modal").addClass("active");
+
+    const $modal = $("#template-modal");
+    const modalElement = $modal[0];
+    modalElement.style.display = "flex";
+    modalElement.style.visibility = "visible";
+    modalElement.style.opacity = "1";
+    modalElement.style.zIndex = "999999";
+    $modal.addClass("active");
   });
 
   // Fecha modal
   function closeModal() {
-    $("#template-modal").removeClass("active");
+    const $modal = $("#template-modal");
+    $modal.removeClass("active");
+
+    // Remove inline styles to allow CSS to control display
+    const modalElement = $modal[0];
+    modalElement.style.display = "";
+    modalElement.style.visibility = "";
+    modalElement.style.opacity = "";
+
     currentTags = [];
   }
 
@@ -2051,8 +2126,63 @@ function createUI() {
   });
 
   // Fecha o menu ao clicar em um item
-  $(".settings-menu-item").click(function () {
-    $("#settings-menu").removeClass("active");
+  // Fecha o menu ao clicar em um item (exceto delete mode)
+  $(document).on(
+    "click",
+    "#export-templates, #import-templates, #shortcuts-config",
+    function () {
+      $("#settings-menu").removeClass("active");
+    },
+  );
+
+  // ============================
+  // MODO DE DELEÇÃO
+  // ============================
+
+  $(document).on("click", "#delete-mode-toggle", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Se já está no modo de deleção, confirma e sai
+    if (deleteMode) {
+      // Confirma deleção dos selecionados
+      if (selectedTemplates.length > 0) {
+        const templateNames = selectedTemplates.join("\n• ");
+        if (
+          confirm(
+            `Tem certeza que deseja deletar ${selectedTemplates.length} template(s)?\n\n• ${templateNames}`,
+          )
+        ) {
+          const templates = loadTemplates();
+          selectedTemplates.forEach((name) => {
+            delete templates[name];
+          });
+          saveTemplates(templates);
+          alert(
+            `✓ ${selectedTemplates.length} template(s) deletado(s) com sucesso!`,
+          );
+        }
+      } else {
+        alert("ℹ️ Nenhum template foi selecionado.");
+      }
+
+      // Desativa modo
+      deleteMode = false;
+      selectedTemplates = [];
+      $(this).removeClass("active");
+      $("#settings-menu").removeClass("active");
+      renderTemplateList();
+    } else {
+      // Ativa modo de deleção
+      deleteMode = true;
+      selectedTemplates = [];
+      $(this).addClass("active");
+      $("#settings-menu").removeClass("active");
+      alert(
+        "🗑 Modo de Deleção Ativado\n\nClique nos templates que deseja deletar.\nClique novamente neste botão quando terminar.",
+      );
+      renderTemplateList();
+    }
   });
 
   // ============================
@@ -2165,6 +2295,18 @@ function createUI() {
     console.log("[Templater] Atalhos salvos:", currentShortcuts);
     alert("✓ Atalhos salvos com sucesso!");
   });
+
+  // Event handler para botão editar - DEVE estar dentro de createUI onde editTemplate está definido
+  $(document).off("click.templater-edit");
+  $(document).on("click.templater-edit", ".template-item .edit", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const name = $(this).closest(".template-item").data("template-name");
+    const templates = loadTemplates();
+    if (templates[name]) {
+      editTemplate(name, templates[name]);
+    }
+  });
 }
 
 function renderTemplateList() {
@@ -2183,16 +2325,25 @@ function renderTemplateList() {
     else if (name.includes("Star Rail")) icon = "🌟";
 
     const $container = $(`
-            <div class="template-item">
+            <div class="template-item" data-template-name="${name}">
                 <span class="template-item-name">${icon} ${name}</span>
                 <div class="template-item-actions">
-                    <button class="btn-icon preview" data-template-name="${name}" title="Preview">👁</button>
-                    <button class="btn-icon apply" data-template-name="${name}" title="Aplicar">✓</button>
-                    <button class="btn-icon edit" data-template-name="${name}" title="Editar">✎</button>
-                    <button class="btn-icon delete" data-template-name="${name}" title="Deletar">🗑</button>
+                    <button class="btn-icon preview" title="Preview">👁</button>
+                    <button class="btn-icon edit" title="Editar">✎</button>
                 </div>
             </div>
         `);
+
+    // Remove todas as classes de modo antes de adicionar (garante limpeza)
+    $container.removeClass("delete-mode selected");
+
+    // Adiciona classes de modo
+    if (deleteMode) {
+      $container.addClass("delete-mode");
+    }
+    if (selectedTemplates.includes(name)) {
+      $container.addClass("selected");
+    }
 
     // Botão preview
     $container.find(".preview").click(function (e) {
@@ -2200,17 +2351,45 @@ function renderTemplateList() {
       showPreview(name, template);
     });
 
-    // Botão aplicar
-    $container.find(".apply").click(function () {
-      const $item = $(this).closest(".template-item");
-      $item.css("animation", "pulse 0.5s");
-      setTimeout(() => $item.css("animation", ""), 500);
+    // Click no template
+    $container.on("click", function (e) {
+      // Ignora se clicou no preview ou editar
+      if ($(e.target).closest(".preview, .edit").length) {
+        return;
+      }
 
-      applyTemplate(template);
+      if (deleteMode) {
+        // Modo deleção: seleciona/deseleciona
+        toggleTemplateSelection(name);
+      } else {
+        // Modo normal: aplica template
+        const $item = $(this);
+        $item.css("animation", "pulse 0.5s");
+        setTimeout(() => $item.css("animation", ""), 500);
+        applyTemplate(template);
+      }
     });
 
     $list.append($container);
   });
+}
+
+function toggleTemplateSelection(name) {
+  const index = selectedTemplates.indexOf(name);
+  if (index > -1) {
+    selectedTemplates.splice(index, 1);
+  } else {
+    selectedTemplates.push(name);
+  }
+  renderTemplateList();
+}
+
+function exitDeleteMode() {
+  deleteMode = false;
+  selectedTemplates = [];
+  $("#delete-mode-toggle").removeClass("active");
+  $("#settings-menu").removeClass("active");
+  renderTemplateList();
 }
 
 function deleteTemplate(name) {
@@ -2222,8 +2401,6 @@ function deleteTemplate(name) {
   delete templates[name];
   saveTemplates(templates);
   renderTemplateList();
-
-  console.log("[Templater] Template deletado:", name);
 }
 
 function showPreview(name, template) {
@@ -2326,8 +2503,6 @@ function exportTemplates() {
   a.download = "pixiv-templates.json";
   a.click();
   URL.revokeObjectURL(url);
-
-  console.log("[Templater] Templates exportados!");
 }
 
 function importTemplates(file) {
@@ -2359,7 +2534,6 @@ function importTemplates(file) {
       alert(
         `✓ Importação concluída!\n\nNovos: ${newCount}\nSubstituídos: ${overwriteCount}`,
       );
-      console.log("[Templater] Templates importados:", importedTemplates);
     } catch (error) {
       alert(
         "❌ Erro ao importar templates!\n\nVerifique se o arquivo JSON está correto.",
@@ -2397,7 +2571,6 @@ function setupKeyboardShortcuts() {
     if (matchesShortcut(e, shortcuts.togglePanel)) {
       e.preventDefault();
       $("#pixiv-templater-toggle").click();
-      console.log("[Templater] Atalho: Toggle painel");
       return;
     }
 
@@ -2405,7 +2578,6 @@ function setupKeyboardShortcuts() {
     if (matchesShortcut(e, shortcuts.newTemplate)) {
       e.preventDefault();
       $("#new-template").click();
-      console.log("[Templater] Atalho: Novo template");
       return;
     }
 
@@ -2413,7 +2585,6 @@ function setupKeyboardShortcuts() {
     if (matchesShortcut(e, shortcuts.exportTemplates)) {
       e.preventDefault();
       exportTemplates();
-      console.log("[Templater] Atalho: Exportar templates");
       return;
     }
 
@@ -2421,7 +2592,6 @@ function setupKeyboardShortcuts() {
     if (matchesShortcut(e, shortcuts.importTemplates)) {
       e.preventDefault();
       $("#import-templates").click();
-      console.log("[Templater] Atalho: Importar templates");
       return;
     }
 
@@ -2429,7 +2599,6 @@ function setupKeyboardShortcuts() {
     if (matchesShortcut(e, shortcuts.showHelp)) {
       e.preventDefault();
       showKeyboardShortcutsHelp();
-      console.log("[Templater] Atalho: Mostrar ajuda");
       return;
     }
 
@@ -2438,13 +2607,11 @@ function setupKeyboardShortcuts() {
       if ($("#template-modal").hasClass("active")) {
         e.preventDefault();
         $("#modal-cancel").click();
-        console.log("[Templater] Atalho: Fechar modal de edição");
         return;
       }
       if ($("#template-preview-modal").hasClass("active")) {
         e.preventDefault();
         $(".preview-close").click();
-        console.log("[Templater] Atalho: Fechar preview");
         return;
       }
     }
@@ -2507,13 +2674,11 @@ function initialize() {
     if ($('input[name="title"]').length > 0) {
       clearInterval(checkReady);
       createUI();
+
       setupKeyboardShortcuts();
       console.log("[Pixiv Templater] Pronto!");
     }
   }, 500);
-
-  // Timeout de segurança (10 segundos)
-  setTimeout(() => clearInterval(checkReady), 10000);
 }
 
 // Registra comandos no menu do Tampermonkey
