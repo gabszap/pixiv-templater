@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         Pixiv Upload Templater
+// @name         Pixiv Templater
 // @namespace    http://tampermonkey.net/
-// @version      1.2.2
+// @version      1.2.3
 // @description  Auto-fill Pixiv upload page with predefined templates (com atalhos personalizáveis!)
-// @author       You
+// @author       gabszap
 // @match        *://www.pixiv.net/illustration/create*
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -65,6 +65,61 @@ function loadTemplates() {
 
 function saveTemplates(templates) {
   GM_setValue("pixiv_templates", JSON.stringify(templates));
+}
+
+// ============================
+// SISTEMA DE ESTATÍSTICAS
+// ============================
+
+function loadStats() {
+  const saved = GM_getValue("pixiv_template_stats", null);
+  return saved ? JSON.parse(saved) : {};
+}
+
+function saveStats(stats) {
+  GM_setValue("pixiv_template_stats", JSON.stringify(stats));
+}
+
+function trackTemplateUsage(templateName) {
+  const stats = loadStats();
+
+  if (!stats[templateName]) {
+    stats[templateName] = {
+      count: 0,
+      firstUsed: new Date().toISOString(),
+      lastUsed: null,
+    };
+  }
+
+  stats[templateName].count++;
+  stats[templateName].lastUsed = new Date().toISOString();
+
+  saveStats(stats);
+  console.log(
+    "[Templater] 📊 Template usado:",
+    templateName,
+    "- Total:",
+    stats[templateName].count,
+  );
+}
+
+function getTemplateStats(templateName) {
+  const stats = loadStats();
+  return stats[templateName] || { count: 0, firstUsed: null, lastUsed: null };
+}
+
+function resetStats() {
+  if (
+    confirm(
+      "⚠️ Tem certeza que deseja resetar todas as estatísticas?\n\nEsta ação não pode ser desfeita.",
+    )
+  ) {
+    GM_setValue("pixiv_template_stats", JSON.stringify({}));
+    console.log("[Templater] 📊 Estatísticas resetadas");
+    alert("✓ Estatísticas resetadas com sucesso!");
+    return true;
+  }
+  return false;
 }
 
 // ============================
@@ -664,7 +719,8 @@ function createUI() {
             border-bottom: none;
         }
 
-        .settings-menu-item:hover {
+        .settings-menu a:hover,
+        .settings-menu button:hover {
             background: #e8f5ff;
             color: #0096fa;
         }
@@ -986,6 +1042,186 @@ function createUI() {
         }
 
         /* Dark mode support */
+
+        /* Estilos do modal de estatísticas */
+        #stats-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            z-index: 10001;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s;
+        }
+
+        #stats-modal.active {
+            display: flex;
+        }
+
+        .stats-content {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .stats-header h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #24292e;
+        }
+
+        .stats-close {
+            background: none;
+            border: none;
+            font-size: 32px;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .stats-close:hover {
+            background: #f0f0f0;
+            color: #24292e;
+        }
+
+        .stats-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .stats-empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #0096fa 0%, #0075cc 100%);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,150,250,0.2);
+        }
+
+        .stat-card.secondary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .stat-card.tertiary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stats-list {
+            margin-top: 24px;
+        }
+
+        .stats-list h3 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: #24292e;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+        }
+
+        .stat-item:hover {
+            background: #e8f5ff;
+            transform: translateX(4px);
+        }
+
+        .stat-item-name {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .stat-item-icon {
+            font-size: 24px;
+        }
+
+        .stat-item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-item-title {
+            font-weight: 600;
+            color: #24292e;
+        }
+
+        .stat-item-date {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .stat-item-count {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0096fa;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+        }
+
         /* Estilos do modal de configuração de atalhos */
         #shortcuts-modal {
             position: fixed;
@@ -1163,26 +1399,55 @@ function createUI() {
                 color: #58a6ff;
             }
 
-            .modal-content {
+            .modal-content,
+            .stats-content {
                 background: #1e1e1e;
                 color: #e1e4e8;
             }
 
-            .modal-header {
+            .modal-header,
+            .stats-header {
                 border-bottom-color: #444;
             }
 
-            .modal-header h2 {
+            .modal-header h2,
+            .stats-header h2 {
                 color: #e1e4e8;
             }
 
-            .modal-close {
+            .modal-close,
+            .stats-close {
                 color: #aaa;
             }
 
-            .modal-close:hover {
+            .modal-close:hover,
+            .stats-close:hover {
                 background: #2c2c2c;
-                color: #fff;
+            }
+
+            .stat-item {
+                background: #2c2c2c;
+            }
+
+            .stat-item:hover {
+                background: #1a3a4a;
+            }
+
+            .stat-item-title {
+                color: #e1e4e8;
+            }
+
+            .stat-item-date {
+                color: #8b949e;
+            }
+
+            .stat-item-count {
+                background: #0d1117;
+                color: #58a6ff;
+            }
+
+            .stats-empty {
+                color: #8b949e;
             }
 
             .form-group label {
@@ -1413,6 +1678,9 @@ function createUI() {
                     <div class="settings-dropdown">
                         <button class="header-settings-btn" id="settings-toggle">⚙️</button>
                         <div class="settings-menu" id="settings-menu">
+                            <div class="settings-menu-item" id="stats-menu-btn">
+                                📊 Ver Estatísticas
+                            </div>
                             <div class="settings-menu-item" id="export-templates">
                                 📤 Exportar Templates
                             </div>
@@ -1424,6 +1692,9 @@ function createUI() {
                             </div>
                             <div class="settings-menu-item" id="delete-mode-toggle">
                                 🗑 Deletar Templates
+                            </div>
+                            <div class="settings-menu-item" id="reset-stats-btn">
+                                🔄 Resetar Estatísticas
                             </div>
                         </div>
                     </div>
@@ -1582,6 +1853,23 @@ function createUI() {
   $("body").append($previewModal);
 
   // Modal de configuração de atalhos
+  // Modal de estatísticas
+  const $statsModal = $(`
+        <div id="stats-modal">
+            <div class="stats-content">
+                <div class="stats-header">
+                    <h2>📊 Estatísticas de Uso</h2>
+                    <button class="stats-close">×</button>
+                </div>
+                <div id="stats-body">
+                    <!-- Conteúdo será preenchido dinamicamente -->
+                </div>
+            </div>
+        </div>
+    `);
+
+  $("body").append($statsModal);
+
   const $shortcutsModal = $(`
         <div id="shortcuts-modal">
             <div class="modal-content">
@@ -2296,6 +2584,35 @@ function createUI() {
     alert("✓ Atalhos salvos com sucesso!");
   });
 
+  // Botão de estatísticas
+  $("#stats-btn, #stats-menu-btn").click(function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    showStats();
+    $("#settings-menu").removeClass("active");
+  });
+
+  // Fechar modal de estatísticas
+  $(".stats-close").click(() => {
+    $("#stats-modal").removeClass("active");
+  });
+
+  $("#stats-modal").click(function (e) {
+    if (e.target === this) {
+      $("#stats-modal").removeClass("active");
+    }
+  });
+
+  // Resetar estatísticas
+  $("#reset-stats-btn").click(function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (resetStats()) {
+      showStats(); // Atualiza a view
+    }
+    $("#settings-menu").removeClass("active");
+  });
+
   // Event handler para botão editar - DEVE estar dentro de createUI onde editTemplate está definido
   $(document).off("click.templater-edit");
   $(document).on("click.templater-edit", ".template-item .edit", function (e) {
@@ -2307,15 +2624,117 @@ function createUI() {
       editTemplate(name, templates[name]);
     }
   });
+
+  // Função para mostrar estatísticas
+  function showStats() {
+    const stats = loadStats();
+    const templates = loadTemplates();
+    const templateNames = Object.keys(templates);
+
+    // Calcula estatísticas gerais
+    let totalUses = 0;
+    let templatesUsed = 0;
+    const statsArray = [];
+
+    templateNames.forEach((name) => {
+      const stat = stats[name];
+      if (stat && stat.count > 0) {
+        totalUses += stat.count;
+        templatesUsed++;
+        statsArray.push({
+          name,
+          ...stat,
+        });
+      }
+    });
+
+    // Ordena por uso (mais usado primeiro)
+    statsArray.sort((a, b) => b.count - a.count);
+
+    const $body = $("#stats-body");
+
+    if (statsArray.length === 0) {
+      $body.html(`
+        <div class="stats-empty">
+          <div class="stats-empty-icon">📊</div>
+          <p><strong>Nenhuma estatística ainda</strong></p>
+          <p style="font-size: 14px; margin-top: 8px;">Use alguns templates para começar a coletar dados!</p>
+        </div>
+      `);
+    } else {
+      // Cards de resumo
+      const mostUsed = statsArray[0];
+      let summaryHTML = `
+        <div class="stats-summary">
+          <div class="stat-card">
+            <div class="stat-value">${totalUses}</div>
+            <div class="stat-label">Total de Usos</div>
+          </div>
+          <div class="stat-card secondary">
+            <div class="stat-value">${templatesUsed}</div>
+            <div class="stat-label">Templates Usados</div>
+          </div>
+          <div class="stat-card tertiary">
+            <div class="stat-value">${templateNames.length}</div>
+            <div class="stat-label">Templates Totais</div>
+          </div>
+        </div>
+      `;
+
+      // Lista de templates
+      summaryHTML += `
+        <div class="stats-list">
+          <h3>🏆 Ranking de Uso</h3>
+      `;
+
+      statsArray.forEach((stat, index) => {
+        const icon =
+          index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : "📄";
+        const lastUsed = stat.lastUsed
+          ? new Date(stat.lastUsed).toLocaleString("pt-BR", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "Nunca";
+
+        summaryHTML += `
+          <div class="stat-item">
+            <div class="stat-item-name">
+              <span class="stat-item-icon">${icon}</span>
+              <div class="stat-item-info">
+                <div class="stat-item-title">${stat.name}</div>
+                <div class="stat-item-date">Último uso: ${lastUsed}</div>
+              </div>
+            </div>
+            <div class="stat-item-count">${stat.count}×</div>
+          </div>
+        `;
+      });
+
+      summaryHTML += `
+        </div>
+      `;
+
+      $body.html(summaryHTML);
+    }
+
+    $("#stats-modal").addClass("active");
+  }
 }
 
 function renderTemplateList() {
   const templates = loadTemplates();
+  const stats = loadStats();
   const $list = $("#template-list");
   $list.empty();
 
   Object.keys(templates).forEach((name) => {
     const template = templates[name];
+    const stat = stats[name];
+    const useCount = stat ? stat.count : 0;
 
     // Cria ícone baseado no tipo de template
     let icon = "📝";
@@ -2324,9 +2743,14 @@ function renderTemplateList() {
     else if (name.includes("Honkai")) icon = "🚂";
     else if (name.includes("Star Rail")) icon = "🌟";
 
+    const useBadge =
+      useCount > 0
+        ? ` <span style="background:#0096fa;color:white;padding:2px 6px;border-radius:8px;font-size:10px;font-weight:600;margin-left:4px;">${useCount}×</span>`
+        : "";
+
     const $container = $(`
             <div class="template-item" data-template-name="${name}">
-                <span class="template-item-name">${icon} ${name}</span>
+                <span class="template-item-name">${icon} ${name}${useBadge}</span>
                 <div class="template-item-actions">
                     <button class="btn-icon preview" title="Preview">👁</button>
                     <button class="btn-icon edit" title="Editar">✎</button>
@@ -2367,6 +2791,8 @@ function renderTemplateList() {
         $item.css("animation", "pulse 0.5s");
         setTimeout(() => $item.css("animation", ""), 500);
         applyTemplate(template);
+        trackTemplateUsage(name); // Rastreia o uso
+        renderTemplateList(); // Atualiza a contagem no badge
       }
     });
 
@@ -2614,6 +3040,11 @@ function setupKeyboardShortcuts() {
         $(".preview-close").click();
         return;
       }
+      if ($("#stats-modal").hasClass("active")) {
+        e.preventDefault();
+        $(".stats-close").click();
+        return;
+      }
     }
 
     // Aplica templates 1-9
@@ -2684,6 +3115,16 @@ function initialize() {
 // Registra comandos no menu do Tampermonkey
 GM_registerMenuCommand("📤 Exportar Templates", exportTemplates);
 GM_registerMenuCommand("⌨️ Ver Atalhos", showKeyboardShortcutsHelp);
+GM_registerMenuCommand("📊 Ver Estatísticas", function () {
+  // Aguarda a UI estar pronta
+  const checkReady = setInterval(() => {
+    if ($("#stats-modal").length > 0) {
+      clearInterval(checkReady);
+      $("#stats-btn").click();
+    }
+  }, 100);
+  setTimeout(() => clearInterval(checkReady), 5000);
+});
 GM_registerMenuCommand("⚙️ Configurar Atalhos", () => {
   $("#shortcuts-config").click();
 });
