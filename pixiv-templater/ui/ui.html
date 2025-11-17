@@ -1,0 +1,395 @@
+<!-- Pixiv Templater UI -->
+<div id="pixiv-templater">
+    <div id="pixiv-templater-header">
+        <div class="header-left">
+            <span>📋 Templates</span>
+            <div class="settings-dropdown">
+                <button class="header-settings-btn" id="settings-toggle">
+                    ⚙️
+                </button>
+                <div class="settings-menu" id="settings-menu">
+                    <div class="settings-menu-item" id="stats-menu-btn">
+                        📊 Ver Estatísticas
+                    </div>
+                    <div class="settings-menu-item" id="export-templates">
+                        📤 Exportar Templates
+                    </div>
+                    <div class="settings-menu-item" id="import-templates">
+                        📥 Importar Templates
+                    </div>
+                    <div class="settings-menu-item" id="shortcuts-config">
+                        ⌨️ Configurar Atalhos
+                    </div>
+                    <div class="settings-menu-item" id="delete-mode-toggle">
+                        🗑 Deletar Templates
+                    </div>
+                    <div class="settings-menu-item" id="reset-stats-btn">
+                        🔄 Resetar Estatísticas
+                    </div>
+                </div>
+            </div>
+            <span class="keyboard-hint" id="shortcuts-hint">Ctrl+Shift+H</span>
+        </div>
+        <span id="pixiv-templater-toggle">−</span>
+    </div>
+    <div id="pixiv-templater-content">
+        <div id="template-list"></div>
+        <div class="template-actions">
+            <button class="action-btn" id="new-template">➕ Novo</button>
+            <button class="action-btn" id="reset-position">🔄 Reset Posição</button>
+            <input
+                type="file"
+                id="import-input"
+                accept=".json"
+                style="display: none"
+            />
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Edição/Criação de Template -->
+<div id="template-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modal-title">Novo Template</h2>
+            <button class="modal-close">×</button>
+        </div>
+        <form id="template-form">
+            <div class="form-group">
+                <label>Nome do Template *</label>
+                <input
+                    type="text"
+                    id="template-name"
+                    required
+                    placeholder="Ex: Genshin Impact"
+                />
+            </div>
+
+            <div class="form-group">
+                <label>Título</label>
+                <input
+                    type="text"
+                    id="template-title"
+                    placeholder="Deixe vazio para preencher manualmente"
+                />
+            </div>
+
+            <div class="form-group">
+                <label>Descrição/Caption</label>
+                <textarea
+                    id="template-caption"
+                    placeholder="Descrição do post..."
+                ></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Tags (pressione Enter para adicionar) *</label>
+                <div class="tag-input-container" id="tag-container">
+                    <input
+                        type="text"
+                        class="tag-input-field"
+                        id="tag-input"
+                        placeholder="Digite uma tag..."
+                    />
+                </div>
+                <small style="color: #666; font-size: 12px"
+                    >Pelo menos 1 tag é obrigatória</small
+                >
+            </div>
+
+            <div class="form-group">
+                <label>Age Rating *</label>
+                <select id="template-age-rating" required>
+                    <option value="general">All ages</option>
+                    <option value="r18">R-18</option>
+                    <option value="r18g">R-18G</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="adult-content-group">
+                <label>Adult Content (para All ages) *</label>
+                <div class="form-group-inline">
+                    <input type="checkbox" id="template-adult-content" />
+                    <label for="template-adult-content"
+                        >Included (Slightly sexual or suggestive content)</label
+                    >
+                </div>
+                <small style="color: #666; font-size: 12px"
+                    >⚠️ Se não houver nada adulto/sugestivo, deixe
+                    desmarcado</small
+                >
+            </div>
+
+            <div
+                class="form-group"
+                id="mature-content-group"
+                style="display: none"
+            >
+                <label>Mature Content (para R-18)</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="lo" /> Minors
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="furry" /> Furry
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="bl" /> BL
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" value="yuri" /> GL
+                    </label>
+                </div>
+                <small style="color: #666; font-size: 12px"
+                    >Opcional - selecione categorias específicas se
+                    aplicável</small
+                >
+            </div>
+
+            <div class="form-group">
+                <label>AI-generated *</label>
+                <select id="template-ai-generated" required>
+                    <option value="aiGenerated">Yes</option>
+                    <option value="notAiGenerated">No</option>
+                </select>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" id="modal-cancel">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn-primary">
+                    Salvar Template
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de Preview -->
+<div id="template-preview-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="preview-title">Preview do Template</h2>
+            <button class="modal-close preview-close">×</button>
+        </div>
+        <div id="preview-content">
+            <div class="preview-section">
+                <h3>📝 Título</h3>
+                <div class="preview-value" id="preview-title-value"></div>
+            </div>
+            <div class="preview-section">
+                <h3>📄 Descrição</h3>
+                <div
+                    class="preview-value preview-multiline"
+                    id="preview-caption-value"
+                ></div>
+            </div>
+            <div class="preview-section">
+                <h3>🏷️ Tags</h3>
+                <div class="preview-tags" id="preview-tags-value"></div>
+            </div>
+            <div class="preview-section">
+                <h3>⚙️ Configurações</h3>
+                <div class="preview-settings">
+                    <div class="preview-setting">
+                        <strong>Age Rating:</strong>
+                        <span id="preview-age-rating"></span>
+                    </div>
+                    <div
+                        class="preview-setting"
+                        id="preview-adult-content-setting"
+                    >
+                        <strong>Adult Content:</strong>
+                        <span id="preview-adult-content"></span>
+                    </div>
+                    <div
+                        class="preview-setting"
+                        id="preview-mature-content-setting"
+                        style="display: none"
+                    >
+                        <strong>Mature Content:</strong>
+                        <span id="preview-mature-content"></span>
+                    </div>
+                    <div class="preview-setting">
+                        <strong>AI-generated:</strong>
+                        <span id="preview-ai-generated"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-secondary preview-close">Fechar</button>
+            <button class="btn-primary" id="preview-apply">
+                Aplicar Template
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Estatísticas -->
+<div id="stats-modal">
+    <div class="stats-content">
+        <div class="stats-header">
+            <h2>📊 Estatísticas de Uso</h2>
+            <button class="stats-close">×</button>
+        </div>
+        <div id="stats-body">
+            <!-- Conteúdo será preenchido dinamicamente -->
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Configuração de Atalhos -->
+<div id="shortcuts-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>⌨️ Configurar Atalhos de Teclado</h2>
+            <button class="modal-close shortcuts-modal-close">×</button>
+        </div>
+        <div class="shortcuts-note">
+            💡 Clique em um campo e pressione a combinação de teclas
+            desejada.<br />
+            Use Ctrl/Cmd, Shift, Alt + uma tecla.
+        </div>
+        <div class="shortcuts-grid">
+            <div class="shortcut-item">
+                <label>Expandir/Colapsar Painel</label>
+                <input
+                    type="text"
+                    class="shortcut-input"
+                    data-action="togglePanel"
+                    readonly
+                />
+            </div>
+            <div class="shortcut-item">
+                <label>Novo Template</label>
+                <input
+                    type="text"
+                    class="shortcut-input"
+                    data-action="newTemplate"
+                    readonly
+                />
+            </div>
+            <div class="shortcut-item">
+                <label>Exportar Templates</label>
+                <input
+                    type="text"
+                    class="shortcut-input"
+                    data-action="exportTemplates"
+                    readonly
+                />
+            </div>
+            <div class="shortcut-item">
+                <label>Importar Templates</label>
+                <input
+                    type="text"
+                    class="shortcut-input"
+                    data-action="importTemplates"
+                    readonly
+                />
+            </div>
+            <div class="shortcut-item">
+                <label>Mostrar Ajuda</label>
+                <input
+                    type="text"
+                    class="shortcut-input"
+                    data-action="showHelp"
+                    readonly
+                />
+            </div>
+            <div class="shortcut-item">
+                <label>Aplicar Template 1</label>
+                <input
+                    type="text"
+                    class="shortcut-input"
+                    data-action="applyTemplate1"
+                    readonly
+                />
+            </div>
+            <div class="shortcut-item">
+                <label>Aplicar Template 2</label>
+                <input
+                    type="text"
+                    class="shortcut-input"
+                    data-action="applyTemplate2"
+                    readonly
+                />
+            </div>
+            <div class="shortcut-item">
+                <label>Aplicar Template 3</label>
+                <input
+                    type="text"
+                    class="shortcut-input"
+                    data-action="applyTemplate3"
+                    readonly
+                />
+            </div>
+            <div class="shortcut-item">
+                <label>Aplicar Template 4</label>
+                <input
+                    type="text"
+                    class="shortcut-input"
+                    data-action="applyTemplate4"
+                    readonly
+                />
+            </div>
+            <div class="shortcut-item">
+                <label>Aplicar Template 5</label>
+                <input
+                    type="text"
+                    class="shortcut-input"
+                    data-action="applyTemplate5"
+                    readonly
+                />
+            </div>
+            <div class="shortcut-item">
+                <label>Aplicar Template 6</label>
+                <input
+                    type="text"
+                    class="shortcut-input"
+                    data-action="applyTemplate6"
+                    readonly
+                />
+            </div>
+            <div class="shortcut-item">
+                <label>Aplicar Template 7</label>
+                <input
+                    type="text"
+                    class="shortcut-input"
+                    data-action="applyTemplate7"
+                    readonly
+                />
+            </div>
+            <div class="shortcut-item">
+                <label>Aplicar Template 8</label>
+                <input
+                    type="text"
+                    class="shortcut-input"
+                    data-action="applyTemplate8"
+                    readonly
+                />
+            </div>
+            <div class="shortcut-item">
+                <label>Aplicar Template 9</label>
+                <input
+                    type="text"
+                    class="shortcut-input"
+                    data-action="applyTemplate9"
+                    readonly
+                />
+            </div>
+        </div>
+        <div class="shortcuts-actions">
+            <button class="btn-reset" id="shortcuts-reset">
+                🔄 Restaurar Padrão
+            </button>
+            <button class="btn-secondary" id="shortcuts-cancel">
+                Cancelar
+            </button>
+            <button class="btn-primary" id="shortcuts-save">
+                Salvar Atalhos
+            </button>
+        </div>
+    </div>
+</div>
