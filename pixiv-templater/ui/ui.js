@@ -28,7 +28,7 @@
   /**
    * Initialize the UI
    */
-  function initializeUI() {
+  async function initializeUI() {
     console.log("[Pixiv Templater UI] Initializing UI...");
 
     // Setup all event handlers
@@ -38,16 +38,16 @@
     setupDragAndDrop();
 
     // Load saved position
-    loadSavedPosition();
+    await loadSavedPosition();
 
     // Render initial template list
-    renderTemplateList();
+    await renderTemplateList();
 
     // Setup keyboard shortcuts
-    setupKeyboardShortcuts();
+    await setupKeyboardShortcuts();
 
     // Update shortcut hint
-    updateShortcutHint();
+    await updateShortcutHint();
 
     console.log("[Pixiv Templater UI] UI initialized successfully");
   }
@@ -77,7 +77,11 @@
 
     // Template actions
     $(document).on("click", "#new-template", handleNewTemplate);
-    $(document).on("click", "#reset-position", handleResetPosition);
+    $(document).on(
+      "click",
+      "#reset-position",
+      async (e) => await handleResetPosition(),
+    );
     $(document).on("change", "#import-input", handleImportFile);
 
     // Modal close
@@ -97,16 +101,29 @@
     $(document).on("change", "#template-age-rating", handleAgeRatingChange);
 
     // Template item clicks
-    $(document).on("click", ".template-item .preview", handlePreviewClick);
-    $(document).on("click", ".template-item .edit", handleEditClick);
-    $(document).on("click", ".template-item", handleTemplateItemClick);
+    $(document).on("click", ".template-item .preview", async (e) => {
+      console.log("[UI] Preview clicked");
+      await handlePreviewClick(e);
+    });
+    $(document).on("click", ".template-item .edit", async (e) => {
+      console.log("[UI] Edit clicked");
+      await handleEditClick(e);
+    });
+    $(document).on("click", ".template-item", async (e) => {
+      console.log("[UI] Template item clicked", e.target);
+      await handleTemplateItemClick(e);
+    });
 
     // Preview modal
     $(document).on("click", ".preview-close", closePreviewModal);
     $(document).on("click", "#template-preview-modal", function (e) {
       if (e.target === this) closePreviewModal();
     });
-    $(document).on("click", "#preview-apply", handlePreviewApply);
+    $(document).on(
+      "click",
+      "#preview-apply",
+      async () => await handlePreviewApply(),
+    );
 
     // Stats modal
     $(document).on("click", ".stats-close", closeStatsModal);
@@ -123,8 +140,16 @@
     $(document).on("click", "#shortcuts-modal", function (e) {
       if (e.target === this) closeShortcutsModal();
     });
-    $(document).on("click", "#shortcuts-save", handleShortcutsSave);
-    $(document).on("click", "#shortcuts-reset", handleShortcutsReset);
+    $(document).on(
+      "click",
+      "#shortcuts-save",
+      async () => await handleShortcutsSave(),
+    );
+    $(document).on(
+      "click",
+      "#shortcuts-reset",
+      async () => await handleShortcutsReset(),
+    );
     $(document).on("focus", ".shortcut-input", handleShortcutInputFocus);
     $(document).on("blur", ".shortcut-input", handleShortcutInputBlur);
 
@@ -182,7 +207,7 @@
       }
     });
 
-    $(document).on("mouseup", function () {
+    $(document).on("mouseup", async function () {
       if (isDragging) {
         isDragging = false;
         const $panel = $("#pixiv-templater");
@@ -193,7 +218,7 @@
         $("#pixiv-templater-header").css("cursor", "grab");
 
         // Save position
-        window.PixivTemplater.Storage.set(
+        await window.PixivTemplater.Storage.set(
           "templater_position",
           JSON.stringify({
             top: yOffset,
@@ -207,18 +232,26 @@
   /**
    * Load saved position
    */
-  function loadSavedPosition() {
-    const savedPos = window.PixivTemplater.Storage.get(
+  async function loadSavedPosition() {
+    const savedPos = await window.PixivTemplater.Storage.get(
       "templater_position",
       null,
     );
     const savedCollapsed =
-      window.PixivTemplater.Storage.get("templater_collapsed", "false") ===
-      "true";
+      (await window.PixivTemplater.Storage.get(
+        "templater_collapsed",
+        "false",
+      )) === "true";
     const $panel = $("#pixiv-templater");
 
     if (savedPos) {
-      const pos = JSON.parse(savedPos);
+      let pos;
+      try {
+        pos = JSON.parse(savedPos);
+      } catch (e) {
+        console.error("[UI] Failed to parse saved position:", e);
+        return;
+      }
       const panelWidth = $panel.outerWidth();
       const panelHeight = $panel.outerHeight();
       const maxX = window.innerWidth - panelWidth;
@@ -235,13 +268,20 @@
       if (!savedCollapsed && validTop + panelHeight > window.innerHeight) {
         $panel.addClass("collapsed");
         $("#pixiv-templater-toggle").text("+");
-        window.PixivTemplater.Storage.set("templater_collapsed", "true");
+        await window.PixivTemplater.Storage.set("templater_collapsed", "true");
 
-        setTimeout(() => {
+        setTimeout(async () => {
           const collapsedHeight = $panel.outerHeight();
           validTop = Math.min(validTop, window.innerHeight - collapsedHeight);
           $panel.css({ top: validTop + "px" });
           yOffset = validTop;
+          await window.PixivTemplater.Storage.set(
+            "templater_position",
+            JSON.stringify({
+              top: validTop,
+              left: xOffset,
+            }),
+          );
         }, 50);
       }
 
@@ -276,27 +316,27 @@
   // EVENT HANDLERS
   // ============================
 
-  function handleToggleCollapse() {
+  async function handleToggleCollapse() {
     const $panel = $("#pixiv-templater");
     const willCollapse = !$panel.hasClass("collapsed");
 
     $panel.toggleClass("collapsed");
     $("#pixiv-templater-toggle").text(willCollapse ? "+" : "−");
 
-    window.PixivTemplater.Storage.set(
+    await window.PixivTemplater.Storage.set(
       "templater_collapsed",
       willCollapse.toString(),
     );
 
     if (!willCollapse) {
-      setTimeout(() => {
+      setTimeout(async () => {
         const panelHeight = $panel.outerHeight();
         const maxY = window.innerHeight - panelHeight;
 
         if (yOffset > maxY) {
           yOffset = Math.max(0, maxY);
           $panel.css({ top: yOffset + "px" });
-          window.PixivTemplater.Storage.set(
+          await window.PixivTemplater.Storage.set(
             "templater_position",
             JSON.stringify({
               top: yOffset,
@@ -337,7 +377,7 @@
     $("#settings-menu").removeClass("active");
   }
 
-  function handleDeleteModeToggle(e) {
+  async function handleDeleteModeToggle(e) {
     e.preventDefault();
     e.stopPropagation();
 
@@ -349,9 +389,9 @@
             `Tem certeza que deseja deletar ${selectedTemplates.length} template(s)?\n\n• ${templateNames}`,
           )
         ) {
-          const templates = window.PixivTemplater.loadTemplates();
+          const templates = await window.PixivTemplater.loadTemplates();
           selectedTemplates.forEach((name) => delete templates[name]);
-          window.PixivTemplater.saveTemplates(templates);
+          await window.PixivTemplater.saveTemplates(templates);
           alert(
             `✓ ${selectedTemplates.length} template(s) deletado(s) com sucesso!`,
           );
@@ -364,7 +404,7 @@
       selectedTemplates = [];
       $(this).removeClass("active");
       $("#settings-menu").removeClass("active");
-      renderTemplateList();
+      await renderTemplateList();
     } else {
       deleteMode = true;
       selectedTemplates = [];
@@ -373,15 +413,15 @@
       alert(
         "🗑 Modo de Deleção Ativado\n\nClique nos templates que deseja deletar.\nClique novamente neste botão quando terminar.",
       );
-      renderTemplateList();
+      await renderTemplateList();
     }
   }
 
-  function handleResetStats(e) {
+  async function handleResetStats(e) {
     e.preventDefault();
     e.stopPropagation();
-    if (window.PixivTemplater.resetStats()) {
-      showStats();
+    if (await window.PixivTemplater.resetStats()) {
+      await showStats();
     }
     $("#settings-menu").removeClass("active");
   }
@@ -396,7 +436,7 @@
     openModal();
   }
 
-  function handleResetPosition() {
+  async function handleResetPosition() {
     const $panel = $("#pixiv-templater");
     $panel.css({
       top: "80px",
@@ -406,7 +446,7 @@
     xOffset = window.innerWidth - 20 - $panel.outerWidth();
     yOffset = 80;
 
-    window.PixivTemplater.Storage.set(
+    await window.PixivTemplater.Storage.set(
       "templater_position",
       JSON.stringify({
         top: yOffset,
@@ -424,7 +464,7 @@
     }
   }
 
-  function handleFormSubmit(e) {
+  async function handleFormSubmit(e) {
     e.preventDefault();
 
     const name = $("#template-name").val().trim();
@@ -439,7 +479,7 @@
       return;
     }
 
-    const templates = window.PixivTemplater.loadTemplates();
+    const templates = await window.PixivTemplater.loadTemplates();
 
     if (!editingTemplateName && templates[name]) {
       if (
@@ -473,8 +513,8 @@
       allowTagEditing: true,
     };
 
-    window.PixivTemplater.saveTemplates(templates);
-    renderTemplateList();
+    await window.PixivTemplater.saveTemplates(templates);
+    await renderTemplateList();
     closeModal();
 
     console.log("[Templater UI] Template saved:", name);
@@ -509,64 +549,75 @@
     }
   }
 
-  function handlePreviewClick(e) {
+  async function handlePreviewClick(e) {
+    console.log("[UI] handlePreviewClick called", e);
     e.stopPropagation();
-    const name = $(this).closest(".template-item").data("template-name");
-    const templates = window.PixivTemplater.loadTemplates();
+    const name = $(e.target).closest(".template-item").data("template-name");
+    console.log("[UI] Preview template name:", name);
+    const templates = await window.PixivTemplater.loadTemplates();
     if (templates[name]) {
       showPreview(name, templates[name]);
     }
   }
 
-  function handleEditClick(e) {
+  async function handleEditClick(e) {
+    console.log("[UI] handleEditClick called", e);
     e.preventDefault();
     e.stopPropagation();
-    const name = $(this).closest(".template-item").data("template-name");
-    const templates = window.PixivTemplater.loadTemplates();
+    const name = $(e.target).closest(".template-item").data("template-name");
+    console.log("[UI] Edit template name:", name);
+    const templates = await window.PixivTemplater.loadTemplates();
     if (templates[name]) {
       editTemplate(name, templates[name]);
     }
   }
 
-  function handleTemplateItemClick(e) {
-    if ($(e.target).closest(".preview, .edit").length) return;
+  async function handleTemplateItemClick(e) {
+    console.log("[UI] handleTemplateItemClick called", e.target);
+    if ($(e.target).closest(".preview, .edit").length) {
+      console.log("[UI] Clicked on preview/edit button, ignoring");
+      return;
+    }
 
-    const name = $(this).data("template-name");
+    const name = $(e.currentTarget).data("template-name");
+    console.log("[UI] Apply template name:", name);
 
     if (deleteMode) {
       toggleTemplateSelection(name);
     } else {
-      const $item = $(this);
+      const $item = $(e.currentTarget);
       $item.css("animation", "pulse 0.5s");
       setTimeout(() => $item.css("animation", ""), 500);
 
-      const templates = window.PixivTemplater.loadTemplates();
+      const templates = await window.PixivTemplater.loadTemplates();
+      console.log("[UI] Template to apply:", templates[name]);
       if (templates[name]) {
-        window.PixivTemplater.applyTemplate(templates[name]);
-        window.PixivTemplater.trackTemplateUsage(name);
-        renderTemplateList();
+        await window.PixivTemplater.applyTemplate(templates[name]);
+        await window.PixivTemplater.trackTemplateUsage(name);
+        await renderTemplateList();
       }
     }
   }
 
-  function handlePreviewApply() {
+  async function handlePreviewApply() {
     const template = $(this).data("template");
     closePreviewModal();
-    window.PixivTemplater.applyTemplate(template);
+    await window.PixivTemplater.applyTemplate(template);
   }
 
-  function handleShortcutsSave() {
-    window.PixivTemplater.saveShortcuts(currentShortcuts);
-    updateShortcutHint();
+  async function handleShortcutsSave() {
+    await window.PixivTemplater.saveShortcuts(currentShortcuts);
+    await updateShortcutHint();
     closeShortcutsModal();
-    setupKeyboardShortcuts();
+    await setupKeyboardShortcuts();
     console.log("[Templater UI] Shortcuts saved:", currentShortcuts);
     alert("✓ Atalhos salvos com sucesso!");
   }
 
-  function handleShortcutsReset() {
+  async function handleShortcutsReset() {
     if (confirm("Restaurar todos os atalhos para o padrão?")) {
       currentShortcuts = { ...window.PixivTemplater.DEFAULT_SHORTCUTS };
+      await window.PixivTemplater.saveShortcuts(currentShortcuts);
       $(".shortcut-input").each(function () {
         const action = $(this).data("action");
         $(this).val(currentShortcuts[action].toUpperCase().replace(/\+/g, "+"));
@@ -610,9 +661,9 @@
   // UI RENDERING FUNCTIONS
   // ============================
 
-  function renderTemplateList() {
-    const templates = window.PixivTemplater.loadTemplates();
-    const stats = window.PixivTemplater.loadStats();
+  async function renderTemplateList() {
+    const templates = await window.PixivTemplater.loadTemplates();
+    const stats = await window.PixivTemplater.loadStats();
     const $list = $("#template-list");
     $list.empty();
 
@@ -759,9 +810,9 @@
     openPreviewModal();
   }
 
-  function showStats() {
-    const stats = window.PixivTemplater.loadStats();
-    const templates = window.PixivTemplater.loadTemplates();
+  async function showStats() {
+    const stats = await window.PixivTemplater.loadStats();
+    const templates = await window.PixivTemplater.loadTemplates();
     const templateNames = Object.keys(templates);
 
     let totalUses = 0;
@@ -904,12 +955,12 @@
   // KEYBOARD SHORTCUTS
   // ============================
 
-  function setupKeyboardShortcuts() {
+  async function setupKeyboardShortcuts() {
     console.log("[Pixiv Templater UI] Setting up keyboard shortcuts...");
 
     $(document).off("keydown.templater");
 
-    $(document).on("keydown.templater", function (e) {
+    $(document).on("keydown.templater", async function (e) {
       if ($(e.target).is("input, textarea") && !$(e.target).is("#tag-input"))
         return;
       if ($("#shortcuts-modal").hasClass("active")) {
@@ -917,7 +968,7 @@
         return;
       }
 
-      const shortcuts = window.PixivTemplater.loadShortcuts();
+      const shortcuts = await window.PixivTemplater.loadShortcuts();
 
       if (matchesShortcut(e, shortcuts.togglePanel)) {
         e.preventDefault();
@@ -933,7 +984,7 @@
 
       if (matchesShortcut(e, shortcuts.exportTemplates)) {
         e.preventDefault();
-        window.PixivTemplater.exportTemplates();
+        await window.PixivTemplater.exportTemplates();
         return;
       }
 
@@ -1047,8 +1098,8 @@ Clique no botão "⌨️ Atalhos" no painel para personalizar os atalhos!
     alert(helpText);
   }
 
-  function updateShortcutHint() {
-    const shortcuts = window.PixivTemplater.loadShortcuts();
+  async function updateShortcutHint() {
+    const shortcuts = await window.PixivTemplater.loadShortcuts();
     $("#shortcuts-hint").text(
       shortcuts.showHelp.toUpperCase().replace(/\+/g, "+"),
     );

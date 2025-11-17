@@ -347,16 +347,6 @@
     </div>
 
     <script src="../libs/jquery.min.js"></script>
-    <script>
-        // Load version from manifest
-        fetch(chrome.runtime.getURL('manifest.json'))
-            .then(response => response.json())
-            .then(manifest => {
-                document.getElementById('header-version').textContent = 'v' + manifest.version;
-                document.getElementById('about-version').textContent = 'Versão ' + manifest.version;
-            })
-            .catch(err => console.error('Failed to load version:', err));
-    </script>
     <script src="options.js"></script>
 </body>
 </html>

@@ -41,23 +41,105 @@
     applyTemplate9: "ctrl+9",
   };
 
+  // Load version from manifest
+  async function loadVersion() {
+    try {
+      const manifest = chrome.runtime.getManifest();
+      document.getElementById("header-version").textContent =
+        "v" + manifest.version;
+      document.getElementById("about-version").textContent =
+        "Versão " + manifest.version;
+    } catch (err) {
+      console.error("Failed to load version:", err);
+    }
+  }
+
+  // Migrate data from localStorage to chrome.storage (one-time migration)
+  async function migrateFromLocalStorage() {
+    const allData = await chrome.storage.local.get(null);
+    const hasData = Object.keys(allData).some((k) =>
+      k.startsWith("pixiv_templater_"),
+    );
+
+    if (hasData) {
+      console.log(
+        "[Options] Data already in chrome.storage, skipping migration",
+      );
+      return;
+    }
+
+    console.log("[Options] Attempting to migrate from localStorage...");
+
+    // Check if we can inject a script to read localStorage from pixiv.net
+    // Since we can't directly access localStorage from another domain,
+    // we'll just ensure chrome.storage is the source of truth
+
+    // Initialize with default templates if empty
+    const templates = await Storage.get("templates", "{}");
+    if (templates === "{}") {
+      console.log("[Options] No templates found, initializing with defaults");
+      const defaultTemplates = {
+        "Genshin Impact": {
+          title: "",
+          caption: "Original character fan art\n#genshinimpact #fanart",
+          tags: ["原神", "Genshin Impact", "fan art"],
+          ageRating: "general",
+          adultContent: true,
+          matureContent: [],
+          aiGenerated: "aiGenerated",
+          allowTagEditing: true,
+        },
+        "Honkai Star Rail": {
+          title: "",
+          caption:
+            "Fan art | Feel free to use with credit\n\nCommissions open!",
+          tags: ["崩壊スターレイル", "Honkai Star Rail", "commission"],
+          ageRating: "general",
+          adultContent: false,
+          matureContent: [],
+          aiGenerated: "notAiGenerated",
+          allowTagEditing: true,
+        },
+        "R-18 Default": {
+          title: "",
+          caption: "",
+          tags: ["R-18"],
+          ageRating: "r18",
+          adultContent: false,
+          matureContent: [],
+          aiGenerated: "notAiGenerated",
+          allowTagEditing: true,
+        },
+      };
+      await Storage.set("templates", JSON.stringify(defaultTemplates));
+      console.log("[Options] Default templates initialized");
+    }
+  }
+
   // Initialize on page load
-  $(document).ready(function () {
+  $(document).ready(async function () {
     console.log("[Pixiv Templater Options] Initializing...");
 
-    // Debug: Show what's in localStorage
+    // Load version
+    await loadVersion();
+
+    // Migrate from localStorage if needed
+    await migrateFromLocalStorage();
+
+    // Debug: Show what's in chrome.storage
+    const allData = await chrome.storage.local.get(null);
     console.log(
-      "[Options] LocalStorage keys:",
-      Object.keys(localStorage).filter((k) => k.startsWith("pixiv_templater_")),
+      "[Options] Storage keys:",
+      Object.keys(allData).filter((k) => k.startsWith("pixiv_templater_")),
     );
-    console.log("[Options] Templates:", Storage.get("templates", "{}"));
-    console.log("[Options] Stats:", Storage.get("template_stats", "{}"));
+    console.log("[Options] Templates:", await Storage.get("templates", "{}"));
+    console.log("[Options] Stats:", await Storage.get("template_stats", "{}"));
 
     initializeTabs();
     setupEventHandlers();
-    loadTemplates();
-    loadShortcuts();
-    loadStats();
+    await loadTemplates();
+    await loadShortcuts();
+    await loadStats();
     console.log("[Pixiv Templater Options] Initialized successfully");
   });
 

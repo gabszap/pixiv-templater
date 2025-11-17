@@ -8,25 +8,91 @@
   console.log("[Pixiv Templater] Initializing extension version...");
 
   // ============================
-  // STORAGE WRAPPER (replaces GM_getValue/GM_setValue)
+  // STORAGE WRAPPER (uses chrome.storage via message bridge)
   // ============================
 
   const Storage = {
-    get: function (key, defaultValue) {
-      try {
-        const value = localStorage.getItem("pixiv_templater_" + key);
-        return value !== null ? value : defaultValue;
-      } catch (e) {
-        console.error("[Templater] Storage get error:", e);
-        return defaultValue;
-      }
+    get: async function (key, defaultValue) {
+      return new Promise((resolve) => {
+        const id = Math.random().toString(36);
+
+        const handler = (event) => {
+          if (
+            event.data.type === "PIXIV_TEMPLATER_STORAGE_GET_RESPONSE" &&
+            event.data.id === id
+          ) {
+            window.removeEventListener("message", handler);
+            resolve(event.data.value);
+          }
+        };
+
+        window.addEventListener("message", handler);
+
+        window.postMessage(
+          {
+            type: "PIXIV_TEMPLATER_STORAGE_GET",
+            id: id,
+            key: key,
+            defaultValue: defaultValue,
+          },
+          "*",
+        );
+
+        // Fallback timeout
+        setTimeout(() => {
+          window.removeEventListener("message", handler);
+          console.warn(
+            "[Templater] Storage get timeout, using localStorage fallback",
+          );
+          try {
+            const value = localStorage.getItem("pixiv_templater_" + key);
+            resolve(value !== null ? value : defaultValue);
+          } catch (e) {
+            resolve(defaultValue);
+          }
+        }, 1000);
+      });
     },
-    set: function (key, value) {
-      try {
-        localStorage.setItem("pixiv_templater_" + key, value);
-      } catch (e) {
-        console.error("[Templater] Storage set error:", e);
-      }
+    set: async function (key, value) {
+      return new Promise((resolve) => {
+        const id = Math.random().toString(36);
+
+        const handler = (event) => {
+          if (
+            event.data.type === "PIXIV_TEMPLATER_STORAGE_SET_RESPONSE" &&
+            event.data.id === id
+          ) {
+            window.removeEventListener("message", handler);
+            resolve(true);
+          }
+        };
+
+        window.addEventListener("message", handler);
+
+        window.postMessage(
+          {
+            type: "PIXIV_TEMPLATER_STORAGE_SET",
+            id: id,
+            key: key,
+            value: value,
+          },
+          "*",
+        );
+
+        // Fallback timeout
+        setTimeout(() => {
+          window.removeEventListener("message", handler);
+          console.warn(
+            "[Templater] Storage set timeout, using localStorage fallback",
+          );
+          try {
+            localStorage.setItem("pixiv_templater_" + key, value);
+          } catch (e) {
+            console.error("[Templater] Storage set error:", e);
+          }
+          resolve(false);
+        }, 1000);
+      });
     },
   };
 
@@ -89,46 +155,54 @@
   };
 
   // ============================
-  // TEMPLATE MANAGEMENT
+  // STORAGE HELPERS
   // ============================
 
-  function loadTemplates() {
-    const saved = Storage.get("pixiv_templates", null);
-    return saved ? JSON.parse(saved) : DEFAULT_TEMPLATES;
+  async function loadTemplates() {
+    console.log("[Templater] Loading templates...");
+    const saved = await Storage.get("templates", null);
+    console.log("[Templater] Templates raw:", saved);
+    const templates = saved ? JSON.parse(saved) : DEFAULT_TEMPLATES;
+    console.log("[Templater] Templates parsed:", Object.keys(templates));
+    return templates;
   }
 
-  function saveTemplates(templates) {
-    Storage.set("pixiv_templates", JSON.stringify(templates));
+  async function saveTemplates(templates) {
+    await Storage.set("templates", JSON.stringify(templates));
   }
 
   // ============================
   // STATISTICS SYSTEM
+  // STATS
   // ============================
 
-  function loadStats() {
-    const saved = Storage.get("pixiv_template_stats", null);
-    return saved ? JSON.parse(saved) : {};
+  async function loadStats() {
+    console.log("[Templater] Loading stats...");
+    const saved = await Storage.get("template_stats", null);
+    console.log("[Templater] Stats raw:", saved);
+    const stats = saved ? JSON.parse(saved) : {};
+    console.log("[Templater] Stats parsed:", Object.keys(stats));
+    return stats;
   }
 
-  function saveStats(stats) {
-    Storage.set("pixiv_template_stats", JSON.stringify(stats));
+  async function saveStats(stats) {
+    await Storage.set("template_stats", JSON.stringify(stats));
   }
 
-  function trackTemplateUsage(templateName) {
-    const stats = loadStats();
+  async function trackTemplateUsage(templateName) {
+    const stats = await loadStats();
 
     if (!stats[templateName]) {
       stats[templateName] = {
         count: 0,
-        firstUsed: new Date().toISOString(),
         lastUsed: null,
       };
     }
 
     stats[templateName].count++;
-    stats[templateName].lastUsed = new Date().toISOString();
+    stats[templateName].lastUsed = Date.now();
 
-    saveStats(stats);
+    await saveStats(stats);
     console.log(
       "[Templater] 📊 Template used:",
       templateName,
@@ -142,13 +216,13 @@
     return stats[templateName] || { count: 0, firstUsed: null, lastUsed: null };
   }
 
-  function resetStats() {
+  async function resetStats() {
     if (
       confirm(
         "⚠️ Tem certeza que deseja resetar todas as estatísticas?\n\nEsta ação não pode ser desfeita.",
       )
     ) {
-      Storage.set("pixiv_template_stats", JSON.stringify({}));
+      await Storage.set("template_stats", "{}");
       console.log("[Templater] 📊 Statistics reset");
       alert("✓ Estatísticas resetadas com sucesso!");
       return true;
@@ -158,15 +232,19 @@
 
   // ============================
   // SHORTCUTS CONFIGURATION
+  // SHORTCUTS
   // ============================
 
-  function loadShortcuts() {
-    const saved = Storage.get("pixiv_shortcuts", null);
-    return saved ? JSON.parse(saved) : DEFAULT_SHORTCUTS;
+  async function loadShortcuts() {
+    console.log("[Templater] Loading shortcuts...");
+    const saved = await Storage.get("shortcuts", null);
+    const shortcuts = saved ? JSON.parse(saved) : { ...DEFAULT_SHORTCUTS };
+    console.log("[Templater] Shortcuts loaded:", Object.keys(shortcuts).length);
+    return shortcuts;
   }
 
-  function saveShortcuts(shortcuts) {
-    Storage.set("pixiv_shortcuts", JSON.stringify(shortcuts));
+  async function saveShortcuts(shortcuts) {
+    await Storage.set("shortcuts", JSON.stringify(shortcuts));
   }
 
   // ============================
@@ -227,7 +305,7 @@
   // APPLY TEMPLATE
   // ============================
 
-  function applyTemplate(template) {
+  async function applyTemplate(template) {
     console.log("[Templater] Applying template:", template);
 
     // 1. Title
@@ -376,10 +454,11 @@
 
   // ============================
   // EXPORT/IMPORT TEMPLATES
+  // IMPORT/EXPORT
   // ============================
 
-  function exportTemplates() {
-    const templates = loadTemplates();
+  async function exportTemplates() {
+    const templates = await loadTemplates();
     const json = JSON.stringify(templates, null, 2);
 
     const blob = new Blob([json], { type: "application/json" });
@@ -395,31 +474,28 @@
 
   function importTemplates(file) {
     const reader = new FileReader();
-    reader.onload = function (event) {
+    reader.onload = async function (event) {
       try {
-        const importedTemplates = JSON.parse(event.target.result);
+        const imported = JSON.parse(event.target.result);
 
-        if (
-          typeof importedTemplates !== "object" ||
-          importedTemplates === null
-        ) {
+        if (typeof imported !== "object" || imported === null) {
           throw new Error("Invalid format");
         }
 
-        const currentTemplates = loadTemplates();
+        const currentTemplates = await loadTemplates();
         let newCount = 0;
         let overwriteCount = 0;
 
-        Object.keys(importedTemplates).forEach((name) => {
+        Object.keys(imported).forEach((name) => {
           if (currentTemplates[name]) {
             overwriteCount++;
           } else {
             newCount++;
           }
-          currentTemplates[name] = importedTemplates[name];
+          currentTemplates[name] = imported[name];
         });
 
-        saveTemplates(currentTemplates);
+        await saveTemplates(currentTemplates);
 
         // Notify UI to re-render
         if (
@@ -477,17 +553,17 @@
   // INITIALIZATION
   // ============================
 
-  function initialize() {
+  async function initialize() {
     console.log("[Pixiv Templater] Initializing...");
 
     // Wait for page to be ready
-    const checkReady = setInterval(() => {
+    const checkReady = setInterval(async () => {
       if ($('input[name="title"]').length > 0) {
         clearInterval(checkReady);
 
         // Initialize UI
         if (window.PixivTemplaterUI && window.PixivTemplaterUI.initialize) {
-          window.PixivTemplaterUI.initialize();
+          await window.PixivTemplaterUI.initialize();
           console.log("[Pixiv Templater] UI initialized");
         } else {
           console.error("[Pixiv Templater] UI module not loaded!");

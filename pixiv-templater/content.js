@@ -48,6 +48,79 @@
       });
   }
 
+  // Storage bridge - runs as content script (has access to chrome.storage)
+  // Listens for messages from page context and responds with storage data
+  window.addEventListener("message", async function (event) {
+    // Only accept messages from same window
+    if (event.source !== window) return;
+
+    const message = event.data;
+    if (!message.type || !message.type.startsWith("PIXIV_TEMPLATER_STORAGE_"))
+      return;
+
+    try {
+      switch (message.type) {
+        case "PIXIV_TEMPLATER_STORAGE_GET":
+          const fullKey = `pixiv_templater_${message.key}`;
+          const result = await chrome.storage.local.get([fullKey]);
+          const value =
+            result[fullKey] !== undefined
+              ? result[fullKey]
+              : message.defaultValue;
+
+          window.postMessage(
+            {
+              type: "PIXIV_TEMPLATER_STORAGE_GET_RESPONSE",
+              id: message.id,
+              value: value,
+            },
+            "*",
+          );
+          break;
+
+        case "PIXIV_TEMPLATER_STORAGE_SET":
+          const setKey = `pixiv_templater_${message.key}`;
+          await chrome.storage.local.set({ [setKey]: message.value });
+
+          window.postMessage(
+            {
+              type: "PIXIV_TEMPLATER_STORAGE_SET_RESPONSE",
+              id: message.id,
+              success: true,
+            },
+            "*",
+          );
+          break;
+
+        case "PIXIV_TEMPLATER_STORAGE_REMOVE":
+          const removeKey = `pixiv_templater_${message.key}`;
+          await chrome.storage.local.remove([removeKey]);
+
+          window.postMessage(
+            {
+              type: "PIXIV_TEMPLATER_STORAGE_REMOVE_RESPONSE",
+              id: message.id,
+              success: true,
+            },
+            "*",
+          );
+          break;
+      }
+    } catch (error) {
+      console.error("[Storage Bridge] Error:", error);
+      window.postMessage(
+        {
+          type: message.type + "_RESPONSE",
+          id: message.id,
+          error: error.message,
+        },
+        "*",
+      );
+    }
+  });
+
+  console.log("[Storage Bridge] Ready");
+
   // Inject scripts in sequence
   // 0. First inject browser polyfill for Firefox compatibility
   injectScript("browser-polyfill.js", function () {
