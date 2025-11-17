@@ -218,6 +218,11 @@ body {
     color: var(--text-primary);
 }
 
+.section-header .header-actions {
+    display: flex;
+    gap: 12px;
+}
+
 /* Templates Grid */
 .templates-grid {
     display: grid;

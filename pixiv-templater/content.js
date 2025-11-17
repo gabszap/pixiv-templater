@@ -1,51 +1,63 @@
 // Content script that injects all necessary scripts into the page context
+// Robust injection with timeouts and error recovery
 
 (function () {
   "use strict";
 
   console.log("[Pixiv Templater Extension] Content script loaded");
 
-  // Function to inject a script into the page context
-  function injectScript(src, callback) {
-    const script = document.createElement("script");
-    script.src = chrome.runtime.getURL(src);
-    script.onload = function () {
-      console.log(`[Pixiv Templater] Injected: ${src}`);
-      this.remove();
-      if (callback) callback();
-    };
-    script.onerror = function () {
-      console.error(`[Pixiv Templater] Failed to inject: ${src}`);
-    };
-    (document.head || document.documentElement).appendChild(script);
+  // Function to inject a script into the page context with timeout
+  function injectScript(src, timeout = 10000) {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = chrome.runtime.getURL(src);
+
+      const timeoutId = setTimeout(() => {
+        console.warn(
+          `[Pixiv Templater] Timeout loading ${src}, continuing anyway...`,
+        );
+        resolve(); // Continue even on timeout
+      }, timeout);
+
+      script.onload = function () {
+        clearTimeout(timeoutId);
+        console.log(`[Pixiv Templater] ✓ Injected: ${src}`);
+        this.remove();
+        resolve();
+      };
+
+      script.onerror = function () {
+        clearTimeout(timeoutId);
+        console.error(`[Pixiv Templater] ✗ Failed to inject: ${src}`);
+        reject(new Error(`Failed to load ${src}`));
+      };
+
+      (document.head || document.documentElement).appendChild(script);
+    });
   }
 
   // Function to load and inject UI resources (HTML and CSS)
-  function loadUIResources(callback) {
-    // Load CSS
-    fetch(chrome.runtime.getURL("ui/ui.css"))
-      .then((response) => response.text())
-      .then((css) => {
-        const style = document.createElement("style");
-        style.textContent = css;
-        document.head.appendChild(style);
-        console.log("[Pixiv Templater] CSS injected");
+  async function loadUIResources() {
+    try {
+      // Load CSS
+      const cssResponse = await fetch(chrome.runtime.getURL("ui/ui.css"));
+      const css = await cssResponse.text();
+      const style = document.createElement("style");
+      style.textContent = css;
+      document.head.appendChild(style);
+      console.log("[Pixiv Templater] ✓ CSS injected");
 
-        // Load HTML
-        return fetch(chrome.runtime.getURL("ui/ui.html"));
-      })
-      .then((response) => response.text())
-      .then((html) => {
-        const container = document.createElement("div");
-        container.innerHTML = html;
-        document.body.appendChild(container);
-        console.log("[Pixiv Templater] HTML injected");
-
-        if (callback) callback();
-      })
-      .catch((err) => {
-        console.error("[Pixiv Templater] Failed to load UI resources:", err);
-      });
+      // Load HTML
+      const htmlResponse = await fetch(chrome.runtime.getURL("ui/ui.html"));
+      const html = await htmlResponse.text();
+      const container = document.createElement("div");
+      container.innerHTML = html;
+      document.body.appendChild(container);
+      console.log("[Pixiv Templater] ✓ HTML injected");
+    } catch (err) {
+      console.error("[Pixiv Templater] Failed to load UI resources:", err);
+      throw err;
+    }
   }
 
   // Storage bridge - runs as content script (has access to chrome.storage)
@@ -119,31 +131,62 @@
     }
   });
 
-  console.log("[Storage Bridge] Ready");
+  console.log("[Storage Bridge] ✓ Ready");
 
-  // Inject scripts in sequence
-  // 0. First inject browser polyfill for Firefox compatibility
-  injectScript("browser-polyfill.js", function () {
-    // 1. Then inject Lucide icons library
-    injectScript("libs/lucide.min.js", function () {
-      // 2. Then inject the Lucide bridge
-      injectScript("page-lucide-bridge.js", function () {
-        // 3. Then inject jQuery
-        injectScript("libs/jquery.min.js", function () {
-          // 4. Load UI resources (HTML and CSS)
-          loadUIResources(function () {
-            // 5. Then inject the UI script
-            injectScript("ui/ui.js", function () {
-              // 6. Finally inject the main templater script
-              injectScript("templater.js", function () {
-                console.log(
-                  "[Pixiv Templater] All scripts loaded successfully",
-                );
-              });
-            });
-          });
-        });
-      });
-    });
-  });
+  // Main injection sequence with error recovery
+  async function initializeExtension() {
+    try {
+      console.log("[Pixiv Templater] Starting injection sequence...");
+
+      // 0. Browser polyfill for Firefox compatibility
+      await injectScript("browser-polyfill.js", 5000);
+
+      // 1. Lucide icons library
+      await injectScript("libs/lucide.min.js", 5000);
+
+      // 2. Lucide bridge
+      await injectScript("page-lucide-bridge.js", 5000);
+
+      // 3. jQuery
+      await injectScript("libs/jquery.min.js", 5000);
+
+      // 4. UI resources (HTML and CSS)
+      await loadUIResources();
+
+      // 5. UI script
+      await injectScript("ui/ui.js", 5000);
+
+      // 6. Main templater script
+      await injectScript("templater.js", 5000);
+
+      console.log("[Pixiv Templater] ✓✓✓ All scripts loaded successfully ✓✓✓");
+    } catch (error) {
+      console.error(
+        "[Pixiv Templater] Critical error during initialization:",
+        error,
+      );
+      console.log("[Pixiv Templater] Attempting retry in 2 seconds...");
+
+      // Retry once after 2 seconds
+      setTimeout(async () => {
+        try {
+          console.log("[Pixiv Templater] Retry attempt...");
+          await loadUIResources();
+          await injectScript("ui/ui.js", 5000);
+          await injectScript("templater.js", 5000);
+          console.log("[Pixiv Templater] ✓ Retry successful");
+        } catch (retryError) {
+          console.error("[Pixiv Templater] Retry failed:", retryError);
+        }
+      }, 2000);
+    }
+  }
+
+  // Wait for DOM to be ready
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initializeExtension);
+  } else {
+    // DOM already loaded
+    initializeExtension();
+  }
 })();

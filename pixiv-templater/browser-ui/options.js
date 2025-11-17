@@ -5,15 +5,25 @@
 
   // Storage wrapper with chrome/browser compatibility
   const Storage = {
-    get: function (key, defaultValue) {
-      const value = localStorage.getItem(`pixiv_templater_${key}`);
-      return value !== null ? value : defaultValue;
+    get: async function (key, defaultValue) {
+      const fullKey = `pixiv_templater_${key}`;
+      const result = await chrome.storage.local.get([fullKey]);
+      const value = result[fullKey];
+      console.log(
+        `[Options Storage] GET ${key}:`,
+        value !== undefined ? "found" : "not found",
+      );
+      return value !== undefined ? value : defaultValue;
     },
-    set: function (key, value) {
-      localStorage.setItem(`pixiv_templater_${key}`, value);
+    set: async function (key, value) {
+      const fullKey = `pixiv_templater_${key}`;
+      await chrome.storage.local.set({ [fullKey]: value });
+      console.log(`[Options Storage] SET ${key}`);
     },
-    remove: function (key) {
-      localStorage.removeItem(`pixiv_templater_${key}`);
+    remove: async function (key) {
+      const fullKey = `pixiv_templater_${key}`;
+      await chrome.storage.local.remove([fullKey]);
+      console.log(`[Options Storage] REMOVE ${key}`);
     },
   };
 
@@ -163,7 +173,9 @@
 
     // Reload data when switching to specific tabs
     if (tabName === "stats") {
-      loadStats();
+      loadStats().catch((err) =>
+        console.error("[Options] Error loading stats:", err),
+      );
     }
   }
 
@@ -173,9 +185,13 @@
 
   function setupEventHandlers() {
     // Header actions
-    $("#export-all").on("click", exportTemplates);
+    $("#export-all").on("click", () =>
+      exportTemplates().catch((err) => console.error(err)),
+    );
     $("#import-templates").on("click", () => $("#import-input").click());
-    $("#import-input").on("change", handleImportFile);
+    $("#import-input").on("change", (e) =>
+      handleImportFile(e).catch((err) => console.error(err)),
+    );
 
     // Template actions
     $("#new-template").on("click", handleNewTemplate);
@@ -188,7 +204,9 @@
     });
 
     // Form submit
-    $("#template-form").on("submit", handleFormSubmit);
+    $("#template-form").on("submit", (e) =>
+      handleFormSubmit(e).catch((err) => console.error(err)),
+    );
 
     // Tag input
     $("#tag-input").on("keydown", handleTagInput);
@@ -198,21 +216,30 @@
     $("#template-age-rating").on("change", handleAgeRatingChange);
 
     // Shortcuts
-    $("#reset-shortcuts").on("click", handleResetShortcuts);
+    $("#reset-shortcuts").on("click", () =>
+      handleResetShortcuts().catch((err) => console.error(err)),
+    );
     $(document).on("focus", ".shortcut-input", handleShortcutInputFocus);
     $(document).on("blur", ".shortcut-input", handleShortcutInputBlur);
-    $(document).on("keydown", ".shortcut-input", handleShortcutRecording);
+    $(document).on("keydown", ".shortcut-input", (e) =>
+      handleShortcutRecording(e).catch((err) => console.error(err)),
+    );
 
     // Stats
-    $("#reset-stats").on("click", handleResetStats);
+    $("#refresh-stats").on("click", () =>
+      loadStats().catch((err) => console.error(err)),
+    );
+    $("#reset-stats").on("click", () =>
+      handleResetStats().catch((err) => console.error(err)),
+    );
   }
 
   // ============================
   // TEMPLATES MANAGEMENT
   // ============================
 
-  function loadTemplates() {
-    const templatesJson = Storage.get("templates", "{}");
+  async function loadTemplates() {
+    const templatesJson = await Storage.get("templates", "{}");
     console.log("[Options] Loading templates, raw JSON:", templatesJson);
 
     let templates;
@@ -223,7 +250,7 @@
       templates = {};
     }
 
-    const stats = loadStatsData();
+    const stats = await loadStatsData();
     const $list = $("#templates-list");
 
     $list.empty();
@@ -303,9 +330,9 @@
         editTemplate(name, template);
       });
 
-      $card.find(".delete").on("click", (e) => {
+      $card.find(".delete").on("click", async (e) => {
         e.stopPropagation();
-        deleteTemplate(name);
+        await deleteTemplate(name);
       });
 
       $list.append($card);
@@ -322,7 +349,7 @@
     openModal();
   }
 
-  function handleFormSubmit(e) {
+  async function handleFormSubmit(e) {
     e.preventDefault();
 
     const name = $("#template-name").val().trim();
@@ -337,7 +364,7 @@
       return;
     }
 
-    const templatesJson = Storage.get("templates", "{}");
+    const templatesJson = await Storage.get("templates", "{}");
     const templates = JSON.parse(templatesJson);
 
     if (!editingTemplateName && templates[name]) {
@@ -372,8 +399,8 @@
       allowTagEditing: true,
     };
 
-    Storage.set("templates", JSON.stringify(templates));
-    loadTemplates();
+    await Storage.set("templates", JSON.stringify(templates));
+    await loadTemplates();
     closeModal();
 
     console.log("[Options] Template saved:", name);
@@ -409,17 +436,17 @@
     openModal();
   }
 
-  function deleteTemplate(name) {
+  async function deleteTemplate(name) {
     if (!confirm(`Tem certeza que deseja deletar o template "${name}"?`)) {
       return;
     }
 
-    const templatesJson = Storage.get("templates", "{}");
+    const templatesJson = await Storage.get("templates", "{}");
     const templates = JSON.parse(templatesJson);
     delete templates[name];
-    Storage.set("templates", JSON.stringify(templates));
+    await Storage.set("templates", JSON.stringify(templates));
 
-    loadTemplates();
+    await loadTemplates();
     console.log("[Options] Template deleted:", name);
   }
 
@@ -536,8 +563,8 @@
   // IMPORT/EXPORT
   // ============================
 
-  function exportTemplates() {
-    const templatesJson = Storage.get("templates", "{}");
+  async function exportTemplates() {
+    const templatesJson = await Storage.get("templates", "{}");
     const templates = JSON.parse(templatesJson);
 
     if (Object.keys(templates).length === 0) {
@@ -557,15 +584,15 @@
     console.log("[Options] Templates exported");
   }
 
-  function handleImportFile(e) {
+  async function handleImportFile(e) {
     const file = e.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = function (event) {
+    reader.onload = async function (event) {
       try {
         const imported = JSON.parse(event.target.result);
-        const templatesJson = Storage.get("templates", "{}");
+        const templatesJson = await Storage.get("templates", "{}");
         const existing = JSON.parse(templatesJson);
 
         let newCount = 0;
@@ -580,8 +607,8 @@
           existing[name] = imported[name];
         });
 
-        Storage.set("templates", JSON.stringify(existing));
-        loadTemplates();
+        await Storage.set("templates", JSON.stringify(existing));
+        await loadTemplates();
 
         alert(
           `✓ Importação concluída!\n\n` +
@@ -608,8 +635,8 @@
   // SHORTCUTS MANAGEMENT
   // ============================
 
-  function loadShortcuts() {
-    const shortcutsJson = Storage.get("shortcuts", "{}");
+  async function loadShortcuts() {
+    const shortcutsJson = await Storage.get("shortcuts", "{}");
     currentShortcuts = JSON.parse(shortcutsJson);
 
     // Merge with defaults
@@ -642,7 +669,7 @@
     }
   }
 
-  function handleShortcutRecording(e) {
+  async function handleShortcutRecording(e) {
     if (!recordingInput || !recordingInput.hasClass("recording")) return;
 
     e.preventDefault();
@@ -661,7 +688,7 @@
     const action = recordingInput.data("action");
     currentShortcuts[action] = shortcut.toLowerCase();
 
-    Storage.set("shortcuts", JSON.stringify(currentShortcuts));
+    await Storage.set("shortcuts", JSON.stringify(currentShortcuts));
 
     recordingInput.blur();
     recordingInput = null;
@@ -669,11 +696,11 @@
     console.log("[Options] Shortcut updated:", action, "=>", shortcut);
   }
 
-  function handleResetShortcuts() {
+  async function handleResetShortcuts() {
     if (!confirm("Restaurar todos os atalhos para o padrão?")) return;
 
     currentShortcuts = { ...DEFAULT_SHORTCUTS };
-    Storage.set("shortcuts", JSON.stringify(currentShortcuts));
+    await Storage.set("shortcuts", JSON.stringify(currentShortcuts));
 
     $(".shortcut-input").each(function () {
       const action = $(this).data("action");
@@ -688,8 +715,8 @@
   // STATS MANAGEMENT
   // ============================
 
-  function loadStatsData() {
-    const statsJson = Storage.get("template_stats", "{}");
+  async function loadStatsData() {
+    const statsJson = await Storage.get("template_stats", "{}");
     try {
       return JSON.parse(statsJson);
     } catch (e) {
@@ -698,9 +725,10 @@
     }
   }
 
-  function loadStats() {
-    const stats = loadStatsData();
-    const templatesJson = Storage.get("templates", "{}");
+  async function loadStats() {
+    console.log("[Options] Loading stats...");
+    const stats = await loadStatsData();
+    const templatesJson = await Storage.get("templates", "{}");
     let templates;
     try {
       templates = JSON.parse(templatesJson);
@@ -710,11 +738,8 @@
     }
     const templateNames = Object.keys(templates);
 
-    console.log(
-      "[Options] Loading stats:",
-      Object.keys(stats).length,
-      "entries",
-    );
+    console.log("[Options] Stats data:", stats);
+    console.log("[Options] Templates:", Object.keys(templates));
 
     let totalUses = 0;
     let templatesUsed = 0;
@@ -803,7 +828,7 @@
     });
   }
 
-  function handleResetStats() {
+  async function handleResetStats() {
     if (
       !confirm(
         "Tem certeza que deseja limpar todas as estatísticas?\n\nEsta ação não pode ser desfeita!",
@@ -812,8 +837,8 @@
       return;
     }
 
-    Storage.set("template_stats", "{}");
-    loadStats();
+    await Storage.set("template_stats", "{}");
+    await loadStats();
     alert("✓ Estatísticas limpas com sucesso!");
     console.log("[Options] Stats reset");
   }

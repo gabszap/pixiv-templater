@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Pixiv Templater",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "Auto-fill Pixiv upload page with predefined templates",
   "author": "gabszap",
   "icons": {
@@ -16,7 +16,7 @@
     {
       "matches": ["*://www.pixiv.net/illustration/create*"],
       "js": ["content.js"],
-      "run_at": "document_end"
+      "run_at": "document_idle"
     }
   ],
   "web_accessible_resources": [

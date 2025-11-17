@@ -49,7 +49,58 @@
     // Update shortcut hint
     await updateShortcutHint();
 
-    console.log("[Pixiv Templater UI] UI initialized successfully");
+    console.log("[Pixiv Templater UI] ✓✓✓ UI initialized successfully ✓✓✓");
+
+    // Show visual indicator that extension loaded
+    showLoadIndicator();
+  }
+
+  /**
+   * Show temporary visual indicator that extension loaded
+   */
+  function showLoadIndicator() {
+    const indicator = $("<div>")
+      .css({
+        position: "fixed",
+        top: "20px",
+        right: "20px",
+        background: "#0096fa",
+        color: "white",
+        padding: "12px 20px",
+        borderRadius: "8px",
+        fontWeight: "bold",
+        fontSize: "14px",
+        zIndex: 999999,
+        boxShadow: "0 4px 12px rgba(0, 150, 250, 0.4)",
+        animation: "slideInRight 0.3s ease-out",
+      })
+      .text("✓ Pixiv Templater carregado!")
+      .appendTo("body");
+
+    // Add CSS animation
+    $("<style>")
+      .text(
+        `
+        @keyframes slideInRight {
+          from {
+            transform: translateX(100px);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+      `,
+      )
+      .appendTo("head");
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+      indicator.fadeOut(300, function () {
+        $(this).remove();
+      });
+    }, 3000);
   }
 
   /**

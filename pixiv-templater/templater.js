@@ -13,6 +13,7 @@
 
   const Storage = {
     get: async function (key, defaultValue) {
+      console.log("[Storage] GET called - key:", key);
       return new Promise((resolve) => {
         const id = Math.random().toString(36);
 
@@ -22,12 +23,19 @@
             event.data.id === id
           ) {
             window.removeEventListener("message", handler);
+            console.log(
+              "[Storage] GET success via bridge for key:",
+              key,
+              "- value exists:",
+              event.data.value !== null && event.data.value !== undefined,
+            );
             resolve(event.data.value);
           }
         };
 
         window.addEventListener("message", handler);
 
+        console.log("[Storage] Sending GET message to bridge for key:", key);
         window.postMessage(
           {
             type: "PIXIV_TEMPLATER_STORAGE_GET",
@@ -42,10 +50,17 @@
         setTimeout(() => {
           window.removeEventListener("message", handler);
           console.warn(
-            "[Templater] Storage get timeout, using localStorage fallback",
+            "[Templater] Storage get timeout, using localStorage fallback for key:",
+            key,
           );
           try {
             const value = localStorage.getItem("pixiv_templater_" + key);
+            console.log(
+              "[Storage] Retrieved from localStorage fallback:",
+              key,
+              "- exists:",
+              value !== null,
+            );
             resolve(value !== null ? value : defaultValue);
           } catch (e) {
             resolve(defaultValue);
@@ -54,6 +69,12 @@
       });
     },
     set: async function (key, value) {
+      console.log(
+        "[Storage] SET called - key:",
+        key,
+        "value length:",
+        value.length,
+      );
       return new Promise((resolve) => {
         const id = Math.random().toString(36);
 
@@ -63,12 +84,14 @@
             event.data.id === id
           ) {
             window.removeEventListener("message", handler);
+            console.log("[Storage] SET success via bridge for key:", key);
             resolve(true);
           }
         };
 
         window.addEventListener("message", handler);
 
+        console.log("[Storage] Sending SET message to bridge for key:", key);
         window.postMessage(
           {
             type: "PIXIV_TEMPLATER_STORAGE_SET",
@@ -83,10 +106,12 @@
         setTimeout(() => {
           window.removeEventListener("message", handler);
           console.warn(
-            "[Templater] Storage set timeout, using localStorage fallback",
+            "[Templater] Storage set timeout, using localStorage fallback for key:",
+            key,
           );
           try {
             localStorage.setItem("pixiv_templater_" + key, value);
+            console.log("[Storage] Saved to localStorage fallback:", key);
           } catch (e) {
             console.error("[Templater] Storage set error:", e);
           }
@@ -190,24 +215,40 @@
   }
 
   async function trackTemplateUsage(templateName) {
+    console.log("[Templater] 📊 trackTemplateUsage called for:", templateName);
     const stats = await loadStats();
+    console.log(
+      "[Templater] Current stats before update:",
+      JSON.stringify(stats),
+    );
 
     if (!stats[templateName]) {
       stats[templateName] = {
         count: 0,
         lastUsed: null,
       };
+      console.log("[Templater] Created new stats entry for:", templateName);
     }
 
     stats[templateName].count++;
     stats[templateName].lastUsed = Date.now();
 
-    await saveStats(stats);
     console.log(
-      "[Templater] 📊 Template used:",
+      "[Templater] Updated stats for",
       templateName,
-      "- Total:",
-      stats[templateName].count,
+      ":",
+      stats[templateName],
+    );
+    console.log("[Templater] All stats before save:", JSON.stringify(stats));
+
+    await saveStats(stats);
+    console.log("[Templater] Stats saved successfully");
+
+    // Verify save
+    const verifyStats = await loadStats();
+    console.log(
+      "[Templater] Stats after save (verification):",
+      JSON.stringify(verifyStats),
     );
   }
 
