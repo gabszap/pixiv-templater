@@ -5,7 +5,17 @@
 (function () {
   "use strict";
 
-  console.log("[Pixiv Templater] Initializing extension version...");
+  // Wait for PageLogger to be available
+  const log = window.PTLogger || {
+    essential: (c, m, d) => console.log(`[${c}] ${m}`, d || ""),
+    info: () => {},
+    debug: () => {},
+    user: (c, m, d) => console.log(`[${c}] 👤 ${m}`, d || ""),
+    error: (c, m, e) => console.error(`[${c}] ❌ ${m}`, e || ""),
+  };
+
+  // ESSENTIAL LOG - Always shown
+  log.essential("Pixiv Templater", "Initializing extension version...");
 
   // ============================
   // STORAGE WRAPPER (uses chrome.storage via message bridge)
@@ -13,7 +23,7 @@
 
   const Storage = {
     get: async function (key, defaultValue) {
-      console.log("[Storage] GET called - key:", key);
+      // DEBUG: Removed verbose logs
       return new Promise((resolve) => {
         const id = Math.random().toString(36);
 
@@ -23,19 +33,14 @@
             event.data.id === id
           ) {
             window.removeEventListener("message", handler);
-            console.log(
-              "[Storage] GET success via bridge for key:",
-              key,
-              "- value exists:",
-              event.data.value !== null && event.data.value !== undefined,
-            );
+            // DEBUG: Removed verbose logs
             resolve(event.data.value);
           }
         };
 
         window.addEventListener("message", handler);
 
-        console.log("[Storage] Sending GET message to bridge for key:", key);
+        // DEBUG: Removed verbose logs
         window.postMessage(
           {
             type: "PIXIV_TEMPLATER_STORAGE_GET",
@@ -55,12 +60,7 @@
           );
           try {
             const value = localStorage.getItem("pixiv_templater_" + key);
-            console.log(
-              "[Storage] Retrieved from localStorage fallback:",
-              key,
-              "- exists:",
-              value !== null,
-            );
+            // DEBUG: Removed verbose logs
             resolve(value !== null ? value : defaultValue);
           } catch (e) {
             resolve(defaultValue);
@@ -69,12 +69,7 @@
       });
     },
     set: async function (key, value) {
-      console.log(
-        "[Storage] SET called - key:",
-        key,
-        "value length:",
-        value.length,
-      );
+      // DEBUG: Removed verbose logs
       return new Promise((resolve) => {
         const id = Math.random().toString(36);
 
@@ -84,14 +79,14 @@
             event.data.id === id
           ) {
             window.removeEventListener("message", handler);
-            console.log("[Storage] SET success via bridge for key:", key);
+            // DEBUG: Removed verbose logs
             resolve(true);
           }
         };
 
         window.addEventListener("message", handler);
 
-        console.log("[Storage] Sending SET message to bridge for key:", key);
+        // DEBUG: Removed verbose logs
         window.postMessage(
           {
             type: "PIXIV_TEMPLATER_STORAGE_SET",
@@ -111,7 +106,7 @@
           );
           try {
             localStorage.setItem("pixiv_templater_" + key, value);
-            console.log("[Storage] Saved to localStorage fallback:", key);
+            // DEBUG: Removed verbose logs
           } catch (e) {
             console.error("[Templater] Storage set error:", e);
           }
@@ -184,11 +179,9 @@
   // ============================
 
   async function loadTemplates() {
-    console.log("[Templater] Loading templates...");
+    // DEBUG: Removed verbose logs
     const saved = await Storage.get("templates", null);
-    console.log("[Templater] Templates raw:", saved);
     const templates = saved ? JSON.parse(saved) : DEFAULT_TEMPLATES;
-    console.log("[Templater] Templates parsed:", Object.keys(templates));
     return templates;
   }
 
@@ -202,11 +195,9 @@
   // ============================
 
   async function loadStats() {
-    console.log("[Templater] Loading stats...");
+    // DEBUG: Removed verbose logs
     const saved = await Storage.get("template_stats", null);
-    console.log("[Templater] Stats raw:", saved);
     const stats = saved ? JSON.parse(saved) : {};
-    console.log("[Templater] Stats parsed:", Object.keys(stats));
     return stats;
   }
 
@@ -215,41 +206,24 @@
   }
 
   async function trackTemplateUsage(templateName) {
-    console.log("[Templater] 📊 trackTemplateUsage called for:", templateName);
+    // DEBUG: Removed verbose logs
     const stats = await loadStats();
-    console.log(
-      "[Templater] Current stats before update:",
-      JSON.stringify(stats),
-    );
 
     if (!stats[templateName]) {
       stats[templateName] = {
         count: 0,
         lastUsed: null,
       };
-      console.log("[Templater] Created new stats entry for:", templateName);
+      // DEBUG: Removed verbose logs
     }
 
     stats[templateName].count++;
     stats[templateName].lastUsed = Date.now();
 
-    console.log(
-      "[Templater] Updated stats for",
-      templateName,
-      ":",
-      stats[templateName],
-    );
-    console.log("[Templater] All stats before save:", JSON.stringify(stats));
+    // DEBUG: Removed verbose logs
 
     await saveStats(stats);
-    console.log("[Templater] Stats saved successfully");
-
-    // Verify save
-    const verifyStats = await loadStats();
-    console.log(
-      "[Templater] Stats after save (verification):",
-      JSON.stringify(verifyStats),
-    );
+    // DEBUG: Removed verbose logs
   }
 
   function getTemplateStats(templateName) {
@@ -264,7 +238,7 @@
       )
     ) {
       await Storage.set("template_stats", "{}");
-      console.log("[Templater] 📊 Statistics reset");
+      // DEBUG: Removed verbose logs
       alert("✓ Estatísticas resetadas com sucesso!");
       return true;
     }
@@ -277,10 +251,9 @@
   // ============================
 
   async function loadShortcuts() {
-    console.log("[Templater] Loading shortcuts...");
+    // DEBUG: Removed verbose logs
     const saved = await Storage.get("shortcuts", null);
     const shortcuts = saved ? JSON.parse(saved) : { ...DEFAULT_SHORTCUTS };
-    console.log("[Templater] Shortcuts loaded:", Object.keys(shortcuts).length);
     return shortcuts;
   }
 
@@ -347,14 +320,15 @@
   // ============================
 
   async function applyTemplate(template) {
-    console.log("[Templater] Applying template:", template);
+    // User action log - always shown
+    log.user("Templater", "Applying template:", template);
 
     // 1. Title
     if (template.title !== undefined) {
       const titleInput = document.querySelector('input[name="title"]');
       if (titleInput) {
         setReactInputValue(titleInput, template.title);
-        console.log("[Templater] ✓ Title filled");
+        log.info("Templater", "✓ Title filled");
       }
     }
 
@@ -365,7 +339,7 @@
       );
       if (captionTextarea) {
         setReactTextareaValue(captionTextarea, template.caption);
-        console.log("[Templater] ✓ Caption filled");
+        log.info("Templater", "✓ Caption filled");
       }
     }
 
@@ -377,7 +351,7 @@
         );
         if (ageRatingRadio) {
           clickReactRadio(ageRatingRadio);
-          console.log("[Templater] ✓ Age rating selected:", template.ageRating);
+          log.info("Templater", "✓ Age rating selected:", template.ageRating);
 
           setTimeout(() => {
             if (template.ageRating === "general") {
@@ -389,9 +363,9 @@
               );
               if (adultContentRadio) {
                 clickReactRadio(adultContentRadio);
-                console.log(
-                  "[Templater] ✓ Adult content set:",
-                  adultContentValue,
+                log.info(
+                  "Templater",
+                  "✓ Adult content set: " + adultContentValue,
                 );
               }
             } else if (template.ageRating === "r18") {
@@ -405,8 +379,9 @@
                   clickReactCheckbox(checkbox, shouldCheck);
                 }
               });
-              console.log(
-                "[Templater] ✓ Mature content set:",
+              log.info(
+                "Templater",
+                "✓ Mature content set:",
                 template.matureContent,
               );
             }
@@ -423,7 +398,7 @@
         );
         if (aiRadio) {
           clickReactRadio(aiRadio);
-          console.log("[Templater] ✓ AI-generated set:", template.aiGenerated);
+          log.info("Templater", "✓ AI-generated set:", template.aiGenerated);
         }
       }, 400);
     }
@@ -431,17 +406,16 @@
     // 5. Tags
     if (template.tags && template.tags.length > 0) {
       setTimeout(() => {
-        console.log("[Templater] Adding tags:", template.tags);
+        log.info("Templater", "Adding tags:", template.tags);
         addTagsSequentially(template.tags, 0);
       }, 600);
     }
-
-    console.log("[Templater] ✓ Template applied successfully!");
+    log.user("Templater", "✓ Template applied successfully!");
   }
 
   function addTagsSequentially(tags, index) {
     if (index >= tags.length) {
-      console.log("[Templater] ✓ All tags added");
+      log.info("Templater", "✓ All tags added");
       return;
     }
 
@@ -454,7 +428,7 @@
   }
 
   function addTag(tagName) {
-    console.log("[Templater] Looking for tag:", tagName);
+    log.debug("Templater", "Looking for tag:", tagName);
 
     const tagButtons = document.querySelectorAll(
       'button[class*="gtm-"][class*="tag"]',
@@ -478,7 +452,7 @@
           buttonText.replace(/\s/g, "") === tagName.replace(/\s/g, "") ||
           buttonText.toLowerCase() === tagName.toLowerCase())
       ) {
-        console.log("[Templater] ✓ Tag found, clicking:", buttonText);
+        log.debug("Templater", "✓ Tag found, clicking:", buttonText);
         button.dataset.templaterClicked = "true";
         button.click();
         found = true;
@@ -595,7 +569,8 @@
   // ============================
 
   async function initialize() {
-    console.log("[Pixiv Templater] Initializing...");
+    // ESSENTIAL LOG - Always shown
+    log.essential("Pixiv Templater", "Initializing...");
 
     // Wait for page to be ready
     const checkReady = setInterval(async () => {
@@ -605,12 +580,12 @@
         // Initialize UI
         if (window.PixivTemplaterUI && window.PixivTemplaterUI.initialize) {
           await window.PixivTemplaterUI.initialize();
-          console.log("[Pixiv Templater] UI initialized");
+          // ESSENTIAL LOG - Always shown
+          log.essential("Pixiv Templater", "UI initialized");
         } else {
-          console.error("[Pixiv Templater] UI module not loaded!");
+          log.error("Pixiv Templater", "UI module not loaded!");
         }
-
-        console.log("[Pixiv Templater] Ready!");
+        // DEBUG: Removed verbose log
       }
     }, 500);
 
@@ -618,19 +593,20 @@
     setTimeout(() => clearInterval(checkReady), 30000);
   }
 
-  // Wait for jQuery to be available
-  function waitForJQuery() {
+  // Wait for jQuery and PageLogger to be available
+  function waitForDependencies() {
     if (
       typeof $ !== "undefined" &&
-      typeof window.PixivTemplaterUI !== "undefined"
+      typeof window.PixivTemplaterUI !== "undefined" &&
+      typeof window.PTLogger !== "undefined"
     ) {
+      // Update log reference with the actual PageLogger
+      Object.assign(log, window.PTLogger);
       $(document).ready(initialize);
     } else {
-      setTimeout(waitForJQuery, 100);
+      setTimeout(waitForDependencies, 100);
     }
   }
 
-  waitForJQuery();
-
-  console.log("[Pixiv Templater] Extension loaded and ready!");
+  waitForDependencies();
 })();

@@ -4,7 +4,39 @@
 (function () {
   "use strict";
 
-  console.log("[Pixiv Templater Extension] Content script loaded");
+  let debugMode = false;
+
+  // Check debug mode from storage
+  async function loadDebugMode() {
+    try {
+      const result = await chrome.storage.local.get([
+        "pixiv_templater_debug_mode",
+      ]);
+      debugMode = result.pixiv_templater_debug_mode || false;
+    } catch (err) {
+      console.error("[Pixiv Templater] Failed to load debug mode:", err);
+    }
+  }
+
+  // Logging helpers
+  const log = {
+    essential: (msg, data) => {
+      console.log(`[Pixiv Templater] ${msg}`, data !== undefined ? data : "");
+    },
+    debug: (msg, data) => {
+      if (!debugMode) return;
+      console.log(`[Pixiv Templater] ${msg}`, data !== undefined ? data : "");
+    },
+    error: (msg, error) => {
+      console.error(
+        `[Pixiv Templater] ${msg}`,
+        error !== undefined ? error : "",
+      );
+    },
+    warn: (msg, data) => {
+      console.warn(`[Pixiv Templater] ${msg}`, data !== undefined ? data : "");
+    },
+  };
 
   // Function to inject a script into the page context with timeout
   function injectScript(src, timeout = 10000) {
@@ -13,22 +45,20 @@
       script.src = chrome.runtime.getURL(src);
 
       const timeoutId = setTimeout(() => {
-        console.warn(
-          `[Pixiv Templater] Timeout loading ${src}, continuing anyway...`,
-        );
+        log.warn(`Timeout loading ${src}, continuing anyway...`);
         resolve(); // Continue even on timeout
       }, timeout);
 
       script.onload = function () {
         clearTimeout(timeoutId);
-        console.log(`[Pixiv Templater] ✓ Injected: ${src}`);
+        log.debug(`✓ Injected: ${src}`);
         this.remove();
         resolve();
       };
 
       script.onerror = function () {
         clearTimeout(timeoutId);
-        console.error(`[Pixiv Templater] ✗ Failed to inject: ${src}`);
+        log.error(`✗ Failed to inject: ${src}`);
         reject(new Error(`Failed to load ${src}`));
       };
 
@@ -45,7 +75,7 @@
       const style = document.createElement("style");
       style.textContent = css;
       document.head.appendChild(style);
-      console.log("[Pixiv Templater] ✓ CSS injected");
+      log.debug("✓ CSS injected");
 
       // Load HTML
       const htmlResponse = await fetch(chrome.runtime.getURL("ui/ui.html"));
@@ -53,11 +83,23 @@
       const container = document.createElement("div");
       container.innerHTML = html;
       document.body.appendChild(container);
-      console.log("[Pixiv Templater] ✓ HTML injected");
+      log.debug("✓ HTML injected");
     } catch (err) {
-      console.error("[Pixiv Templater] Failed to load UI resources:", err);
+      log.error("Failed to load UI resources:", err);
       throw err;
     }
+  }
+
+  // Inject debug mode flag into page context
+  function injectDebugMode() {
+    const script = document.createElement("script");
+    script.textContent = `
+      // Debug mode flag accessible by page scripts
+      window.PIXIV_TEMPLATER_DEBUG_MODE = ${debugMode};
+      console.log("[Pixiv Templater] Debug mode in page context:", ${debugMode});
+    `;
+    (document.head || document.documentElement).appendChild(script);
+    script.remove();
   }
 
   // Storage bridge - runs as content script (has access to chrome.storage)
@@ -80,6 +122,14 @@
               ? result[fullKey]
               : message.defaultValue;
 
+          log.debug(`Storage GET: ${message.key}`, value !== undefined);
+
+          // Special handling for debug_mode - also update page context
+          if (message.key === "debug_mode") {
+            debugMode = value || false;
+            injectDebugMode();
+          }
+
           window.postMessage(
             {
               type: "PIXIV_TEMPLATER_STORAGE_GET_RESPONSE",
@@ -93,6 +143,14 @@
         case "PIXIV_TEMPLATER_STORAGE_SET":
           const setKey = `pixiv_templater_${message.key}`;
           await chrome.storage.local.set({ [setKey]: message.value });
+
+          log.debug(`Storage SET: ${message.key}`);
+
+          // Special handling for debug_mode - also update page context
+          if (message.key === "debug_mode") {
+            debugMode = message.value || false;
+            injectDebugMode();
+          }
 
           window.postMessage(
             {
@@ -108,6 +166,8 @@
           const removeKey = `pixiv_templater_${message.key}`;
           await chrome.storage.local.remove([removeKey]);
 
+          log.debug(`Storage REMOVE: ${message.key}`);
+
           window.postMessage(
             {
               type: "PIXIV_TEMPLATER_STORAGE_REMOVE_RESPONSE",
@@ -119,7 +179,7 @@
           break;
       }
     } catch (error) {
-      console.error("[Storage Bridge] Error:", error);
+      log.error("Storage Bridge Error:", error);
       window.postMessage(
         {
           type: message.type + "_RESPONSE",
@@ -131,62 +191,74 @@
     }
   });
 
-  console.log("[Storage Bridge] ✓ Ready");
+  log.debug("Storage Bridge ready");
 
   // Main injection sequence with error recovery
   async function initializeExtension() {
     try {
-      console.log("[Pixiv Templater] Starting injection sequence...");
+      // ESSENTIAL LOG - Always shown
+      log.essential("Starting injection sequence...");
+
+      // Inject debug mode flag first
+      injectDebugMode();
 
       // 0. Browser polyfill for Firefox compatibility
       await injectScript("browser-polyfill.js", 5000);
 
-      // 1. Lucide icons library
+      // 1. Page logger for debug mode support
+      await injectScript("page-logger.js", 5000);
+
+      // 2. Lucide icons library
       await injectScript("libs/lucide.min.js", 5000);
 
-      // 2. Lucide bridge
+      // 3. Lucide bridge
       await injectScript("page-lucide-bridge.js", 5000);
 
-      // 3. jQuery
+      // 4. jQuery
       await injectScript("libs/jquery.min.js", 5000);
 
-      // 4. UI resources (HTML and CSS)
+      // 5. UI resources (HTML and CSS)
       await loadUIResources();
 
-      // 5. UI script
+      // 6. UI script
       await injectScript("ui/ui.js", 5000);
 
-      // 6. Main templater script
+      // 7. Main templater script
       await injectScript("templater.js", 5000);
 
-      console.log("[Pixiv Templater] ✓✓✓ All scripts loaded successfully ✓✓✓");
+      // ESSENTIAL LOG - Always shown
+      log.essential("✓✓✓ All scripts loaded successfully ✓✓✓");
     } catch (error) {
-      console.error(
-        "[Pixiv Templater] Critical error during initialization:",
-        error,
-      );
-      console.log("[Pixiv Templater] Attempting retry in 2 seconds...");
+      log.error("Critical error during initialization:", error);
+      log.debug("Attempting retry in 2 seconds...");
 
       // Retry once after 2 seconds
       setTimeout(async () => {
         try {
-          console.log("[Pixiv Templater] Retry attempt...");
+          log.debug("Retry attempt...");
           await loadUIResources();
           await injectScript("ui/ui.js", 5000);
           await injectScript("templater.js", 5000);
-          console.log("[Pixiv Templater] ✓ Retry successful");
+          log.debug("✓ Retry successful");
         } catch (retryError) {
-          console.error("[Pixiv Templater] Retry failed:", retryError);
+          log.error("Retry failed:", retryError);
         }
       }, 2000);
     }
   }
 
-  // Wait for DOM to be ready
+  // Wait for DOM to be ready and load debug mode first
+  async function init() {
+    await loadDebugMode();
+    log.debug("Debug mode loaded:", debugMode);
+    initializeExtension();
+  }
+
+  // Start initialization
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initializeExtension);
+    document.addEventListener("DOMContentLoaded", init);
   } else {
     // DOM already loaded
-    initializeExtension();
+    init();
   }
 })();

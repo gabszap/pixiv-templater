@@ -4,6 +4,15 @@
 (function () {
   "use strict";
 
+  // Wait for PageLogger to be available
+  const log = window.PTLogger || {
+    essential: (c, m, d) => console.log(`[${c}] ${m}`, d || ""),
+    info: () => {},
+    debug: () => {},
+    user: (c, m, d) => console.log(`[${c}] 👤 ${m}`, d || ""),
+    error: (c, m, e) => console.error(`[${c}] ❌ ${m}`, e || ""),
+  };
+
   // Export UI functions to window for access from templater.js
   window.PixivTemplaterUI = {
     initialize: initializeUI,
@@ -29,7 +38,8 @@
    * Initialize the UI
    */
   async function initializeUI() {
-    console.log("[Pixiv Templater UI] Initializing UI...");
+    // ESSENTIAL LOG - Always shown
+    log.essential("Pixiv Templater UI", "Initializing UI...");
 
     // Setup all event handlers
     setupEventHandlers();
@@ -49,7 +59,8 @@
     // Update shortcut hint
     await updateShortcutHint();
 
-    console.log("[Pixiv Templater UI] ✓✓✓ UI initialized successfully ✓✓✓");
+    // ESSENTIAL LOG - Always shown
+    log.essential("Pixiv Templater UI", "✓✓✓ UI initialized successfully ✓✓✓");
 
     // Show visual indicator that extension loaded
     showLoadIndicator();

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Pixiv Templater",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "Auto-fill Pixiv upload page with predefined templates",
   "author": "gabszap",
   "icons": {
@@ -23,6 +23,8 @@
     {
       "resources": [
         "browser-polyfill.js",
+        "debug-logger.js",
+        "page-logger.js",
         "libs/jquery.min.js",
         "libs/lucide.min.js",
         "page-lucide-bridge.js",

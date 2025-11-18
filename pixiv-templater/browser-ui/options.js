@@ -150,6 +150,7 @@
     await loadTemplates();
     await loadShortcuts();
     await loadStats();
+    await loadAdvancedSettings();
     console.log("[Pixiv Templater Options] Initialized successfully");
   });
 
@@ -175,6 +176,10 @@
     if (tabName === "stats") {
       loadStats().catch((err) =>
         console.error("[Options] Error loading stats:", err),
+      );
+    } else if (tabName === "advanced") {
+      loadAdvancedSettings().catch((err) =>
+        console.error("[Options] Error loading advanced settings:", err),
       );
     }
   }
@@ -231,6 +236,15 @@
     );
     $("#reset-stats").on("click", () =>
       handleResetStats().catch((err) => console.error(err)),
+    );
+
+    // Advanced settings
+    $("#debug-mode-toggle").on("change", (e) =>
+      handleDebugToggle(e).catch((err) => console.error(err)),
+    );
+    $("#open-console-btn").on("click", handleOpenConsole);
+    $("#clear-all-data-btn").on("click", () =>
+      handleClearAllData().catch((err) => console.error(err)),
     );
   }
 
@@ -859,5 +873,136 @@
     $(".modal").removeClass("active");
     currentTags = [];
     editingTemplateName = null;
+  }
+
+  // ============================
+  // ADVANCED TAB MANAGEMENT
+  // ============================
+
+  async function loadAdvancedSettings() {
+    // Load debug mode status
+    const debugMode = await Storage.get("debug_mode", false);
+    $("#debug-mode-toggle").prop("checked", debugMode);
+    updateDebugStatus(debugMode);
+
+    // Load storage info
+    await updateStorageInfo();
+  }
+
+  function updateDebugStatus(enabled) {
+    const statusText = enabled ? "Ativado" : "Desativado";
+    const statusColor = enabled
+      ? "var(--success-color)"
+      : "var(--text-secondary)";
+    $("#debug-status").text(statusText).css("color", statusColor);
+  }
+
+  async function handleDebugToggle(e) {
+    const enabled = $(e.target).is(":checked");
+    await Storage.set("debug_mode", enabled);
+    updateDebugStatus(enabled);
+
+    // Notify the logger if available
+    if (window.PixivTemplaterLogger) {
+      await window.PixivTemplaterLogger.setDebugMode(enabled);
+    }
+
+    console.log(`[Options] Debug mode ${enabled ? "ENABLED" : "DISABLED"}`);
+
+    // Show notification
+    alert(
+      enabled
+        ? "✓ Modo Debug ativado!\n\nOs logs detalhados agora aparecerão no console."
+        : "✓ Modo Debug desativado!\n\nApenas logs essenciais serão exibidos.",
+    );
+  }
+
+  function handleOpenConsole() {
+    alert(
+      "Para abrir o Console do Navegador:\n\n" +
+        "• Chrome/Brave: Pressione F12 ou Ctrl+Shift+J\n" +
+        "• Firefox: Pressione F12 ou Ctrl+Shift+K\n" +
+        "• Edge: Pressione F12 ou Ctrl+Shift+I\n\n" +
+        "Depois, clique na aba 'Console'",
+    );
+  }
+
+  async function handleClearAllData() {
+    const confirmation = prompt(
+      "⚠️ ATENÇÃO: Esta ação irá deletar TODOS os dados da extensão!\n\n" +
+        "Isso inclui:\n" +
+        "• Todos os templates\n" +
+        "• Todas as estatísticas\n" +
+        "• Todas as configurações\n" +
+        "• Todos os atalhos personalizados\n\n" +
+        "Esta ação NÃO PODE ser desfeita!\n\n" +
+        'Digite "DELETAR" (em maiúsculas) para confirmar:',
+    );
+
+    if (confirmation !== "DELETAR") {
+      if (confirmation !== null) {
+        alert("Ação cancelada. Nenhum dado foi removido.");
+      }
+      return;
+    }
+
+    try {
+      // Get all keys
+      const allData = await chrome.storage.local.get(null);
+      const keysToRemove = Object.keys(allData).filter((k) =>
+        k.startsWith("pixiv_templater_"),
+      );
+
+      // Remove all data
+      await chrome.storage.local.remove(keysToRemove);
+
+      console.log(
+        "[Options] All data cleared:",
+        keysToRemove.length,
+        "keys removed",
+      );
+
+      alert(
+        "✓ Todos os dados foram removidos com sucesso!\n\n" +
+          "A página será recarregada.",
+      );
+
+      // Reload page
+      location.reload();
+    } catch (err) {
+      console.error("[Options] Error clearing data:", err);
+      alert("❌ Erro ao limpar dados: " + err.message);
+    }
+  }
+
+  async function updateStorageInfo() {
+    try {
+      const templates = await Storage.get("templates", "{}");
+      const stats = await Storage.get("template_stats", "{}");
+      const shortcuts = await Storage.get("shortcuts", "{}");
+
+      const templatesSize = new Blob([templates]).size;
+      const statsSize = new Blob([stats]).size;
+      const totalSize = templatesSize + statsSize + new Blob([shortcuts]).size;
+
+      const formatBytes = (bytes) => {
+        if (bytes === 0) return "0 B";
+        const k = 1024;
+        const sizes = ["B", "KB", "MB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return (
+          Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i]
+        );
+      };
+
+      $("#storage-templates").text(formatBytes(templatesSize));
+      $("#storage-stats").text(formatBytes(statsSize));
+      $("#storage-total").text(formatBytes(totalSize));
+    } catch (err) {
+      console.error("[Options] Error loading storage info:", err);
+      $("#storage-templates").text("Erro");
+      $("#storage-stats").text("Erro");
+      $("#storage-total").text("Erro");
+    }
   }
 })();

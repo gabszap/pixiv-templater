@@ -47,6 +47,10 @@
                 <span class="icon">ℹ️</span>
                 Sobre
             </button>
+            <button class="tab" data-tab="advanced">
+                <span class="icon">⚙️</span>
+                Avançado
+            </button>
         </nav>
 
         <!-- Content Sections -->
@@ -170,6 +174,80 @@
                     <div class="empty-icon">📊</div>
                     <h3>Nenhuma estatística ainda</h3>
                     <p>Use alguns templates na página do Pixiv para começar a coletar dados!</p>
+                </div>
+            </section>
+
+            <!-- Advanced Tab -->
+            <section id="advanced-tab" class="tab-content">
+                <div class="section-header">
+                    <h2>⚙️ Configurações Avançadas</h2>
+                </div>
+
+                <div class="settings-section">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>🐛 Modo Debug</h3>
+                            <p>Ativa logs detalhados no console do navegador para diagnóstico de problemas.</p>
+                            <p class="setting-note">⚠️ Pode afetar a performance. Use apenas para debugging.</p>
+                        </div>
+                        <div class="setting-control">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="debug-mode-toggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span id="debug-status" class="status-text">Desativado</span>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>📊 Console de Debug</h3>
+                            <p>Visualize logs em tempo real e teste funcionalidades.</p>
+                        </div>
+                        <div class="setting-control">
+                            <button id="open-console-btn" class="btn btn-secondary">
+                                <span class="icon">🖥️</span>
+                                Abrir Console do Navegador
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>🗑️ Limpar Todos os Dados</h3>
+                            <p>Remove todos os templates, estatísticas e configurações da extensão.</p>
+                            <p class="setting-note">⚠️ Esta ação não pode ser desfeita!</p>
+                        </div>
+                        <div class="setting-control">
+                            <button id="clear-all-data-btn" class="btn btn-danger">
+                                <span class="icon">🗑️</span>
+                                Limpar Tudo
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3>📦 Informações de Armazenamento</h3>
+                            <p>Espaço utilizado pela extensão no navegador.</p>
+                        </div>
+                        <div class="setting-control">
+                            <div class="storage-info">
+                                <div class="storage-item">
+                                    <span class="storage-label">Templates:</span>
+                                    <span id="storage-templates" class="storage-value">-</span>
+                                </div>
+                                <div class="storage-item">
+                                    <span class="storage-label">Estatísticas:</span>
+                                    <span id="storage-stats" class="storage-value">-</span>
+                                </div>
+                                <div class="storage-item">
+                                    <span class="storage-label">Total:</span>
+                                    <span id="storage-total" class="storage-value">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -352,6 +430,7 @@
         </div>
     </div>
 
+    <script src="../debug-logger.js"></script>
     <script src="../libs/jquery.min.js"></script>
     <script src="options.js"></script>
 </body>
