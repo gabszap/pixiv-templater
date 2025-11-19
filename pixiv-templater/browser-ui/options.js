@@ -327,7 +327,16 @@
             ${template.tags.length > 5 ? `<span class="template-tag">+${template.tags.length - 5}</span>` : ""}
           </div>
           <div class="template-meta">
-            <span>Criado</span>
+            <span title="Data de criação">${template.createdAt
+          ? "Data de criação: " + new Date(template.createdAt).toLocaleString("pt-BR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+          : "Data de criação: None"
+        }</span>
             ${useCount > 0 ? `<span class="use-count">${useCount}× usado</span>` : ""}
           </div>
         </div>
@@ -411,6 +420,10 @@
       matureContent: matureContent,
       aiGenerated: $("#template-ai-generated").val(),
       allowTagEditing: true,
+      createdAt:
+        editingTemplateName && templates[editingTemplateName]?.createdAt
+          ? templates[editingTemplateName].createdAt
+          : new Date().toISOString(),
     };
 
     await Storage.set("templates", JSON.stringify(templates));
@@ -854,6 +867,8 @@
     const $list = $("#stats-list");
     $list.empty();
 
+    const maxCount = statsArray.length > 0 ? statsArray[0].count : 1;
+
     statsArray.forEach((stat, index) => {
       const rank =
         index === 0
@@ -862,7 +877,8 @@
             ? "🥈"
             : index === 2
               ? "🥉"
-              : `${index + 1}.`;
+              : `#${index + 1}`;
+
       const lastUsed = stat.lastUsed
         ? new Date(stat.lastUsed).toLocaleString("pt-BR", {
           day: "2-digit",
@@ -873,8 +889,11 @@
         })
         : "Nunca";
 
+      const percentage = Math.min(100, Math.max(5, (stat.count / maxCount) * 100));
+
       $list.append(`
         <div class="stat-item">
+          <div class="stat-progress-bar" style="width: ${percentage}%"></div>
           <div class="stat-item-left">
             <div class="stat-rank">${rank}</div>
             <div>
@@ -882,7 +901,7 @@
               <div class="stat-details">Último uso: ${lastUsed}</div>
             </div>
           </div>
-          <div class="stat-count">${stat.count}×</div>
+          <div class="stat-count">${stat.count}</div>
         </div>
       `);
     });
