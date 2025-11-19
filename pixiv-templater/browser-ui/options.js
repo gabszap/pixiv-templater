@@ -305,13 +305,13 @@
             <div class="template-card-title">${icon} ${name}</div>
             <div class="template-card-actions">
               <button class="template-action preview" title="Visualizar">
-                👁️
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-icon lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
               </button>
               <button class="template-action edit" title="Editar">
-                ✏️
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil-icon lucide-pencil"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
               </button>
               <button class="template-action delete" title="Excluir">
-                🗑️
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-icon lucide-trash"><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
               </button>
             </div>
           </div>
@@ -321,9 +321,9 @@
           </div>
           <div class="template-card-tags">
             ${template.tags
-              .slice(0, 5)
-              .map((tag) => `<span class="template-tag">${tag}</span>`)
-              .join("")}
+          .slice(0, 5)
+          .map((tag) => `<span class="template-tag">${tag}</span>`)
+          .join("")}
             ${template.tags.length > 5 ? `<span class="template-tag">+${template.tags.length - 5}</span>` : ""}
           </div>
           <div class="template-meta">
@@ -466,60 +466,106 @@
 
   function showPreview(name, template) {
     $("#preview-title").text(`Preview: ${name}`);
-    $("#preview-title-value").text(template.title || "(sem título)");
-    $("#preview-caption-value").text(template.caption || "(sem descrição)");
 
-    const $tagsContainer = $("#preview-tags-value");
-    $tagsContainer.empty();
+    // Build tags HTML
+    let tagsHtml = "";
     if (template.tags && template.tags.length > 0) {
       template.tags.forEach((tag) => {
-        $tagsContainer.append(`<span class="tag-chip">${tag}</span>`);
+        tagsHtml += `<span class="preview-tag">${tag}</span>`;
       });
     } else {
-      $tagsContainer.text("(sem tags)");
+      tagsHtml = '<span class="preview-empty">(sem tags)</span>';
     }
 
+    // Age rating labels
     const ageRatingLabels = {
       general: "All ages",
       r18: "R-18",
       r18g: "R-18G",
     };
-    $("#preview-age-rating-value").text(
-      ageRatingLabels[template.ageRating] || "All ages",
-    );
 
+    // Adult content info
+    let adultContentHtml = "";
     if (template.ageRating === "general") {
-      $("#preview-adult-content-field").show();
-      $("#preview-mature-content-field").hide();
-      $("#preview-adult-content-value").text(
-        template.adultContent ? "✓ Sim (conteúdo levemente sexual)" : "✗ Não",
-      );
-    } else {
-      $("#preview-adult-content-field").hide();
-      $("#preview-mature-content-field").show();
+      adultContentHtml = template.adultContent
+        ? "✓ Sim (conteúdo levemente sexual)"
+        : "✗ Não";
+    }
 
-      if (template.matureContent && template.matureContent.length > 0) {
+    // Mature content info
+    let matureContentHtml = "";
+    if (template.ageRating === "r18" && template.matureContent) {
+      if (template.matureContent.length > 0) {
         const labels = {
           lo: "Menores",
           furry: "Furry",
           bl: "BL (Boys Love)",
           yuri: "GL (Girls Love)",
         };
-        const matureLabels = template.matureContent
-          .map((c) => labels[c])
-          .join(", ");
-        $("#preview-mature-content-value").text(matureLabels);
+        const items = template.matureContent
+          .map((c) => `✓ ${labels[c] || c}`)
+          .join("<br>");
+        matureContentHtml = items;
       } else {
-        $("#preview-mature-content-value").text(
-          "(nenhuma categoria selecionada)",
-        );
+        matureContentHtml = '<span class="preview-empty">(nenhuma)</span>';
       }
     }
 
-    $("#preview-ai-generated-value").text(
-      template.aiGenerated === "aiGenerated" ? "✓ Sim" : "✗ Não",
-    );
+    // AI generated
+    const aiGeneratedText =
+      template.aiGenerated === "aiGenerated" ? "✓ Sim" : "✗ Não";
 
+    // Build complete preview HTML
+    const previewHtml = `
+      <div class="preview-section">
+        <h3>📄 Título</h3>
+        <div class="preview-content">${template.title || '<span class="preview-empty">(vazio)</span>'}</div>
+      </div>
+
+      <div class="preview-section">
+        <h3>📝 Descrição</h3>
+        <div class="preview-content">${template.caption || '<span class="preview-empty">(vazio)</span>'}</div>
+      </div>
+
+      <div class="preview-section">
+        <h3>🏷️ Tags</h3>
+        <div class="preview-tags">${tagsHtml}</div>
+      </div>
+
+      <div class="preview-section">
+        <h3>⚙️ Configurações</h3>
+        <div class="preview-config">
+          <div class="preview-config-item">
+            <span class="preview-config-label">Classificação:</span>
+            <span class="preview-config-value">${ageRatingLabels[template.ageRating] || "All ages"}</span>
+          </div>
+          ${template.ageRating === "general"
+        ? `
+          <div class="preview-config-item">
+            <span class="preview-config-label">Conteúdo adulto:</span>
+            <span class="preview-config-value">${adultContentHtml}</span>
+          </div>
+          `
+        : ""
+      }
+          ${template.ageRating === "r18" && matureContentHtml
+        ? `
+          <div class="preview-config-item">
+            <span class="preview-config-label">Conteúdo sensível:</span>
+            <span class="preview-config-value">${matureContentHtml}</span>
+          </div>
+          `
+        : ""
+      }
+          <div class="preview-config-item">
+            <span class="preview-config-label">Gerado por IA:</span>
+            <span class="preview-config-value">${aiGeneratedText}</span>
+          </div>
+        </div>
+      </div>
+    `;
+
+    $("#preview-body-content").html(previewHtml);
     openPreviewModal();
   }
 
@@ -626,8 +672,8 @@
 
         alert(
           `✓ Importação concluída!\n\n` +
-            `Novos templates: ${newCount}\n` +
-            `Templates atualizados: ${updatedCount}`,
+          `Novos templates: ${newCount}\n` +
+          `Templates atualizados: ${updatedCount}`,
         );
 
         console.log("[Options] Templates imported:", {
@@ -783,20 +829,20 @@
     const avgUses =
       templatesUsed > 0 ? (totalUses / templatesUsed).toFixed(1) : 0;
     $("#stats-summary").html(`
-      <div class="stat-card">
-        <div class="stat-value">${totalUses}</div>
+      <div class="stat-card" style="background: linear-gradient(135deg, #0096fa 0%, #00d4ff 100%);">
+        <div class="stat-number">${totalUses}</div>
         <div class="stat-label">Total de Usos</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-value">${templatesUsed}</div>
+      <div class="stat-card" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">
+        <div class="stat-number">${templatesUsed}</div>
         <div class="stat-label">Templates Usados</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-value">${avgUses}</div>
+      <div class="stat-card" style="background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);">
+        <div class="stat-number">${avgUses}</div>
         <div class="stat-label">Média de Usos</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-value">${templateNames.length}</div>
+      <div class="stat-card" style="background: linear-gradient(135deg, #10b981 0%, #34d399 100%);">
+        <div class="stat-number">${templateNames.length}</div>
         <div class="stat-label">Total de Templates</div>
       </div>
     `);
@@ -819,12 +865,12 @@
               : `${index + 1}.`;
       const lastUsed = stat.lastUsed
         ? new Date(stat.lastUsed).toLocaleString("pt-BR", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
         : "Nunca";
 
       $list.append(`
@@ -920,23 +966,23 @@
   function handleOpenConsole() {
     alert(
       "Para abrir o Console do Navegador:\n\n" +
-        "• Chrome/Brave: Pressione F12 ou Ctrl+Shift+J\n" +
-        "• Firefox: Pressione F12 ou Ctrl+Shift+K\n" +
-        "• Edge: Pressione F12 ou Ctrl+Shift+I\n\n" +
-        "Depois, clique na aba 'Console'",
+      "• Chrome/Brave: Pressione F12 ou Ctrl+Shift+J\n" +
+      "• Firefox: Pressione F12 ou Ctrl+Shift+K\n" +
+      "• Edge: Pressione F12 ou Ctrl+Shift+I\n\n" +
+      "Depois, clique na aba 'Console'",
     );
   }
 
   async function handleClearAllData() {
     const confirmation = prompt(
       "⚠️ ATENÇÃO: Esta ação irá deletar TODOS os dados da extensão!\n\n" +
-        "Isso inclui:\n" +
-        "• Todos os templates\n" +
-        "• Todas as estatísticas\n" +
-        "• Todas as configurações\n" +
-        "• Todos os atalhos personalizados\n\n" +
-        "Esta ação NÃO PODE ser desfeita!\n\n" +
-        'Digite "DELETAR" (em maiúsculas) para confirmar:',
+      "Isso inclui:\n" +
+      "• Todos os templates\n" +
+      "• Todas as estatísticas\n" +
+      "• Todas as configurações\n" +
+      "• Todos os atalhos personalizados\n\n" +
+      "Esta ação NÃO PODE ser desfeita!\n\n" +
+      'Digite "DELETAR" (em maiúsculas) para confirmar:',
     );
 
     if (confirmation !== "DELETAR") {
@@ -964,7 +1010,7 @@
 
       alert(
         "✓ Todos os dados foram removidos com sucesso!\n\n" +
-          "A página será recarregada.",
+        "A página será recarregada.",
       );
 
       // Reload page

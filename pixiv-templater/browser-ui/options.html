@@ -1,28 +1,52 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pixiv Templater - Configurações</title>
     <link rel="stylesheet" href="options.css">
 </head>
+
 <body>
     <div class="container">
         <!-- Header -->
         <header class="header">
             <div class="header-content">
                 <div class="header-title">
-                    <h1>📝 Pixiv Templater</h1>
+                    <h1>
+                        <svg width="32" height="32" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg"
+                            style="vertical-align: middle; margin-right: 8px;">
+                            <rect width="128" height="128" rx="28" fill="#0096FA" />
+                            <rect x="34" y="28" width="60" height="72" rx="4" fill="white" />
+                            <rect x="40" y="34" width="48" height="12" rx="2" fill="#0096FA" fill-opacity="0.2" />
+                            <rect x="40" y="52" width="14" height="42" rx="2" fill="#0096FA" fill-opacity="0.2" />
+                            <rect x="58" y="52" width="30" height="42" rx="2" fill="#0096FA" fill-opacity="0.4" />
+                        </svg>
+                        Pixiv Templater
+                    </h1>
                     <p class="version" id="header-version">v2.0.2</p>
                 </div>
                 <div class="header-actions">
-                    <button id="export-all" class="btn btn-secondary">
-                        <span class="icon">📤</span>
-                        Exportar Templates
+                    <button id="export-all" class="btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="icon">
+                            <path d="M12 15V3" />
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <path d="m7 10 5 5 5-5" />
+                        </svg>
+                        Exportar
                     </button>
-                    <button id="import-templates" class="btn btn-secondary">
-                        <span class="icon">📥</span>
-                        Importar Templates
+                    <button id="import-templates" class="btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-upload-icon lucide-upload">
+                            <path d="M12 3v12" />
+                            <path d="m17 8-5-5-5 5" />
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        </svg>
+                        Importar
                     </button>
                     <input type="file" id="import-input" accept=".json" style="display: none;">
                 </div>
@@ -142,7 +166,8 @@
                 </div>
 
                 <div class="shortcuts-help">
-                    <p><strong>💡 Dica:</p></strong> Clique em um campo para gravar um novo atalho. Pressione as teclas desejadas (ex: Ctrl+Shift+T).</p>
+                    <p><strong>💡 Dica:</p></strong> Clique em um campo para gravar um novo atalho. Pressione as teclas
+                    desejadas (ex: Ctrl+Shift+T).</p>
                 </div>
             </section>
 
@@ -162,9 +187,14 @@
                     </div>
                 </div>
 
-                <div id="stats-summary" class="stats-summary">
+                <div id="stats-summary" class="stats-overview">
                     <!-- Stats summary will be rendered here -->
                 </div>
+
+                <h3
+                    style="font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    🏆 Ranking de Uso
+                </h3>
 
                 <div id="stats-list" class="stats-list">
                     <!-- Stats list will be rendered here -->
@@ -261,7 +291,8 @@
 
                     <div class="about-section">
                         <h3>Sobre</h3>
-                        <p>Pixiv Templater é uma extensão que</p> facilita o upload de obras no Pixiv, permitindo criar templates reutilizáveis com títulos, descrições, tags e configurações predefinidas.</p>
+                        <p>Pixiv Templater é uma extensão que</p> facilita o upload de obras no Pixiv, permitindo criar
+                        templates reutilizáveis com títulos, descrições, tags e configurações predefinidas.</p>
                     </div>
 
                     <div class="about-section">
@@ -274,7 +305,8 @@
                             <li>🤖 Marcação de conteúdo gerado por IA</li>
                             <li>📊 Estatísticas de uso de templates</li>
                             <li>💾 Import/Export de templates em JSON</li>
-                            <li>⌨️ Atalhos de teclado personalizáveis</li></li>
+                            <li>⌨️ Atalhos de teclado personalizáveis</li>
+                            </li>
                             <li>🎨 Interface moderna e responsiva</li>
                             <li>🌙 Suporte a modo escuro</li>
                         </ul>
@@ -332,7 +364,8 @@
 
                     <div class="form-group">
                         <label for="template-caption">Descrição</label>
-                        <textarea id="template-caption" rows="4" placeholder="Descrição da obra (suporta formatação do Pixiv)"></textarea>
+                        <textarea id="template-caption" rows="4"
+                            placeholder="Descrição da obra (suporta formatação do Pixiv)"></textarea>
                     </div>
 
                     <div class="form-group">
@@ -353,29 +386,29 @@
                             </select>
                         </div>
 
+                        <div id="adult-content-group" class="form-group">
+                            <label>
+                                <input type="checkbox" id="template-adult-content">
+                                Conteúdo adulto (levemente sexual)
+                            </label>
+                        </div>
+
+                        <div id="mature-content-group" class="form-group" style="display: none;">
+                            <label>Categorias de Conteúdo Sensível (não marque nada, caso não haja)</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" value="lo"> Menores</label>
+                                <label><input type="checkbox" value="furry"> Furry</label>
+                                <label><input type="checkbox" value="bl"> BL (Boys Love)</label>
+                                <label><input type="checkbox" value="yuri"> GL (Girls Love)</label>
+                            </div>
+                        </div>
+
                         <div class="form-group">
                             <label for="template-ai-generated">Conteúdo Gerado por IA</label>
                             <select id="template-ai-generated">
                                 <option value="notAiGenerated">Não</option>
                                 <option value="aiGenerated">Sim</option>
                             </select>
-                        </div>
-                    </div>
-
-                    <div id="adult-content-group" class="form-group">
-                        <label>
-                            <input type="checkbox" id="template-adult-content">
-                            Conteúdo adulto (levemente sexual)
-                        </label>
-                    </div>
-
-                    <div id="mature-content-group" class="form-group" style="display: none;">
-                        <label>Categorias de Conteúdo Maduro</label>
-                        <div class="checkbox-group">
-                            <label><input type="checkbox" value="lo"> Menores</label>
-                            <label><input type="checkbox" value="furry"> Furry</label>
-                            <label><input type="checkbox" value="bl"> BL (Boys Love)</label>
-                            <label><input type="checkbox" value="yuri"> GL (Girls Love)</label>
                         </div>
                     </div>
 
@@ -396,35 +429,8 @@
                 <button class="modal-close">×</button>
             </div>
             <div class="modal-body">
-                <div class="preview-content">
-                    <div class="preview-field">
-                        <strong>Título:</strong>
-                        <p id="preview-title-</strong>value"></p>
-                    </div>
-                    <div class="preview-field">
-                        <strong>Descrição:</strong>
-                        <p id="preview-caption-value"></p>
-                    </div>
-                    <div class="preview-field">
-                        <strong>Tags:</strong>
-                        <div id="preview-tags-value" class="preview-tags"></div>
-                    </div>
-                    <div class="preview-field">
-                        <strong>Classificação:</strong>
-                        <p id="preview-age-rating-value"></p>
-                    </div>
-                    <div class="preview-field" id="preview-adult-content-field">
-                        <strong>Conteúdo Adulto:</strong>
-                        <p id="preview-adult-content-value"></p>
-                    </div>
-                    <div class="preview-field" id="preview-mature-content-field">
-                        <strong>Categorias Maduras:</strong>
-                        <p id="preview-mature-content-value"></p>
-                    </div>
-                    <div class="preview-field">
-                        <strong>IA Gerada:</strong>
-                        <p id="preview-ai-generated-value"></p>
-                    </div>
+                <div id="preview-body-content">
+                    <!-- Content will be dynamically generated -->
                 </div>
             </div>
         </div>
@@ -434,4 +440,5 @@
     <script src="../libs/jquery.min.js"></script>
     <script src="options.js"></script>
 </body>
+
 </html>
