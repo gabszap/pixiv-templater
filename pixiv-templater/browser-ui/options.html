@@ -15,13 +15,13 @@
             <div class="header-content">
                 <div class="header-title">
                     <h1>
-                        <svg width="32" height="32" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        <svg width="64" height="64" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg"
                             style="vertical-align: middle; margin-right: 8px;">
-                            <rect width="128" height="128" rx="28" fill="#0096FA" />
+                            <rect width="128" height="128" rx="28" fill="white" fill-opacity="0.2" />
                             <rect x="34" y="28" width="60" height="72" rx="4" fill="white" />
-                            <rect x="40" y="34" width="48" height="12" rx="2" fill="#0096FA" fill-opacity="0.2" />
-                            <rect x="40" y="52" width="14" height="42" rx="2" fill="#0096FA" fill-opacity="0.2" />
-                            <rect x="58" y="52" width="30" height="42" rx="2" fill="#0096FA" fill-opacity="0.4" />
+                            <rect x="40" y="34" width="48" height="12" rx="2" fill="#0096FA" fill-opacity="0.3" />
+                            <rect x="40" y="52" width="14" height="42" rx="2" fill="#0096FA" fill-opacity="0.3" />
+                            <rect x="58" y="52" width="30" height="42" rx="2" fill="#0096FA" fill-opacity="0.5" />
                         </svg>
                         Pixiv Templater
                     </h1>
@@ -56,23 +56,63 @@
         <!-- Navigation Tabs -->
         <nav class="tabs">
             <button class="tab active" data-tab="templates">
-                <span class="icon">📋</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-clipboard-list-icon lucide-clipboard-list">
+                    <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                    <path d="M12 11h4" />
+                    <path d="M12 16h4" />
+                    <path d="M8 11h.01" />
+                    <path d="M8 16h.01" />
+                </svg>
                 Templates
             </button>
-            <button class="tab" data-tab="shortcuts">
-                <span class="icon">⌨️</span>
-                Atalhos
-            </button>
             <button class="tab" data-tab="stats">
-                <span class="icon">📊</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-chart-column-increasing-icon lucide-chart-column-increasing">
+                    <path d="M13 17V9" />
+                    <path d="M18 17V5" />
+                    <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+                    <path d="M8 17v-3" />
+                </svg>
                 Estatísticas
             </button>
             <button class="tab" data-tab="about">
-                <span class="icon">ℹ️</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-info-icon lucide-info">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 16v-4" />
+                    <path d="M12 8h.01" />
+                </svg>
                 Sobre
             </button>
+            <button class="tab" data-tab="shortcuts">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-keyboard-icon lucide-keyboard">
+                    <path d="M10 8h.01" />
+                    <path d="M12 12h.01" />
+                    <path d="M14 8h.01" />
+                    <path d="M16 12h.01" />
+                    <path d="M18 8h.01" />
+                    <path d="M6 8h.01" />
+                    <path d="M7 16h10" />
+                    <path d="M8 12h.01" />
+                    <rect width="20" height="16" x="2" y="4" rx="2" />
+                </svg>
+                Atalhos
+            </button>
             <button class="tab" data-tab="advanced">
-                <span class="icon">⚙️</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-settings-icon lucide-settings">
+                    <path
+                        d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" />
+                    <circle cx="12" cy="12" r="3" />
+                </svg>
                 Avançado
             </button>
         </nav>
@@ -84,7 +124,12 @@
                 <div class="section-header">
                     <h2>Gerenciar Templates</h2>
                     <button id="new-template" class="btn btn-primary">
-                        <span class="icon">➕</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-plus-icon lucide-plus">
+                            <path d="M5 12h14" />
+                            <path d="M12 5v14" />
+                        </svg>
                         Novo Template
                     </button>
                 </div>
@@ -94,10 +139,19 @@
                 </div>
 
                 <div id="empty-state" class="empty-state" style="display: none;">
-                    <div class="empty-icon">📝</div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-clipboard-list-icon lucide-clipboard-list">
+                        <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                        <path d="M12 11h4" />
+                        <path d="M12 16h4" />
+                        <path d="M8 11h.01" />
+                        <path d="M8 16h.01" />
+                    </svg>
                     <h3>Nenhum template ainda</h3>
                     <p>Crie seu primeiro template para começar!</p>
-                    <button class="btn btn-primary" onclick="document.getElementById('new-template').click()">
+                    <button id="empty-create-btn" class="btn btn-primary">
                         Criar Template
                     </button>
                 </div>
@@ -108,7 +162,12 @@
                 <div class="section-header">
                     <h2>Atalhos de Teclado</h2>
                     <button id="reset-shortcuts" class="btn btn-secondary">
-                        <span class="icon">🔄</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-rotate-cw-icon lucide-rotate-cw">
+                            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+                            <path d="M21 3v5h-5" />
+                        </svg>
                         Restaurar Padrão
                     </button>
                 </div>
@@ -177,11 +236,24 @@
                     <h2>Estatísticas de Uso</h2>
                     <div class="header-actions">
                         <button id="refresh-stats" class="btn btn-secondary">
-                            <span class="icon">🔄</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-rotate-cw-icon lucide-rotate-cw">
+                                <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+                                <path d="M21 3v5h-5" />
+                            </svg>
                             Atualizar
                         </button>
                         <button id="reset-stats" class="btn btn-danger">
-                            <span class="icon">🗑️</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-trash2-icon lucide-trash-2">
+                                <path d="M10 11v6" />
+                                <path d="M14 11v6" />
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                <path d="M3 6h18" />
+                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            </svg>
                             Limpar Estatísticas
                         </button>
                     </div>
@@ -201,7 +273,14 @@
                 </div>
 
                 <div id="stats-empty" class="empty-state" style="display: none;">
-                    <div class="empty-icon">📊</div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-chart-column-increasing-icon lucide-chart-column-increasing">
+                        <path d="M13 17V9" />
+                        <path d="M18 17V5" />
+                        <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+                        <path d="M8 17v-3" />
+                    </svg>
                     <h3>Nenhuma estatística ainda</h3>
                     <p>Use alguns templates na página do Pixiv para começar a coletar dados!</p>
                 </div>
@@ -210,13 +289,23 @@
             <!-- Advanced Tab -->
             <section id="advanced-tab" class="tab-content">
                 <div class="section-header">
-                    <h2>⚙️ Configurações Avançadas</h2>
+                <h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" style="vertical-align: middle; margin-right: 1px; "
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-settings-icon lucide-settings">
+                    <path
+                    d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" />
+                    <circle cx="12" cy="12" r="3" />
+                </svg>
+                    Configurações Avançadas</h2>
                 </div>
 
                 <div class="settings-section">
                     <div class="setting-item">
                         <div class="setting-info">
-                            <h3>🐛 Modo Debug</h3>
+                            <h3 style="display: flex; align-items: center; gap: 8px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bug-icon lucide-bug"><path d="M12 20v-9"/><path d="M14 7a4 4 0 0 1 4 4v3a6 6 0 0 1-12 0v-3a4 4 0 0 1 4-4z"/><path d="M14.12 3.88 16 2"/><path d="M21 21a4 4 0 0 0-3.81-4"/><path d="M21 5a4 4 0 0 1-3.55 3.97"/><path d="M22 13h-4"/><path d="M3 21a4 4 0 0 1 3.81-4"/><path d="M3 5a4 4 0 0 0 3.55 3.97"/><path d="M6 13H2"/><path d="m8 2 1.88 1.88"/><path d="M9 7.13V6a3 3 0 1 1 6 0v1.13"/></svg>
+                                Modo Debug</h3>
                             <p>Ativa logs detalhados no console do navegador para diagnóstico de problemas.</p>
                             <p class="setting-note">⚠️ Pode afetar a performance. Use apenas para debugging.</p>
                         </div>
@@ -231,26 +320,15 @@
 
                     <div class="setting-item">
                         <div class="setting-info">
-                            <h3>📊 Console de Debug</h3>
-                            <p>Visualize logs em tempo real e teste funcionalidades.</p>
-                        </div>
-                        <div class="setting-control">
-                            <button id="open-console-btn" class="btn btn-secondary">
-                                <span class="icon">🖥️</span>
-                                Abrir Console do Navegador
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h3>🗑️ Limpar Todos os Dados</h3>
+                            <h3 style="display: flex; align-items: center; gap: 8px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2-icon lucide-trash-2"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            Limpar Todos os Dados</h3>
                             <p>Remove todos os templates, estatísticas e configurações da extensão.</p>
                             <p class="setting-note">⚠️ Esta ação não pode ser desfeita!</p>
                         </div>
                         <div class="setting-control">
                             <button id="clear-all-data-btn" class="btn btn-danger">
-                                <span class="icon">🗑️</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2-icon lucide-trash-2"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                                 Limpar Tudo
                             </button>
                         </div>
@@ -258,89 +336,92 @@
 
                     <div class="setting-item">
                         <div class="setting-info">
-                            <h3>📦 Informações de Armazenamento</h3>
+                            <h3 style="display: flex; align-items: center; gap: 8px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package-icon lucide-package" transform="scale(-1 1)"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73zm1 .27V12"/><path d="M3.29 7 12 12l8.71-5M7.5 4.27l9 5.15"/></svg>
+                                Informações de Armazenamento</h3>
                             <p>Espaço utilizado pela extensão no navegador.</p>
                         </div>
                         <div class="setting-control">
                             <div class="storage-info">
                                 <div class="storage-item">
                                     <span class="storage-label">Templates:</span>
-                                    <span id="storage-templates" class="storage-value">-</span>
-                                </div>
-                                <div class="storage-item">
-                                    <span class="storage-label">Estatísticas:</span>
-                                    <span id="storage-stats" class="storage-value">-</span>
-                                </div>
-                                <div class="storage-item">
-                                    <span class="storage-label">Total:</span>
-                                    <span id="storage-total" class="storage-value">-</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+                <span id="storage-templates" class="storage-value">-</span>
+    </div>
+    <div class="storage-item">
+        <span class="storage-label">Estatísticas:</span>
+        <span id="storage-stats" class="storage-value">-</span>
+    </div>
+    <div class="storage-item">
+        <span class="storage-label">Total:</span>
+        <span id="storage-total" class="storage-value">-</span>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    </section>
 
-            <!-- About Tab -->
-            <section id="about-tab" class="tab-content">
-                <div class="about-content">
-                    <div class="about-header">
-                        <h2>📝 Pixiv Templater</h2>
-                        <p class="about-version" id="about-version">Versão 2.0.2</p>
-                    </div>
+    <!-- About Tab -->
+    <section id="about-tab" class="tab-content">
+        <div class="about-content">
+            <div class="about-header">
+                <h2>
+                    <svg width="64" height="64" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        style="vertical-align: middle; margin-right: 1px;">
+                        <rect width="128" height="128" rx="28" fill="#0096FA" />
+                        <rect x="34" y="28" width="60" height="72" rx="4" fill="white" />
+                        <rect x="40" y="34" width="48" height="12" rx="2" fill="#0096FA" fill-opacity="0.2" />
+                        <rect x="40" y="52" width="14" height="42" rx="2" fill="#0096FA" fill-opacity="0.2" />
+                        <rect x="58" y="52" width="30" height="42" rx="2" fill="#0096FA" fill-opacity="0.4" />
+                    </svg>
+                    Pixiv Templater
+                </h2>
+                <p class="about-version" id="about-version">Versão 2.0.2</p>
+            </div>
 
-                    <div class="about-section">
-                        <h3>Sobre</h3>
-                        <p>Pixiv Templater é uma extensão que</p> facilita o upload de obras no Pixiv, permitindo criar
-                        templates reutilizáveis com títulos, descrições, tags e configurações predefinidas.</p>
-                    </div>
+            <div class="about-section">
+                <h3>Sobre</h3>
+                <p>Pixiv Templater é uma extensão que facilita o upload de obras no Pixiv.</p>
+                <p>Permite criar templates reutilizáveis com títulos, descrições, tags e configurações
+                    predefinidas.</p>
+            </div>
 
-                    <div class="about-section">
-                        <h3>Recursos</h3>
-                        <ul class="features-list">
-                            <li>✨ Criação e gerenciamento de templates</li>
-                            <li>⚡ Aplicação rápida com um clique ou atalho de teclado</li>
-                            <li>🏷️ Suporte completo para tags japonesas</li>
-                            <li>🔞 Configurações de classificação etária (All ages, R-18, R-18G)</li>
-                            <li>🤖 Marcação de conteúdo gerado por IA</li>
-                            <li>📊 Estatísticas de uso de templates</li>
-                            <li>💾 Import/Export de templates em JSON</li>
-                            <li>⌨️ Atalhos de teclado personalizáveis</li>
-                            </li>
-                            <li>🎨 Interface moderna e responsiva</li>
-                            <li>🌙 Suporte a modo escuro</li>
-                        </ul>
-                    </div>
+            <div class="about-section">
+                <h3>Recursos</h3>
+                <ul class="features-list">
+                    <li>✨ Criação e gerenciamento de templates</li>
+                    <li>⚡ Aplicação rápida com um clique ou atalho de teclado</li>
+                    <li>🏷️ Suporte completo para tags japonesas</li>
+                    <li>🔞 Configurações de classificação etária (All ages, R-18, R-18G)</li>
+                    <li>🤖 Marcação de conteúdo gerado por IA</li>
+                    <li>📊 Estatísticas de uso de templates</li>
+                    <li>💾 Import/Export de templates em JSON</li>
+                    <li>⌨️ Atalhos de teclado personalizáveis</li>
+                    </li>
+                    <li>🎨 Interface moderna e responsiva</li>
+                    <li>🌙 Suporte a modo escuro</li>
+                </ul>
+            </div>
 
-                    <div class="about-section">
-                        <h3>Como Usar</h3>
-                        <ol class="usage-list">
-                            <li>Acesse a página de upload do Pixiv: <code>pixiv.net/illustration/create</code></li>
-                            <li>O painel do Pixiv Templater aparecerá automaticamente no canto da página</li>
-                            <li>Clique em um template para aplicá-lo ao formulário</li>
-                            <li>Use <code>Ctrl+Shift+H</code> para ver todos os atalhos disponíveis</li>
-                            <li>Gerencie seus templates nesta página de configurações</li>
-                        </ol>
-                    </div>
+            <div class="about-section">
+                <h3>Como Usar</h3>
+                <ol class="usage-list">
+                    <li>Acesse a página de upload do Pixiv: <code>pixiv.net/illustration/create</code></li>
+                    <li>O painel do Pixiv Templater aparecerá automaticamente no canto da página</li>
+                    <li>Clique em um template para aplicá-lo ao formulário</li>
+                    <li>Use <code>Ctrl+Shift+H</code> para ver todos os atalhos disponíveis</li>
+                    <li>Gerencie seus templates nesta página de configurações</li>
+                </ol>
+            </div>
 
-                    <div class="about-section">
-                        <h3>Autor</h3>
-                        <p><strong>gabszap</strong></p>
-                        <p>Criado com ❤️ para facilitar a vida de artistas no Pixiv</p>
-                    </div>
-
-                    <div class="about-section">
-                        <h3>Tecnologias</h3>
-                        <div class="tech-badges">
-                            <span class="badge">Manifest V3</span>
-                            <span class="badge">JavaScript</span>
-                            <span class="badge">jQuery</span>
-                            <span class="badge">Lucide Icons</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </main>
+            <div class="about-section">
+                <h3>Autor</h3>
+                <p><strong>gabszap</strong></p>
+                <p>Criado com ❤️ para facilitar a vida de artistas no Pixiv</p>
+            </div>
+        </div>
+    </section>
+    </main>
     </div>
 
     <!-- Template Editor Modal -->
@@ -373,7 +454,7 @@
                         <div id="tag-container" class="tag-container">
                             <input type="text" id="tag-input" placeholder="Digite uma tag e pressione Enter">
                         </div>
-                        <small>Pressione Enter ou</small> vírgula para adicionar uma tag</small>
+                        <small style="opacity: 0.5;">Adicione pelo menos 1 tag</small>
                     </div>
 
                     <div class="form-row">
@@ -391,10 +472,14 @@
                                 <input type="checkbox" id="template-adult-content">
                                 Conteúdo adulto (levemente sexual)
                             </label>
+                            <small style="opacity: 0.5; font-size: 12px">⚠️ Se não houver nada adulto/sugestivo, deixe
+                                desmarcado</small>
                         </div>
 
                         <div id="mature-content-group" class="form-group" style="display: none;">
-                            <label>Categorias de Conteúdo Sensível (não marque nada, caso não haja)</label>
+                            <label>Categorias de Conteúdo Sensível</label>
+                            <small style="opacity: 0.5; font-size: 12px">⚠️ Se não houver nenhuma, deixe
+                                desmarcado</small>
                             <div class="checkbox-group">
                                 <label><input type="checkbox" value="lo"> Menores</label>
                                 <label><input type="checkbox" value="furry"> Furry</label>

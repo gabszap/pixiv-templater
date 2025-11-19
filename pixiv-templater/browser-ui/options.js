@@ -200,6 +200,7 @@
 
     // Template actions
     $("#new-template").on("click", handleNewTemplate);
+    $("#empty-create-btn").on("click", handleNewTemplate);
 
     // Modal close
     $(".modal-close").on("click", closeModal);
@@ -242,7 +243,6 @@
     $("#debug-mode-toggle").on("change", (e) =>
       handleDebugToggle(e).catch((err) => console.error(err)),
     );
-    $("#open-console-btn").on("click", handleOpenConsole);
     $("#clear-all-data-btn").on("click", () =>
       handleClearAllData().catch((err) => console.error(err)),
     );
@@ -960,16 +960,6 @@
       enabled
         ? "✓ Modo Debug ativado!\n\nOs logs detalhados agora aparecerão no console."
         : "✓ Modo Debug desativado!\n\nApenas logs essenciais serão exibidos.",
-    );
-  }
-
-  function handleOpenConsole() {
-    alert(
-      "Para abrir o Console do Navegador:\n\n" +
-      "• Chrome/Brave: Pressione F12 ou Ctrl+Shift+J\n" +
-      "• Firefox: Pressione F12 ou Ctrl+Shift+K\n" +
-      "• Edge: Pressione F12 ou Ctrl+Shift+I\n\n" +
-      "Depois, clique na aba 'Console'",
     );
   }
 

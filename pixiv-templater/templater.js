@@ -8,8 +8,8 @@
   // Wait for PageLogger to be available
   const log = window.PTLogger || {
     essential: (c, m, d) => console.log(`[${c}] ${m}`, d || ""),
-    info: () => {},
-    debug: () => {},
+    info: () => { },
+    debug: () => { },
     user: (c, m, d) => console.log(`[${c}] 👤 ${m}`, d || ""),
     error: (c, m, e) => console.error(`[${c}] ❌ ${m}`, e || ""),
   };
