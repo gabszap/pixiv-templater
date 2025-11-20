@@ -51,30 +51,6 @@
     applyTemplate9: "ctrl+9",
   };
 
-  // Lucide SVG paths for the icon selector
-  const LUCIDE_ICONS = {
-    "pencil": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>',
-    "image": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>',
-    "gamepad-2": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="10" y1="12" y2="12"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="15" x2="15.01" y1="13" y2="13"/><line x1="18" x2="18.01" y1="11" y2="11"/><rect width="20" height="12" x="2" y="6" rx="2"/></svg>',
-    "heart": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
-    "star": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
-    "zap": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
-    "user": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
-    "book": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>',
-    "brush": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2.5 2.24 0 .46.62.8.62.8h7.48c.42 0 .62-.38.62-.8 0-.72-2.5-.91-2.5-2.24 0-1.67-1.34-3.02-3-3.02Z"/><line x1="14" x2="14" y1="13" y2="17"/><line x1="20" x2="20" y1="2" y2="2"/></svg>',
-    "camera": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>',
-    "music": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
-    "film": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18"/><path d="M3 7.5h4"/><path d="M3 12h18"/><path d="M3 16.5h4"/><path d="M17 3v18"/><path d="M17 7.5h4"/><path d="M17 16.5h4"/></svg>',
-    "monitor": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>',
-    "smartphone": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>',
-    "globe": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
-    "sun": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>',
-    "moon": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>',
-    "flame": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.1.2-2.2.6-3.3.3.3.5.6.9.9z"/></svg>',
-    "droplet": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>',
-    "leaf": '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.77 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>',
-  };
-
   // Load version from manifest
   async function loadVersion() {
     try {
@@ -209,100 +185,6 @@
   }
 
   // ============================
-  // ICON SELECTOR
-  // ============================
-
-  let emojiPicker = null;
-
-  async function initEmojiPicker() {
-    if (emojiPicker) return;
-
-    try {
-      const response = await fetch("../libs/emoji-data.json");
-      const data = await response.json();
-
-      const pickerOptions = {
-        data: data,
-        onEmojiSelect: (emoji) => {
-          selectIcon(emoji.native);
-        },
-        locale: "pt",
-        theme: "auto",
-        previewPosition: "none",
-        skinTonePosition: "none",
-      };
-
-      emojiPicker = new EmojiMart.Picker(pickerOptions);
-      $("#emoji-picker-container").append(emojiPicker);
-    } catch (error) {
-      console.error("Failed to load emoji data:", error);
-      $("#emoji-picker-container").text("Erro ao carregar emojis.");
-    }
-  }
-
-  function renderIconSelector() {
-    const $grid = $("#icon-grid");
-    $grid.empty();
-
-    // Add Lucide Icons only to the grid
-    Object.keys(LUCIDE_ICONS).forEach((name) => {
-      const svg = LUCIDE_ICONS[name];
-      const $option = $(`
-        <div class="icon-option" data-icon="${name}" title="${name}">
-          ${svg}
-        </div>
-      `);
-      $grid.append($option);
-    });
-
-    // Event delegation for icon selection
-    $grid.on("click", ".icon-option", function () {
-      const icon = $(this).data("icon");
-      selectIcon(icon);
-    });
-
-    // Tab switching
-    $(".icon-tab").on("click", function () {
-      const target = $(this).data("target");
-
-      $(".icon-tab").removeClass("active");
-      $(this).addClass("active");
-
-      $(".icon-tab-content").removeClass("active");
-      $(`#icon-tab-${target}`).addClass("active");
-
-      if (target === "emoji") {
-        initEmojiPicker();
-      }
-    });
-  }
-
-  function selectIcon(icon) {
-    $("#template-icon").val(icon);
-
-    // Update preview
-    const $preview = $("#selected-icon-preview");
-    if (LUCIDE_ICONS[icon]) {
-      $preview.html(LUCIDE_ICONS[icon]);
-    } else {
-      $preview.text(icon);
-    }
-
-    // Update grid selection state
-    $(".icon-option").removeClass("selected");
-    if (LUCIDE_ICONS[icon]) {
-      $(`.icon-option[data-icon="${icon}"]`).addClass("selected");
-    }
-  }
-
-  function getIconHtml(icon) {
-    if (LUCIDE_ICONS[icon]) {
-      return LUCIDE_ICONS[icon];
-    }
-    return icon || "📝"; // Default fallback
-  }
-
-  // ============================
   // EVENT HANDLERS
   // ============================
 
@@ -315,20 +197,6 @@
     $("#import-input").on("change", (e) =>
       handleImportFile(e).catch((err) => console.error(err)),
     );
-
-    // Icon Selector
-    renderIconSelector();
-
-    $("#toggle-icon-grid-btn").on("click", (e) => {
-      e.stopPropagation();
-      $("#icon-grid").toggleClass("hidden");
-    });
-
-    $(document).on("click", (e) => {
-      if (!$(e.target).closest(".icon-selector-container").length) {
-        $("#icon-grid").addClass("hidden");
-      }
-    });
 
     // Template actions
     $("#new-template").on("click", handleNewTemplate);
@@ -419,18 +287,11 @@
       const stat = stats[name];
       const useCount = stat ? stat.count : 0;
 
-      let iconHtml;
-      if (template.icon) {
-        iconHtml = getIconHtml(template.icon);
-      } else {
-        // Legacy fallback
-        let icon = "📝";
-        if (name.includes("R-18")) icon = "🔞";
-        else if (name.includes("Genshin")) icon = "⚔️";
-        else if (name.includes("Honkai")) icon = "🚂";
-        else if (name.includes("Star Rail")) icon = "🌟";
-        iconHtml = icon;
-      }
+      let icon = "📝";
+      if (name.includes("R-18")) icon = "🔞";
+      else if (name.includes("Genshin")) icon = "⚔️";
+      else if (name.includes("Honkai")) icon = "🚂";
+      else if (name.includes("Star Rail")) icon = "🌟";
 
       const ageRatingLabels = {
         general: "All ages",
@@ -441,10 +302,7 @@
       const $card = $(`
         <div class="template-card" data-template-name="${name}">
           <div class="template-card-header">
-            <div class="template-card-title">
-              <span class="template-icon-display">${iconHtml}</span>
-              ${name}
-            </div>
+            <div class="template-card-title">${icon} ${name}</div>
             <div class="template-card-actions">
               <button class="template-action preview" title="Visualizar">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-icon lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
@@ -509,7 +367,6 @@
     currentTags = [];
     $("#modal-title").text("Novo Template");
     $("#template-form")[0].reset();
-    selectIcon("📝"); // Default icon
     renderTags();
     $("#template-age-rating").trigger("change");
     openModal();
@@ -562,7 +419,6 @@
       adultContent: $("#template-adult-content").is(":checked"),
       matureContent: matureContent,
       aiGenerated: $("#template-ai-generated").val(),
-      icon: $("#template-icon").val(),
       allowTagEditing: true,
       createdAt:
         editingTemplateName && templates[editingTemplateName]?.createdAt
@@ -604,11 +460,6 @@
 
     renderTags();
     $("#template-age-rating").trigger("change");
-
-    // Set icon
-    const icon = template.icon || "📝";
-    selectIcon(icon);
-
     openModal();
   }
 
