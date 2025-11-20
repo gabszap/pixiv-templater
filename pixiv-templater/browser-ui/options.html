@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pixiv Templater - Configurações</title>
     <link rel="stylesheet" href="options.css">
+    <script src="../libs/emoji-mart.js"></script>
 </head>
 
 <body>
@@ -483,6 +484,15 @@
                     <div class="form-group">
                         <label for="template-title">Título da Obra</label>
                         <input type="text" id="template-title" placeholder="Título que aparecerá na obra">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="template-emoji">Emoji do Template</label>
+                        <div class="emoji-selector-container">
+                            <div class="emoji-preview" id="emoji-preview">📝</div>
+                            <div id="emoji-picker-container"></div>
+                        </div>
+                        <input type="hidden" id="template-emoji" value="📝">
                     </div>
 
                     <div class="form-group">
