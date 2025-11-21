@@ -24,6 +24,64 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+/* Estado minimizado - oculta o painel completamente */
+#pixiv-templater.minimized {
+    display: none !important;
+}
+
+/* Ícone minimizado */
+#pixiv-templater-minimized {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+#pixiv-templater-minimized:hover {
+    transform: scale(1.1);
+    box-shadow: 0 12px 40px rgba(0, 150, 250, 0.3), 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+#pixiv-templater-minimized:active {
+    transform: scale(0.95);
+}
+
+#pixiv-templater-minimized.active {
+    display: flex;
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+
+    70% {
+        transform: scale(0.9);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+
 /* Quando está na parte inferior da tela */
 #pixiv-templater.bottom-position {
     flex-direction: column-reverse;
@@ -175,12 +233,10 @@
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(0, 150, 250, 0.1),
-        transparent
-    );
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(0, 150, 250, 0.1),
+            transparent);
     transition: left 0.5s;
 }
 
@@ -207,10 +263,12 @@
 }
 
 @keyframes pulse {
+
     0%,
     100% {
         transform: scale(1);
     }
+
     50% {
         transform: scale(1.02);
     }
@@ -286,6 +344,7 @@
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -349,6 +408,7 @@
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
@@ -371,6 +431,7 @@
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);

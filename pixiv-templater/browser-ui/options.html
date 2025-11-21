@@ -487,8 +487,18 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="template-emoji">Emoji do Template</label>
-                        <div class="emoji-selector-container">
+                        <div class="emoji-label-container">
+                            <label for="template-emoji">Emoji do Template</label>
+                            <button type="button" id="emoji-toggle-btn" class="emoji-toggle-btn"
+                                title="Minimizar/Expandir">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="chevron-icon">
+                                    <path d="m6 9 6 6 6-6" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="emoji-selector-container" id="emoji-selector-container">
                             <div class="emoji-preview" id="emoji-preview">📝</div>
                             <div id="emoji-picker-container"></div>
                         </div>

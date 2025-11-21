@@ -159,6 +159,7 @@
 
   const DEFAULT_SHORTCUTS = {
     togglePanel: "ctrl+shift+t",
+    minimizePanel: "ctrl+shift+m",
     newTemplate: "ctrl+shift+n",
     exportTemplates: "ctrl+shift+e",
     importTemplates: "ctrl+shift+i",

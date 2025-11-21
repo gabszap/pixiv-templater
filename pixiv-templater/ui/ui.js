@@ -7,8 +7,8 @@
   // Wait for PageLogger to be available
   const log = window.PTLogger || {
     essential: (c, m, d) => console.log(`[${c}] ${m}`, d || ""),
-    info: () => {},
-    debug: () => {},
+    info: () => { },
+    debug: () => { },
     user: (c, m, d) => console.log(`[${c}] 👤 ${m}`, d || ""),
     error: (c, m, e) => console.error(`[${c}] ❌ ${m}`, e || ""),
   };
@@ -120,6 +120,12 @@
   function setupEventHandlers() {
     // Toggle collapse
     $(document).on("click", "#pixiv-templater-toggle", handleToggleCollapse);
+
+    // Minimizar com duplo clique no header
+    $(document).on("dblclick", "#pixiv-templater-header", handleMinimize);
+
+    // Expandir ao clicar no ícone minimizado
+    $(document).on("click", "#pixiv-templater-minimized", handleExpand);
 
     // Settings menu
     $(document).on("click", "#settings-toggle", handleSettingsToggle);
@@ -304,7 +310,19 @@
         "templater_collapsed",
         "false",
       )) === "true";
+    const savedMinimized =
+      (await window.PixivTemplater.Storage.get(
+        "templater_minimized",
+        "false",
+      )) === "true";
     const $panel = $("#pixiv-templater");
+    const $minimizedIcon = $("#pixiv-templater-minimized");
+
+    // Restaurar estado minimizado
+    if (savedMinimized) {
+      $panel.addClass("minimized");
+      $minimizedIcon.addClass("active");
+    }
 
     if (savedPos) {
       let pos;
@@ -409,6 +427,41 @@
         checkPosition();
       }, 50);
     }
+  }
+
+  async function handleMinimize(e) {
+    // Prevenir que o duplo clique selecione texto
+    e.preventDefault();
+
+    const $panel = $("#pixiv-templater");
+    const $minimizedIcon = $("#pixiv-templater-minimized");
+
+    // Adicionar classe minimized ao painel
+    $panel.addClass("minimized");
+
+    // Mostrar ícone minimizado
+    $minimizedIcon.addClass("active");
+
+    // Salvar estado minimizado
+    await window.PixivTemplater.Storage.set("templater_minimized", "true");
+
+    log.user("Pixiv Templater UI", "Painel minimizado");
+  }
+
+  async function handleExpand() {
+    const $panel = $("#pixiv-templater");
+    const $minimizedIcon = $("#pixiv-templater-minimized");
+
+    // Remover classe minimized do painel
+    $panel.removeClass("minimized");
+
+    // Ocultar ícone minimizado
+    $minimizedIcon.removeClass("active");
+
+    // Salvar estado expandido
+    await window.PixivTemplater.Storage.set("templater_minimized", "false");
+
+    log.user("Pixiv Templater UI", "Painel expandido");
   }
 
   function handleSettingsToggle(e) {
@@ -927,12 +980,12 @@
           index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : "📄";
         const lastUsed = stat.lastUsed
           ? new Date(stat.lastUsed).toLocaleString("pt-BR", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
           : "Nunca";
 
         summaryHTML += `
@@ -1035,6 +1088,17 @@
       if (matchesShortcut(e, shortcuts.togglePanel)) {
         e.preventDefault();
         $("#pixiv-templater-toggle").click();
+        return;
+      }
+
+      if (matchesShortcut(e, shortcuts.minimizePanel)) {
+        e.preventDefault();
+        const $panel = $("#pixiv-templater");
+        if ($panel.hasClass("minimized")) {
+          handleExpand();
+        } else {
+          handleMinimize(e);
+        }
         return;
       }
 

@@ -37,14 +37,20 @@
         <div class="template-actions">
             <button class="action-btn" id="new-template">➕ Novo</button>
             <button class="action-btn" id="reset-position">🔄 Reset Posição</button>
-            <input
-                type="file"
-                id="import-input"
-                accept=".json"
-                style="display: none"
-            />
+            <input type="file" id="import-input" accept=".json" style="display: none" />
         </div>
     </div>
+</div>
+
+<!-- Ícone Minimizado -->
+<div id="pixiv-templater-minimized">
+    <svg width="48" height="48" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="128" height="128" rx="28" fill="#0096FA" />
+        <rect x="34" y="28" width="60" height="72" rx="4" fill="white" />
+        <rect x="40" y="34" width="48" height="12" rx="2" fill="#0096FA" fill-opacity="0.2" />
+        <rect x="40" y="52" width="14" height="42" rx="2" fill="#0096FA" fill-opacity="0.2" />
+        <rect x="58" y="52" width="30" height="42" rx="2" fill="#0096FA" fill-opacity="0.4" />
+    </svg>
 </div>
 
 <!-- Modal de Edição/Criação de Template -->
@@ -57,44 +63,25 @@
         <form id="template-form">
             <div class="form-group">
                 <label>Nome do Template *</label>
-                <input
-                    type="text"
-                    id="template-name"
-                    required
-                    placeholder="Ex: Genshin Impact"
-                />
+                <input type="text" id="template-name" required placeholder="Ex: Genshin Impact" />
             </div>
 
             <div class="form-group">
                 <label>Título</label>
-                <input
-                    type="text"
-                    id="template-title"
-                    placeholder="Deixe vazio para preencher manualmente"
-                />
+                <input type="text" id="template-title" placeholder="Deixe vazio para preencher manualmente" />
             </div>
 
             <div class="form-group">
                 <label>Descrição/Caption</label>
-                <textarea
-                    id="template-caption"
-                    placeholder="Descrição do post..."
-                ></textarea>
+                <textarea id="template-caption" placeholder="Descrição do post..."></textarea>
             </div>
 
             <div class="form-group">
                 <label>Tags (pressione Enter para adicionar) *</label>
                 <div class="tag-input-container" id="tag-container">
-                    <input
-                        type="text"
-                        class="tag-input-field"
-                        id="tag-input"
-                        placeholder="Digite uma tag..."
-                    />
+                    <input type="text" class="tag-input-field" id="tag-input" placeholder="Digite uma tag..." />
                 </div>
-                <small style="color: #666; font-size: 12px"
-                    >Pelo menos 1 tag é obrigatória</small
-                >
+                <small style="color: #666; font-size: 12px">Pelo menos 1 tag é obrigatória</small>
             </div>
 
             <div class="form-group">
@@ -110,21 +97,13 @@
                 <label>Adult Content (para All ages) *</label>
                 <div class="form-group-inline">
                     <input type="checkbox" id="template-adult-content" />
-                    <label for="template-adult-content"
-                        >Included (Slightly sexual or suggestive content)</label
-                    >
+                    <label for="template-adult-content">Included (Slightly sexual or suggestive content)</label>
                 </div>
-                <small style="color: #666; font-size: 12px"
-                    >⚠️ Se não houver nada adulto/sugestivo, deixe
-                    desmarcado</small
-                >
+                <small style="color: #666; font-size: 12px">⚠️ Se não houver nada adulto/sugestivo, deixe
+                    desmarcado</small>
             </div>
 
-            <div
-                class="form-group"
-                id="mature-content-group"
-                style="display: none"
-            >
+            <div class="form-group" id="mature-content-group" style="display: none">
                 <label>Mature Content (para R-18)</label>
                 <div class="checkbox-group">
                     <label class="checkbox-label">
@@ -140,10 +119,8 @@
                         <input type="checkbox" value="yuri" /> GL
                     </label>
                 </div>
-                <small style="color: #666; font-size: 12px"
-                    >Opcional - selecione categorias específicas se
-                    aplicável</small
-                >
+                <small style="color: #666; font-size: 12px">Opcional - selecione categorias específicas se
+                    aplicável</small>
             </div>
 
             <div class="form-group">
@@ -180,10 +157,7 @@
             </div>
             <div class="preview-section">
                 <h3>📄 Descrição</h3>
-                <div
-                    class="preview-value preview-multiline"
-                    id="preview-caption-value"
-                ></div>
+                <div class="preview-value preview-multiline" id="preview-caption-value"></div>
             </div>
             <div class="preview-section">
                 <h3>🏷️ Tags</h3>
@@ -196,18 +170,11 @@
                         <strong>Age Rating:</strong>
                         <span id="preview-age-rating"></span>
                     </div>
-                    <div
-                        class="preview-setting"
-                        id="preview-adult-content-setting"
-                    >
+                    <div class="preview-setting" id="preview-adult-content-setting">
                         <strong>Adult Content:</strong>
                         <span id="preview-adult-content"></span>
                     </div>
-                    <div
-                        class="preview-setting"
-                        id="preview-mature-content-setting"
-                        style="display: none"
-                    >
+                    <div class="preview-setting" id="preview-mature-content-setting" style="display: none">
                         <strong>Mature Content:</strong>
                         <span id="preview-mature-content"></span>
                     </div>
@@ -255,129 +222,59 @@
         <div class="shortcuts-grid">
             <div class="shortcut-item">
                 <label>Expandir/Colapsar Painel</label>
-                <input
-                    type="text"
-                    class="shortcut-input"
-                    data-action="togglePanel"
-                    readonly
-                />
+                <input type="text" class="shortcut-input" data-action="togglePanel" readonly />
             </div>
             <div class="shortcut-item">
                 <label>Novo Template</label>
-                <input
-                    type="text"
-                    class="shortcut-input"
-                    data-action="newTemplate"
-                    readonly
-                />
+                <input type="text" class="shortcut-input" data-action="newTemplate" readonly />
             </div>
             <div class="shortcut-item">
                 <label>Exportar Templates</label>
-                <input
-                    type="text"
-                    class="shortcut-input"
-                    data-action="exportTemplates"
-                    readonly
-                />
+                <input type="text" class="shortcut-input" data-action="exportTemplates" readonly />
             </div>
             <div class="shortcut-item">
                 <label>Importar Templates</label>
-                <input
-                    type="text"
-                    class="shortcut-input"
-                    data-action="importTemplates"
-                    readonly
-                />
+                <input type="text" class="shortcut-input" data-action="importTemplates" readonly />
             </div>
             <div class="shortcut-item">
                 <label>Mostrar Ajuda</label>
-                <input
-                    type="text"
-                    class="shortcut-input"
-                    data-action="showHelp"
-                    readonly
-                />
+                <input type="text" class="shortcut-input" data-action="showHelp" readonly />
             </div>
             <div class="shortcut-item">
                 <label>Aplicar Template 1</label>
-                <input
-                    type="text"
-                    class="shortcut-input"
-                    data-action="applyTemplate1"
-                    readonly
-                />
+                <input type="text" class="shortcut-input" data-action="applyTemplate1" readonly />
             </div>
             <div class="shortcut-item">
                 <label>Aplicar Template 2</label>
-                <input
-                    type="text"
-                    class="shortcut-input"
-                    data-action="applyTemplate2"
-                    readonly
-                />
+                <input type="text" class="shortcut-input" data-action="applyTemplate2" readonly />
             </div>
             <div class="shortcut-item">
                 <label>Aplicar Template 3</label>
-                <input
-                    type="text"
-                    class="shortcut-input"
-                    data-action="applyTemplate3"
-                    readonly
-                />
+                <input type="text" class="shortcut-input" data-action="applyTemplate3" readonly />
             </div>
             <div class="shortcut-item">
                 <label>Aplicar Template 4</label>
-                <input
-                    type="text"
-                    class="shortcut-input"
-                    data-action="applyTemplate4"
-                    readonly
-                />
+                <input type="text" class="shortcut-input" data-action="applyTemplate4" readonly />
             </div>
             <div class="shortcut-item">
                 <label>Aplicar Template 5</label>
-                <input
-                    type="text"
-                    class="shortcut-input"
-                    data-action="applyTemplate5"
-                    readonly
-                />
+                <input type="text" class="shortcut-input" data-action="applyTemplate5" readonly />
             </div>
             <div class="shortcut-item">
                 <label>Aplicar Template 6</label>
-                <input
-                    type="text"
-                    class="shortcut-input"
-                    data-action="applyTemplate6"
-                    readonly
-                />
+                <input type="text" class="shortcut-input" data-action="applyTemplate6" readonly />
             </div>
             <div class="shortcut-item">
                 <label>Aplicar Template 7</label>
-                <input
-                    type="text"
-                    class="shortcut-input"
-                    data-action="applyTemplate7"
-                    readonly
-                />
+                <input type="text" class="shortcut-input" data-action="applyTemplate7" readonly />
             </div>
             <div class="shortcut-item">
                 <label>Aplicar Template 8</label>
-                <input
-                    type="text"
-                    class="shortcut-input"
-                    data-action="applyTemplate8"
-                    readonly
-                />
+                <input type="text" class="shortcut-input" data-action="applyTemplate8" readonly />
             </div>
             <div class="shortcut-item">
                 <label>Aplicar Template 9</label>
-                <input
-                    type="text"
-                    class="shortcut-input"
-                    data-action="applyTemplate9"
-                    readonly
-                />
+                <input type="text" class="shortcut-input" data-action="applyTemplate9" readonly />
             </div>
         </div>
         <div class="shortcuts-actions">

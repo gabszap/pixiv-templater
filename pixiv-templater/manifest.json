@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Pixiv Templater",
-  "version": "2.0.6",
+  "version": "2.0.9",
   "description": "Auto-fill Pixiv upload page with predefined templates",
   "author": "gabszap",
   "icons": {
@@ -11,13 +11,21 @@
     "96": "icons/96.png",
     "128": "icons/128.png"
   },
-  "permissions": ["storage"],
-  "host_permissions": ["*://www.pixiv.net/*"],
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "*://www.pixiv.net/*"
+  ],
   "options_page": "browser-ui/options.html",
   "content_scripts": [
     {
-      "matches": ["*://www.pixiv.net/illustration/create*"],
-      "js": ["content.js"],
+      "matches": [
+        "*://www.pixiv.net/illustration/create*"
+      ],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_idle"
     }
   ],
@@ -28,14 +36,16 @@
         "debug-logger.js",
         "page-logger.js",
         "libs/jquery.min.js",
-        "libs/lucide.min.js",
-        "page-lucide-bridge.js",
+        "libs/emoji-mart.js",
+        "libs/emoji-data.json",
         "templater.js",
         "ui/ui.html",
         "ui/ui.css",
         "ui/ui.js"
       ],
-      "matches": ["*://www.pixiv.net/*"]
+      "matches": [
+        "*://www.pixiv.net/*"
+      ]
     }
   ]
 }

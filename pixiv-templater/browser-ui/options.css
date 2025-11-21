@@ -96,11 +96,9 @@ body {
 
 /* Header */
 .header {
-    background: linear-gradient(
-        135deg,
-        var(--primary-blue) 0%,
-        var(--primary-blue-dark) 100%
-    );
+    background: linear-gradient(135deg,
+            var(--primary-blue) 0%,
+            var(--primary-blue-dark) 100%);
     padding: 32px 40px;
     box-shadow: var(--shadow-md);
     backdrop-filter: blur(10px);
@@ -293,11 +291,9 @@ body {
 }
 
 .btn-primary {
-    background: linear-gradient(
-        135deg,
-        var(--primary-blue) 0%,
-        var(--primary-blue-dark) 100%
-    );
+    background: linear-gradient(135deg,
+            var(--primary-blue) 0%,
+            var(--primary-blue-dark) 100%);
     color: white;
     border: none;
     box-shadow: var(--shadow-sm);
@@ -354,12 +350,10 @@ body {
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(
-        90deg,
-        var(--primary-blue),
-        var(--secondary-purple),
-        var(--secondary-pink)
-    );
+    background: linear-gradient(90deg,
+            var(--primary-blue),
+            var(--secondary-purple),
+            var(--secondary-pink));
     opacity: 0;
     transition: opacity var(--transition-base);
 }
@@ -458,11 +452,9 @@ body {
 }
 
 .use-count {
-    background: linear-gradient(
-        135deg,
-        var(--primary-blue),
-        var(--secondary-purple)
-    );
+    background: linear-gradient(135deg,
+            var(--primary-blue),
+            var(--secondary-purple));
     color: white;
     padding: 4px 12px;
     border-radius: 12px;
@@ -558,6 +550,7 @@ body {
 }
 
 @keyframes pulse {
+
     0%,
     100% {
         box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
@@ -651,11 +644,9 @@ body {
     left: 0;
     top: 0;
     bottom: 0;
-    background: linear-gradient(
-        90deg,
-        rgba(0, 150, 250, 0.08),
-        rgba(139, 92, 246, 0.08)
-    );
+    background: linear-gradient(90deg,
+            rgba(0, 150, 250, 0.08),
+            rgba(139, 92, 246, 0.08));
     z-index: -1;
     border-radius: var(--radius-md);
     transition: width 1s ease-out;
@@ -722,11 +713,9 @@ body {
 }
 
 .stat-count {
-    background: linear-gradient(
-        135deg,
-        var(--primary-blue),
-        var(--secondary-purple)
-    );
+    background: linear-gradient(135deg,
+            var(--primary-blue),
+            var(--secondary-purple));
     color: white;
     padding: 8px 20px;
     border-radius: 20px;
@@ -834,16 +823,14 @@ body {
     transition: all var(--transition-base);
 }
 
-.toggle-switch input:checked + .toggle-slider {
-    background: linear-gradient(
-        135deg,
-        var(--primary-blue),
-        var(--secondary-purple)
-    );
+.toggle-switch input:checked+.toggle-slider {
+    background: linear-gradient(135deg,
+            var(--primary-blue),
+            var(--secondary-purple));
     border-color: transparent;
 }
 
-.toggle-switch input:checked + .toggle-slider:before {
+.toggle-switch input:checked+.toggle-slider:before {
     transform: translateX(26px);
     background-color: white;
 }
@@ -917,11 +904,9 @@ body {
     font-size: 36px;
     font-weight: 700;
     margin-bottom: 12px;
-    background: linear-gradient(
-        135deg,
-        var(--primary-blue),
-        var(--secondary-purple)
-    );
+    background: linear-gradient(135deg,
+            var(--primary-blue),
+            var(--secondary-purple));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -1003,11 +988,9 @@ body {
     left: 16px;
     top: 50%;
     transform: translateY(-50%);
-    background: linear-gradient(
-        135deg,
-        var(--primary-blue),
-        var(--secondary-purple)
-    );
+    background: linear-gradient(135deg,
+            var(--primary-blue),
+            var(--secondary-purple));
     color: white;
     width: 24px;
     height: 24px;
@@ -1036,11 +1019,9 @@ body {
 }
 
 .badge {
-    background: linear-gradient(
-        135deg,
-        var(--primary-blue),
-        var(--secondary-purple)
-    );
+    background: linear-gradient(135deg,
+            var(--primary-blue),
+            var(--secondary-purple));
     color: white;
     padding: 8px 18px;
     border-radius: 20px;
@@ -1481,12 +1462,10 @@ body {
 }
 
 .loading {
-    background: linear-gradient(
-        90deg,
-        var(--bg-card) 25%,
-        var(--bg-hover) 50%,
-        var(--bg-card) 75%
-    );
+    background: linear-gradient(90deg,
+            var(--bg-card) 25%,
+            var(--bg-hover) 50%,
+            var(--bg-card) 75%);
     background-size: 1000px 100%;
     animation: shimmer 2s infinite;
 }
@@ -1562,6 +1541,56 @@ body {
     background: var(--bg-hover);
     box-shadow: 0 0 12px rgba(0, 150, 250, 0.3);
     transform: scale(1.05);
+}
+
+/* Emoji Label with Toggle */
+.emoji-label-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.emoji-toggle-btn {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    padding: 0;
+}
+
+.emoji-toggle-btn:hover {
+    background: var(--bg-hover);
+    color: var(--primary-blue);
+    border-color: var(--primary-blue);
+}
+
+.emoji-toggle-btn .chevron-icon {
+    transition: transform var(--transition-base);
+}
+
+.emoji-toggle-btn.collapsed .chevron-icon {
+    transform: rotate(-90deg);
+}
+
+/* Emoji Selector Container */
+.emoji-selector-container {
+    max-height: 500px;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    opacity: 1;
+}
+
+.emoji-selector-container.collapsed {
+    max-height: 0;
+    opacity: 0;
 }
 
 #emoji-picker-container {

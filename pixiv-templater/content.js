@@ -208,11 +208,11 @@
       // 1. Page logger for debug mode support
       await injectScript("page-logger.js", 5000);
 
-      // 2. Lucide icons library
-      await injectScript("libs/lucide.min.js", 5000);
+      // 2. Lucide icons library - REMOVED (file doesn't exist)
+      // await injectScript("libs/lucide.min.js", 5000);
 
-      // 3. Lucide bridge
-      await injectScript("page-lucide-bridge.js", 5000);
+      // 3. Lucide bridge - REMOVED (not needed without lucide)
+      // await injectScript("page-lucide-bridge.js", 5000);
 
       // 4. jQuery
       await injectScript("libs/jquery.min.js", 5000);

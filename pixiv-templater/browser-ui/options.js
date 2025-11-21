@@ -224,6 +224,9 @@
     // Emoji picker
     initEmojiPicker();
 
+    // Emoji toggle
+    $("#emoji-toggle-btn").on("click", handleEmojiToggle);
+
     // Shortcuts
     $("#reset-shortcuts").on("click", () =>
       handleResetShortcuts().catch((err) => console.error(err)),
@@ -296,6 +299,14 @@
   function selectEmoji(emoji) {
     $("#template-emoji").val(emoji);
     $("#emoji-preview").text(emoji);
+  }
+
+  function handleEmojiToggle() {
+    const $container = $("#emoji-selector-container");
+    const $button = $("#emoji-toggle-btn");
+
+    $container.toggleClass("collapsed");
+    $button.toggleClass("collapsed");
   }
 
   // ============================
@@ -373,24 +384,23 @@
           </div>
           <div class="template-card-tags">
             ${template.tags
-              .slice(0, 5)
-              .map((tag) => `<span class="template-tag">${tag}</span>`)
-              .join("")}
+          .slice(0, 5)
+          .map((tag) => `<span class="template-tag">${tag}</span>`)
+          .join("")}
             ${template.tags.length > 5 ? `<span class="template-tag">+${template.tags.length - 5}</span>` : ""}
           </div>
           <div class="template-meta">
-            <span title="Data de criação">${
-              template.createdAt
-                ? "Data de criação: " +
-                  new Date(template.createdAt).toLocaleString("pt-BR", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "2-digit",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
-                : "Data de criação: None"
-            }</span>
+            <span title="Data de criação">${template.createdAt
+          ? "Data de criação: " +
+          new Date(template.createdAt).toLocaleString("pt-BR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+          : "Data de criação: None"
+        }</span>
             ${useCount > 0 ? `<span class="use-count">${useCount}× usado</span>` : ""}
           </div>
         </div>
@@ -613,26 +623,24 @@
             <span class="preview-config-label">Classificação:</span>
             <span class="preview-config-value">${ageRatingLabels[template.ageRating] || "All ages"}</span>
           </div>
-          ${
-            template.ageRating === "general"
-              ? `
+          ${template.ageRating === "general"
+        ? `
           <div class="preview-config-item">
             <span class="preview-config-label">Conteúdo adulto:</span>
             <span class="preview-config-value">${adultContentHtml}</span>
           </div>
           `
-              : ""
-          }
-          ${
-            template.ageRating === "r18" && matureContentHtml
-              ? `
+        : ""
+      }
+          ${template.ageRating === "r18" && matureContentHtml
+        ? `
           <div class="preview-config-item">
             <span class="preview-config-label">Conteúdo sensível:</span>
             <span class="preview-config-value">${matureContentHtml}</span>
           </div>
           `
-              : ""
-          }
+        : ""
+      }
           <div class="preview-config-item">
             <span class="preview-config-label">Gerado por IA:</span>
             <span class="preview-config-value">${aiGeneratedText}</span>
@@ -748,8 +756,8 @@
 
         alert(
           `✓ Importação concluída!\n\n` +
-            `Novos templates: ${newCount}\n` +
-            `Templates atualizados: ${updatedCount}`,
+          `Novos templates: ${newCount}\n` +
+          `Templates atualizados: ${updatedCount}`,
         );
 
         console.log("[Options] Templates imported:", {
@@ -944,12 +952,12 @@
 
       const lastUsed = stat.lastUsed
         ? new Date(stat.lastUsed).toLocaleString("pt-BR", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
         : "Nunca";
 
       const percentage = Math.min(
@@ -1051,13 +1059,13 @@
   async function handleClearAllData() {
     const confirmation = prompt(
       "⚠️ ATENÇÃO: Esta ação irá deletar TODOS os dados da extensão!\n\n" +
-        "Isso inclui:\n" +
-        "• Todos os templates\n" +
-        "• Todas as estatísticas\n" +
-        "• Todas as configurações\n" +
-        "• Todos os atalhos personalizados\n\n" +
-        "Esta ação NÃO PODE ser desfeita!\n\n" +
-        'Digite "DELETAR" (em maiúsculas) para confirmar:',
+      "Isso inclui:\n" +
+      "• Todos os templates\n" +
+      "• Todas as estatísticas\n" +
+      "• Todas as configurações\n" +
+      "• Todos os atalhos personalizados\n\n" +
+      "Esta ação NÃO PODE ser desfeita!\n\n" +
+      'Digite "DELETAR" (em maiúsculas) para confirmar:',
     );
 
     if (confirmation !== "DELETAR") {
@@ -1085,7 +1093,7 @@
 
       alert(
         "✓ Todos os dados foram removidos com sucesso!\n\n" +
-          "A página será recarregada.",
+        "A página será recarregada.",
       );
 
       // Reload page
