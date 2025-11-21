@@ -36,6 +36,7 @@
   // Default shortcuts
   const DEFAULT_SHORTCUTS = {
     togglePanel: "ctrl+shift+t",
+    minimizePanel: "ctrl+shift+m",
     newTemplate: "ctrl+shift+n",
     exportTemplates: "ctrl+shift+e",
     importTemplates: "ctrl+shift+i",
@@ -66,64 +67,54 @@
 
   // Migrate data from localStorage to chrome.storage (one-time migration)
   async function migrateFromLocalStorage() {
-    const allData = await chrome.storage.local.get(null);
-    const hasData = Object.keys(allData).some((k) =>
-      k.startsWith("pixiv_templater_"),
-    );
+    // Verificar especificamente se já existem templates
+    const templates = await Storage.get("templates", null);
 
-    if (hasData) {
+    if (templates !== null && templates !== "{}") {
       console.log(
-        "[Options] Data already in chrome.storage, skipping migration",
+        "[Options] Templates already exist in chrome.storage, skipping migration",
       );
       return;
     }
 
-    console.log("[Options] Attempting to migrate from localStorage...");
-
-    // Check if we can inject a script to read localStorage from pixiv.net
-    // Since we can't directly access localStorage from another domain,
-    // we'll just ensure chrome.storage is the source of truth
+    console.log("[Options] No templates found, initializing with defaults");
 
     // Initialize with default templates if empty
-    const templates = await Storage.get("templates", "{}");
-    if (templates === "{}") {
-      console.log("[Options] No templates found, initializing with defaults");
-      const defaultTemplates = {
-        "Genshin Impact": {
-          title: "",
-          caption: "Original character fan art\n#genshinimpact #fanart",
-          tags: ["原神", "Genshin Impact", "fan art"],
-          ageRating: "general",
-          adultContent: true,
-          matureContent: [],
-          aiGenerated: "aiGenerated",
-          allowTagEditing: true,
-        },
-        "Honkai Star Rail": {
-          title: "",
-          caption:
-            "Fan art | Feel free to use with credit\n\nCommissions open!",
-          tags: ["崩壊スターレイル", "Honkai Star Rail", "commission"],
-          ageRating: "general",
-          adultContent: false,
-          matureContent: [],
-          aiGenerated: "notAiGenerated",
-          allowTagEditing: true,
-        },
-        "R-18 Default": {
-          title: "",
-          caption: "",
-          tags: ["R-18"],
-          ageRating: "r18",
-          adultContent: false,
-          matureContent: [],
-          aiGenerated: "notAiGenerated",
-          allowTagEditing: true,
-        },
-      };
-      await Storage.set("templates", JSON.stringify(defaultTemplates));
-      console.log("[Options] Default templates initialized");
-    }
+    const defaultTemplates = {
+      "Genshin Impact": {
+        title: "",
+        caption: "Original character fan art\n#genshinimpact #fanart",
+        tags: ["原神", "Genshin Impact", "fan art"],
+        ageRating: "general",
+        adultContent: true,
+        matureContent: [],
+        aiGenerated: "aiGenerated",
+        allowTagEditing: true,
+      },
+      "Honkai Star Rail": {
+        title: "",
+        caption:
+          "Fan art | Feel free to use with credit\n\nCommissions open!",
+        tags: ["崩壊スターレイル", "Honkai Star Rail", "commission"],
+        ageRating: "general",
+        adultContent: false,
+        matureContent: [],
+        aiGenerated: "notAiGenerated",
+        allowTagEditing: true,
+      },
+      "R-18 Default": {
+        title: "",
+        caption: "",
+        tags: ["R-18"],
+        ageRating: "r18",
+        adultContent: false,
+        matureContent: [],
+        aiGenerated: "notAiGenerated",
+        allowTagEditing: true,
+      },
+    };
+    await Storage.set("templates", JSON.stringify(defaultTemplates));
+    console.log("[Options] Default templates initialized");
   }
 
   // Initialize on page load
