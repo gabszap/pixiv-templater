@@ -80,8 +80,10 @@
       // Load HTML
       const htmlResponse = await fetch(chrome.runtime.getURL("ui/ui.html"));
       const html = await htmlResponse.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
       const container = document.createElement("div");
-      container.innerHTML = html;
+      container.append(...doc.body.childNodes);
       document.body.appendChild(container);
       log.debug("✓ HTML injected");
     } catch (err) {
@@ -109,6 +111,26 @@
     if (event.source !== window) return;
 
     const message = event.data;
+
+    // Handle dashboard open request
+    if (message.type === "PIXIV_TEMPLATER_OPEN_DASHBOARD") {
+      log.essential("Received OPEN_DASHBOARD request from page");
+
+      // Send message to background script to open dashboard
+      chrome.runtime.sendMessage({ type: "OPEN_DASHBOARD" }, (response) => {
+        if (response && response.success) {
+          log.essential(
+            "Dashboard opened successfully in tab:",
+            response.tabId,
+          );
+        } else {
+          log.error("Failed to open dashboard");
+        }
+      });
+
+      return;
+    }
+
     if (!message.type || !message.type.startsWith("PIXIV_TEMPLATER_STORAGE_"))
       return;
 

@@ -136,20 +136,27 @@
     });
 
     // Menu items
-    $(document).on("click", "#stats-menu-btn", handleStatsClick);
-    $(document).on("click", "#export-templates", handleExportClick);
-    $(document).on("click", "#import-templates", handleImportClick);
-    $(document).on("click", "#shortcuts-config", handleShortcutsConfig);
-    $(document).on("click", "#delete-mode-toggle", handleDeleteModeToggle);
-    $(document).on("click", "#reset-stats-btn", handleResetStats);
-
-    // Template actions
-    $(document).on("click", "#new-template", handleNewTemplate);
     $(document).on(
       "click",
       "#reset-position",
       async (e) => await handleResetPosition(),
     );
+    $(document).on(
+      "click",
+      "#refresh-data",
+      async (e) => await handleRefreshData(),
+    );
+    $(document).on("click", "#open-dashboard", handleOpenDashboard);
+
+    // Help icon
+    $(document)
+      .on(
+        "click",
+        "#shortcuts-hint",
+        async () => await showKeyboardShortcutsHelp(),
+      );
+
+    // Template actions (removed - managed via dashboard)
     $(document).on("change", "#import-input", handleImportFile);
 
     // Modal close
@@ -173,10 +180,7 @@
       console.log("[UI] Preview clicked");
       await handlePreviewClick(e);
     });
-    $(document).on("click", ".template-item .edit", async (e) => {
-      console.log("[UI] Edit clicked");
-      await handleEditClick(e);
-    });
+    // Edit button removed - templates managed via dashboard
     $(document).on("click", ".template-item", async (e) => {
       console.log("[UI] Template item clicked", e.target);
       await handleTemplateItemClick(e);
@@ -470,86 +474,9 @@
     $("#settings-menu").toggleClass("active");
   }
 
-  function handleStatsClick(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    showStats();
-    $("#settings-menu").removeClass("active");
-  }
-
-  function handleExportClick() {
-    window.PixivTemplater.exportTemplates();
-    $("#settings-menu").removeClass("active");
-  }
-
-  function handleImportClick() {
-    $("#import-input").click();
-    $("#settings-menu").removeClass("active");
-  }
-
-  function handleShortcutsConfig() {
-    openShortcutsModal();
-    $("#settings-menu").removeClass("active");
-  }
-
-  async function handleDeleteModeToggle(e) {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (deleteMode) {
-      if (selectedTemplates.length > 0) {
-        const templateNames = selectedTemplates.join("\n• ");
-        if (
-          confirm(
-            `Tem certeza que deseja deletar ${selectedTemplates.length} template(s)?\n\n• ${templateNames}`,
-          )
-        ) {
-          const templates = await window.PixivTemplater.loadTemplates();
-          selectedTemplates.forEach((name) => delete templates[name]);
-          await window.PixivTemplater.saveTemplates(templates);
-          alert(
-            `✓ ${selectedTemplates.length} template(s) deletado(s) com sucesso!`,
-          );
-        }
-      } else {
-        alert("ℹ️ Nenhum template foi selecionado.");
-      }
-
-      deleteMode = false;
-      selectedTemplates = [];
-      $(this).removeClass("active");
-      $("#settings-menu").removeClass("active");
-      await renderTemplateList();
-    } else {
-      deleteMode = true;
-      selectedTemplates = [];
-      $(this).addClass("active");
-      $("#settings-menu").removeClass("active");
-      alert(
-        "🗑 Modo de Deleção Ativado\n\nClique nos templates que deseja deletar.\nClique novamente neste botão quando terminar.",
-      );
-      await renderTemplateList();
-    }
-  }
-
-  async function handleResetStats(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    if (await window.PixivTemplater.resetStats()) {
-      await showStats();
-    }
-    $("#settings-menu").removeClass("active");
-  }
-
-  function handleNewTemplate() {
-    editingTemplateName = null;
-    currentTags = [];
-    $("#modal-title").text("Novo Template");
-    $("#template-form")[0].reset();
-    renderTags();
-    $("#template-age-rating").trigger("change");
-    openModal();
-  }
+  // Funções antigas removidas - gerenciamento via dashboard
+  // handleStatsClick, handleExportClick, handleImportClick, handleShortcutsConfig,
+  // handleDeleteModeToggle, handleResetStats, handleNewTemplate
 
   async function handleResetPosition() {
     const $panel = $("#pixiv-templater");
@@ -569,6 +496,57 @@
       }),
     );
     checkPosition();
+    $("#settings-menu").removeClass("active");
+    log.user("Pixiv Templater UI", "Posição resetada para padrão");
+  }
+
+  async function handleRefreshData() {
+    $("#settings-menu").removeClass("active");
+    log.user("Pixiv Templater UI", "Atualizando dados da extensão...");
+
+    // Recarregar templates
+    await renderTemplateList();
+
+    // Mostrar feedback visual
+    const $indicator = $("<div>")
+      .css({
+        position: "fixed",
+        top: "20px",
+        right: "20px",
+        background: "#28a745",
+        color: "white",
+        padding: "12px 20px",
+        borderRadius: "8px",
+        fontWeight: "bold",
+        fontSize: "14px",
+        zIndex: 999999,
+        boxShadow: "0 4px 12px rgba(40, 167, 69, 0.4)",
+      })
+      .text("✓ Dados atualizados!")
+      .appendTo("body");
+
+    setTimeout(() => {
+      $indicator.fadeOut(300, function () {
+        $(this).remove();
+      });
+    }, 2000);
+
+    log.user("Pixiv Templater UI", "Dados atualizados com sucesso");
+  }
+
+  function handleOpenDashboard() {
+    $("#settings-menu").removeClass("active");
+
+    // Enviar mensagem para o content script abrir o dashboard
+    // (ui.js roda no contexto da página, não tem acesso direto ao chrome.runtime)
+    window.postMessage(
+      {
+        type: "PIXIV_TEMPLATER_OPEN_DASHBOARD",
+      },
+      "*",
+    );
+
+    log.user("Pixiv Templater UI", "Abrindo dashboard...");
   }
 
   function handleImportFile(e) {
@@ -803,7 +781,6 @@
                     <span class="template-item-name">${icon} ${name}${useBadge}</span>
                     <div class="template-item-actions">
                         <button class="btn-icon preview" title="Preview">👁</button>
-                        <button class="btn-icon edit" title="Editar">✎</button>
                     </div>
                 </div>
             `);
@@ -880,46 +857,106 @@
 
   function showPreview(name, template) {
     $("#preview-title").text(`Preview: ${name}`);
-    $("#preview-title-value").text(template.title || "");
-    $("#preview-caption-value").text(template.caption || "");
 
-    const $tagsContainer = $("#preview-tags-value");
-    $tagsContainer.empty();
+    // Build tags HTML
+    let tagsHtml = "";
     if (template.tags && template.tags.length > 0) {
       template.tags.forEach((tag) => {
-        $tagsContainer.append(`<span class="tag-chip">${tag}</span>`);
+        tagsHtml += `<span class="preview-tag">${tag}</span>`;
       });
+    } else {
+      tagsHtml = '<span class="preview-empty">(sem tags)</span>';
     }
 
-    const ageRatingLabels = { general: "All ages", r18: "R-18", r18g: "R-18G" };
-    $("#preview-age-rating").text(
-      ageRatingLabels[template.ageRating] || "All ages",
-    );
+    // Age rating labels
+    const ageRatingLabels = {
+      general: "All ages",
+      r18: "R-18",
+      r18g: "R-18G",
+    };
 
+    // Adult content info
+    let adultContentHtml = "";
     if (template.ageRating === "general") {
-      $("#preview-adult-content-setting").show();
-      $("#preview-mature-content-setting").hide();
-      $("#preview-adult-content").text(
-        template.adultContent ? "✓ Included (Slightly sexual)" : "✗ No",
-      );
-    } else {
-      $("#preview-adult-content-setting").hide();
-      $("#preview-mature-content-setting").show();
+      adultContentHtml = template.adultContent
+        ? "✓ Sim (conteúdo levemente sexual)"
+        : "✗ Não";
+    }
 
-      if (template.matureContent && template.matureContent.length > 0) {
-        const labels = { lo: "Minors", furry: "Furry", bl: "BL", yuri: "GL" };
-        const matureLabels = template.matureContent
-          .map((c) => labels[c])
-          .join(", ");
-        $("#preview-mature-content").text(matureLabels);
+    // Mature content info
+    let matureContentHtml = "";
+    if (template.ageRating === "r18" && template.matureContent) {
+      if (template.matureContent.length > 0) {
+        const labels = {
+          lo: "Menores",
+          furry: "Furry",
+          bl: "BL (Boys Love)",
+          yuri: "GL (Girls Love)",
+        };
+        const items = template.matureContent
+          .map((c) => `✓ ${labels[c] || c}`)
+          .join("<br>");
+        matureContentHtml = items;
       } else {
-        $("#preview-mature-content").text("(nenhuma categoria selecionada)");
+        matureContentHtml = '<span class="preview-empty">(nenhuma)</span>';
       }
     }
 
-    $("#preview-ai-generated").text(
-      template.aiGenerated === "aiGenerated" ? "✓ Yes" : "✗ No",
-    );
+    // AI generated
+    const aiGeneratedText =
+      template.aiGenerated === "aiGenerated" ? "✓ Sim" : "✗ Não";
+
+    // Build complete preview HTML
+    const previewHtml = `
+      <div class="preview-section">
+        <h3>📄 Título</h3>
+        <div class="preview-content">${template.title || '<span class="preview-empty">(vazio)</span>'}</div>
+      </div>
+
+      <div class="preview-section">
+        <h3>📝 Descrição</h3>
+        <div class="preview-content">${template.caption || '<span class="preview-empty">(vazio)</span>'}</div>
+      </div>
+
+      <div class="preview-section">
+        <h3>🏷️ Tags</h3>
+        <div class="preview-tags">${tagsHtml}</div>
+      </div>
+
+      <div class="preview-section">
+        <h3>⚙️ Configurações</h3>
+        <div class="preview-config">
+          <div class="preview-config-item">
+            <span class="preview-config-label">Classificação:</span>
+            <span class="preview-config-value">${ageRatingLabels[template.ageRating] || "All ages"}</span>
+          </div>
+          ${template.ageRating === "general"
+        ? `
+          <div class="preview-config-item">
+            <span class="preview-config-label">Conteúdo adulto:</span>
+            <span class="preview-config-value">${adultContentHtml}</span>
+          </div>
+          `
+        : ""
+      }
+          ${template.ageRating === "r18" && matureContentHtml
+        ? `
+          <div class="preview-config-item">
+            <span class="preview-config-label">Conteúdo sensível:</span>
+            <span class="preview-config-value">${matureContentHtml}</span>
+          </div>
+          `
+        : ""
+      }
+          <div class="preview-config-item">
+            <span class="preview-config-label">Gerado por IA:</span>
+            <span class="preview-config-value">${aiGeneratedText}</span>
+          </div>
+        </div>
+      </div>
+    `;
+
+    $("#preview-body-content").html(previewHtml);
     $("#preview-apply").data("template", template);
 
     openPreviewModal();
@@ -1195,14 +1232,16 @@
     );
   }
 
-  function showKeyboardShortcutsHelp() {
-    const shortcuts = window.PixivTemplater.loadShortcuts();
+  async function showKeyboardShortcutsHelp() {
+    const shortcuts = await window.PixivTemplater.loadShortcuts();
     const formatShortcut = (s) => s.toUpperCase().replace(/\+/g, " + ");
 
     const helpText = `⌨️ ATALHOS DE TECLADO - PIXIV TEMPLATER
 
 📋 PAINEL
 • ${formatShortcut(shortcuts.togglePanel)} → Expandir/Colapsar painel
+• ${formatShortcut(shortcuts.minimizePanel)} → Minimizar/Maximizar painel
+
 
 📝 TEMPLATES
 • ${formatShortcut(shortcuts.applyTemplate1)} a ${formatShortcut(shortcuts.applyTemplate9)} → Aplicar templates 1-9
@@ -1225,9 +1264,6 @@ Clique no botão "⌨️ Atalhos" no painel para personalizar os atalhos!
   }
 
   async function updateShortcutHint() {
-    const shortcuts = await window.PixivTemplater.loadShortcuts();
-    $("#shortcuts-hint").text(
-      shortcuts.showHelp.toUpperCase().replace(/\+/g, "+"),
-    );
+    // Não atualiza mais o texto, mantém apenas o ícone SVG
   }
 })();

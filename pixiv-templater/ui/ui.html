@@ -2,43 +2,63 @@
 <div id="pixiv-templater">
     <div id="pixiv-templater-header">
         <div class="header-left">
-            <span>📋 Templates</span>
+            <span class="header-title-with-icon">
+                <svg width="26" height="26" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg"
+                    style="vertical-align: middle;">
+                    <rect width="128" height="128" rx="28" fill="white"" fill-opacity=" 0.2" />
+                    <rect x="34" y="28" width="60" height="72" rx="4" fill="white" />
+                    <rect x="40" y="34" width="48" height="12" rx="2" fill="#0096FA" fill-opacity="0.3" />
+                    <rect x="40" y="52" width="14" height="42" rx="2" fill="#0096FA" fill-opacity="0.3" />
+                    <rect x="58" y="52" width="30" height="42" rx="2" fill="#0096FA" fill-opacity="0.5" />
+                </svg>
+                Templates
+            </span>
+        </div>
+        <div class="header-right">
             <div class="settings-dropdown">
                 <button class="header-settings-btn" id="settings-toggle">
-                    ⚙️
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-menu-icon lucide-menu">
+                        <path d="M4 5h16" />
+                        <path d="M4 12h16" />
+                        <path d="M4 19h16" />
+                    </svg>
                 </button>
                 <div class="settings-menu" id="settings-menu">
-                    <div class="settings-menu-item" id="stats-menu-btn">
-                        📊 Ver Estatísticas
+                    <div class="settings-menu-item" id="reset-position">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-move"><path d="M12 2v20"/><path d="m15 19-3 3-3-3"/><path d="m19 9 3 3-3 3"/><path d="m2 12 20 0"/><path d="m5 9-3 3 3 3"/><path d="m9 5 3-3 3 3"/></svg>
+                        Resetar Posição
                     </div>
-                    <div class="settings-menu-item" id="export-templates">
-                        📤 Exportar Templates
+                    <div class="settings-menu-item" id="refresh-data">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-rotate-cw-icon lucide-rotate-cw">
+                            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+                            <path d="M21 3v5h-5" />
+                        </svg>
+                        Atualizar Dados
                     </div>
-                    <div class="settings-menu-item" id="import-templates">
-                        📥 Importar Templates
-                    </div>
-                    <div class="settings-menu-item" id="shortcuts-config">
-                        ⌨️ Configurar Atalhos
-                    </div>
-                    <div class="settings-menu-item" id="delete-mode-toggle">
-                        🗑 Deletar Templates
-                    </div>
-                    <div class="settings-menu-item" id="reset-stats-btn">
-                        🔄 Resetar Estatísticas
+                    <div class="settings-menu-item" id="open-dashboard">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-external-link"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                        Abrir Dashboard
                     </div>
                 </div>
             </div>
-            <span class="keyboard-hint" id="shortcuts-hint">Ctrl+Shift+H</span>
+            <span class="keyboard-hint" id="shortcuts-hint"><svg xmlns="http://www.w3.org/2000/svg" width="24"
+                    height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-circle-question-mark-icon lucide-circle-question-mark">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                    <path d="M12 17h.01" />
+                </svg></span>
         </div>
         <span id="pixiv-templater-toggle">−</span>
     </div>
     <div id="pixiv-templater-content">
         <div id="template-list"></div>
-        <div class="template-actions">
-            <button class="action-btn" id="new-template">➕ Novo</button>
-            <button class="action-btn" id="reset-position">🔄 Reset Posição</button>
-            <input type="file" id="import-input" accept=".json" style="display: none" />
-        </div>
+        <input type="file" id="import-input" accept=".json" style="display: none" />
     </div>
 </div>
 
@@ -148,41 +168,16 @@
     <div class="modal-content">
         <div class="modal-header">
             <h2 id="preview-title">Preview do Template</h2>
-            <button class="modal-close preview-close">×</button>
+            <button class="modal-close preview-close"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" class="lucide lucide-x-icon lucide-x">
+                    <path d="M18 6 6 18" />
+                    <path d="m6 6 12 12" />
+                </svg></button>
         </div>
-        <div id="preview-content">
-            <div class="preview-section">
-                <h3>📝 Título</h3>
-                <div class="preview-value" id="preview-title-value"></div>
-            </div>
-            <div class="preview-section">
-                <h3>📄 Descrição</h3>
-                <div class="preview-value preview-multiline" id="preview-caption-value"></div>
-            </div>
-            <div class="preview-section">
-                <h3>🏷️ Tags</h3>
-                <div class="preview-tags" id="preview-tags-value"></div>
-            </div>
-            <div class="preview-section">
-                <h3>⚙️ Configurações</h3>
-                <div class="preview-settings">
-                    <div class="preview-setting">
-                        <strong>Age Rating:</strong>
-                        <span id="preview-age-rating"></span>
-                    </div>
-                    <div class="preview-setting" id="preview-adult-content-setting">
-                        <strong>Adult Content:</strong>
-                        <span id="preview-adult-content"></span>
-                    </div>
-                    <div class="preview-setting" id="preview-mature-content-setting" style="display: none">
-                        <strong>Mature Content:</strong>
-                        <span id="preview-mature-content"></span>
-                    </div>
-                    <div class="preview-setting">
-                        <strong>AI-generated:</strong>
-                        <span id="preview-ai-generated"></span>
-                    </div>
-                </div>
+        <div class="modal-body">
+            <div id="preview-body-content">
+                <!-- Conteúdo será preenchido dinamicamente -->
             </div>
         </div>
         <div class="modal-actions">
@@ -193,6 +188,7 @@
         </div>
     </div>
 </div>
+</parameter>
 
 <!-- Modal de Estatísticas -->
 <div id="stats-modal">

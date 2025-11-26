@@ -1,9 +1,19 @@
 {
   "manifest_version": 3,
   "name": "Pixiv Templater",
-  "version": "2.0.9",
+  "version": "2.0.10",
   "description": "Auto-fill Pixiv upload page with predefined templates",
   "author": "gabszap",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "pixiv-templater@gabszap",
+      "strict_min_version": "128.0",
+      "update_url": "https://gabszap.github.io/pixiv-templater/pixiv-templater/updates.json",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  },
   "icons": {
     "16": "icons/16.png",
     "32": "icons/32.png",
@@ -11,21 +21,16 @@
     "96": "icons/96.png",
     "128": "icons/128.png"
   },
-  "permissions": [
-    "storage"
-  ],
-  "host_permissions": [
-    "*://www.pixiv.net/*"
-  ],
+  "permissions": ["storage", "tabs"],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "host_permissions": ["*://www.pixiv.net/*"],
   "options_page": "browser-ui/options.html",
   "content_scripts": [
     {
-      "matches": [
-        "*://www.pixiv.net/illustration/create*"
-      ],
-      "js": [
-        "content.js"
-      ],
+      "matches": ["*://www.pixiv.net/illustration/create*"],
+      "js": ["content.js"],
       "run_at": "document_idle"
     }
   ],
@@ -43,9 +48,7 @@
         "ui/ui.css",
         "ui/ui.js"
       ],
-      "matches": [
-        "*://www.pixiv.net/*"
-      ]
+      "matches": ["*://www.pixiv.net/*"]
     }
   ]
 }
