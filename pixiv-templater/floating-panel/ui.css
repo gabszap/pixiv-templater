@@ -1395,6 +1395,51 @@
     transform: translateY(-1px);
 }
 
+/* Tag Translation Styles */
+.preview-tag-translations {
+    margin-left: 6px;
+    font-size: 11px;
+    color: #666;
+}
+
+.preview-tag-translation {
+    color: #0075f8;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.2s;
+}
+
+.preview-tag-translation:hover {
+    text-decoration: underline;
+}
+
+/* Danbooru tag category colors */
+.ptpt-tag-category-0 {
+    color: #0075f8 !important;
+}
+
+/* General */
+.ptpt-tag-category-1 {
+    color: #c00004 !important;
+}
+
+/* Artist */
+.ptpt-tag-category-3 {
+    color: #a800aa !important;
+}
+
+/* Copyright */
+.ptpt-tag-category-4 {
+    color: #00ab2c !important;
+}
+
+/* Character */
+.ptpt-tag-category-5 {
+    color: #fd9200 !important;
+}
+
+/* Meta */
+
 .preview-config {
     display: flex;
     flex-direction: column;
@@ -1450,4 +1495,35 @@
     .preview-config-value {
         color: #aaa;
     }
+
+    /* Dark mode tag translation colors */
+    .preview-tag-translations {
+        color: #8b949e;
+    }
+
+    .ptpt-tag-category-0 {
+        color: #009be6 !important;
+    }
+
+    /* General */
+    .ptpt-tag-category-1 {
+        color: #ff8a8b !important;
+    }
+
+    /* Artist */
+    .ptpt-tag-category-3 {
+        color: #c797ff !important;
+    }
+
+    /* Copyright */
+    .ptpt-tag-category-4 {
+        color: #35c64a !important;
+    }
+
+    /* Character */
+    .ptpt-tag-category-5 {
+        color: #ead084 !important;
+    }
+
+    /* Meta */
 }

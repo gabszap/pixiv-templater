@@ -1,8 +1,29 @@
 // Content script that injects all necessary scripts into the page context
 // Robust injection with timeouts and error recovery
+// Supports SPA navigation detection
 
 (function () {
   "use strict";
+
+  const UPLOAD_PAGE_PATTERN = /\/illustration\/create/;
+
+  // Track if we've already initialized on this page
+  let initialized = false;
+  let lastUrl = location.href;
+
+  /**
+   * Check if current URL is the upload page
+   */
+  function isUploadPage() {
+    return UPLOAD_PAGE_PATTERN.test(location.pathname);
+  }
+
+  // Prevent double content script injection
+  if (window.__pixivTemplaterContentScriptLoaded) {
+    console.log("[Pixiv Templater] Content script already loaded");
+    return;
+  }
+  window.__pixivTemplaterContentScriptLoaded = true;
 
   let debugMode = false;
 
@@ -70,7 +91,7 @@
   async function loadUIResources() {
     try {
       // Load CSS
-      const cssResponse = await fetch(chrome.runtime.getURL("ui/ui.css"));
+      const cssResponse = await fetch(chrome.runtime.getURL("floating-panel/ui.css"));
       const css = await cssResponse.text();
       const style = document.createElement("style");
       style.textContent = css;
@@ -78,7 +99,7 @@
       log.debug("✓ CSS injected");
 
       // Load HTML
-      const htmlResponse = await fetch(chrome.runtime.getURL("ui/ui.html"));
+      const htmlResponse = await fetch(chrome.runtime.getURL("floating-panel/ui.html"));
       const html = await htmlResponse.text();
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, "text/html");
@@ -92,13 +113,33 @@
     }
   }
 
-  // Inject debug mode flag into page context
-  function injectDebugMode() {
+  // Inject extension URL, version, debug mode and other settings into page context
+  async function injectExtensionConfig() {
+    const extensionUrl = chrome.runtime.getURL("");
+    const manifest = chrome.runtime.getManifest();
+    const version = manifest.version;
+
+    // Load auto-translate setting
+    let autoTranslateTags = true; // default enabled
+    try {
+      const result = await chrome.storage.local.get(["pixiv_templater_auto_translate_tags"]);
+      if (result.pixiv_templater_auto_translate_tags === false) {
+        autoTranslateTags = false;
+      }
+    } catch (err) {
+      log.warn("Could not load auto_translate_tags setting, using default (enabled)");
+    }
+
     const script = document.createElement("script");
     script.textContent = `
+      // Extension URL base accessible by page scripts (for i18n)
+      window.__PIXIV_TEMPLATER_EXTENSION_URL__ = "${extensionUrl}";
+      // Extension version
+      window.__PIXIV_TEMPLATER_VERSION__ = "${version}";
       // Debug mode flag accessible by page scripts
       window.PIXIV_TEMPLATER_DEBUG_MODE = ${debugMode};
-      console.log("[Pixiv Templater] Debug mode in page context:", ${debugMode});
+      // Auto-translate tags flag
+      window.__PIXIV_TEMPLATER_AUTO_TRANSLATE__ = ${autoTranslateTags};
     `;
     (document.head || document.documentElement).appendChild(script);
     script.remove();
@@ -149,7 +190,7 @@
           // Special handling for debug_mode - also update page context
           if (message.key === "debug_mode") {
             debugMode = value || false;
-            injectDebugMode();
+            injectExtensionConfig();
           }
 
           window.postMessage(
@@ -171,7 +212,7 @@
           // Special handling for debug_mode - also update page context
           if (message.key === "debug_mode") {
             debugMode = message.value || false;
-            injectDebugMode();
+            injectExtensionConfig();
           }
 
           window.postMessage(
@@ -218,11 +259,11 @@
   // Main injection sequence with error recovery
   async function initializeExtension() {
     try {
-      // ESSENTIAL LOG - Always shown
-      log.essential("Starting injection sequence...");
+      // Silently inject - only log on debug mode
+      if (debugMode) log.essential("Starting injection sequence...");
 
-      // Inject debug mode flag first
-      injectDebugMode();
+      // Inject extension config (URL + debug mode + settings) first
+      await injectExtensionConfig();
 
       // 0. Browser polyfill for Firefox compatibility
       await injectScript("browser-polyfill.js", 5000);
@@ -239,17 +280,26 @@
       // 4. jQuery
       await injectScript("libs/jquery.min.js", 5000);
 
-      // 5. UI resources (HTML and CSS)
+      // 5. i18n module (must load before UI)
+      await injectScript("i18n.js", 5000);
+
+      // 6. UI resources (HTML and CSS)
       await loadUIResources();
 
-      // 6. UI script
-      await injectScript("ui/ui.js", 5000);
+      // 7. UI script
+      await injectScript("floating-panel/ui.js", 5000);
 
-      // 7. Main templater script
+      // 8. Tag translator module
+      await injectScript("tag-translator.js", 5000);
+
+      // 9. Main templater script
       await injectScript("templater.js", 5000);
 
-      // ESSENTIAL LOG - Always shown
-      log.essential("✓✓✓ All scripts loaded successfully ✓✓✓");
+      // 10. Upload page tag translator (translates recommended tags)
+      await injectScript("upload-translator.js", 5000);
+
+      // Show single success message
+      log.essential("Pixiv Templater loaded");
     } catch (error) {
       log.error("Critical error during initialization:", error);
       log.debug("Attempting retry in 2 seconds...");
@@ -259,9 +309,9 @@
         try {
           log.debug("Retry attempt...");
           await loadUIResources();
-          await injectScript("ui/ui.js", 5000);
+          await injectScript("floating-panel/ui.js", 5000);
           await injectScript("templater.js", 5000);
-          log.debug("✓ Retry successful");
+          log.debug("Retry successful");
         } catch (retryError) {
           log.error("Retry failed:", retryError);
         }
@@ -273,8 +323,53 @@
   async function init() {
     await loadDebugMode();
     log.debug("Debug mode loaded:", debugMode);
-    initializeExtension();
+
+    // Only initialize if on upload page
+    if (isUploadPage() && !initialized) {
+      initialized = true;
+      initializeExtension();
+    }
   }
+
+  /**
+   * Check for URL changes (SPA navigation)
+   */
+  function checkUrlChange() {
+    if (location.href !== lastUrl) {
+      lastUrl = location.href;
+      log.essential("URL changed to:", location.href);
+
+      // If navigated to upload page, initialize
+      if (isUploadPage() && !initialized) {
+        log.essential("Navigated to upload page, initializing...");
+        initialized = true;
+        initializeExtension();
+      }
+    }
+  }
+
+  // Start URL monitoring for SPA navigation
+  // Use multiple detection methods for reliability
+
+  // 1. Interval-based checking (fallback)
+  setInterval(checkUrlChange, 500);
+
+  // 2. Listen for popstate (back/forward navigation)
+  window.addEventListener("popstate", checkUrlChange);
+
+  // 3. Intercept pushState and replaceState
+  const originalPushState = history.pushState;
+  const originalReplaceState = history.replaceState;
+
+  history.pushState = function (...args) {
+    originalPushState.apply(this, args);
+    checkUrlChange();
+  };
+
+  history.replaceState = function (...args) {
+    originalReplaceState.apply(this, args);
+    checkUrlChange();
+  };
 
   // Start initialization
   if (document.readyState === "loading") {

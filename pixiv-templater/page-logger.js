@@ -4,6 +4,18 @@
 (function () {
   "use strict";
 
+  // Log colors
+  const COLORS = {
+    essential: "color: #0096fa; font-weight: bold",
+    info: "color: #888",
+    debug: "color: #ff9800",
+    verbose: "color: #9c27b0",
+    error: "color: #f44336; font-weight: bold",
+    warn: "color: #ff9800; font-weight: bold",
+    success: "color: #4caf50; font-weight: bold",
+    user: "color: #00bcd4",
+  };
+
   // Check if debug mode is enabled
   function isDebugEnabled() {
     return window.PIXIV_TEMPLATER_DEBUG_MODE === true;
@@ -14,7 +26,8 @@
     // Essential logs (always shown)
     essential: function (component, message, data) {
       console.log(
-        `[${component}] ${message}`,
+        `%c[${component}] ${message}`,
+        COLORS.essential,
         data !== undefined ? data : "",
       );
     },
@@ -23,7 +36,8 @@
     info: function (component, message, data) {
       if (!isDebugEnabled()) return;
       console.log(
-        `[${component}] ${message}`,
+        `%c[${component}] ${message}`,
+        COLORS.info,
         data !== undefined ? data : "",
       );
     },
@@ -32,7 +46,8 @@
     debug: function (component, message, data) {
       if (!isDebugEnabled()) return;
       console.log(
-        `[${component}] 🐛 ${message}`,
+        `%c[${component}] [DEBUG] ${message}`,
+        COLORS.debug,
         data !== undefined ? data : "",
       );
     },
@@ -41,7 +56,8 @@
     verbose: function (component, message, data) {
       if (!isDebugEnabled()) return;
       console.log(
-        `[${component}] 📝 ${message}`,
+        `%c[${component}] ${message}`,
+        COLORS.verbose,
         data !== undefined ? data : "",
       );
     },
@@ -49,7 +65,8 @@
     // Error logs (always shown)
     error: function (component, message, error) {
       console.error(
-        `[${component}] ❌ ERROR: ${message}`,
+        `%c[${component}] ERROR: ${message}`,
+        COLORS.error,
         error !== undefined ? error : "",
       );
     },
@@ -57,7 +74,8 @@
     // Warning logs (always shown)
     warn: function (component, message, data) {
       console.warn(
-        `[${component}] ⚠️ WARNING: ${message}`,
+        `%c[${component}] WARNING: ${message}`,
+        COLORS.warn,
         data !== undefined ? data : "",
       );
     },
@@ -66,7 +84,8 @@
     success: function (component, message, data) {
       if (!isDebugEnabled()) return;
       console.log(
-        `[${component}] ✓ ${message}`,
+        `%c[${component}] ${message}`,
+        COLORS.success,
         data !== undefined ? data : "",
       );
     },
@@ -74,7 +93,8 @@
     // User logs (always shown - for important user actions)
     user: function (component, message, data) {
       console.log(
-        `[${component}] 👤 ${message}`,
+        `%c[${component}] ${message}`,
+        COLORS.user,
         data !== undefined ? data : "",
       );
     },
@@ -107,10 +127,4 @@
 
   // Shorthand alias
   window.PTLogger = PageLogger;
-
-  // Essential startup log
-  PageLogger.essential(
-    "Page Logger",
-    "Logger ready (Debug mode: " + isDebugEnabled() + ")",
-  );
 })();

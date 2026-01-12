@@ -15,7 +15,8 @@
   };
 
   // ESSENTIAL LOG - Always shown
-  log.essential("Pixiv Templater", "Initializing extension version...");
+  const version = window.__PIXIV_TEMPLATER_VERSION__ || "?";
+  log.essential("Pixiv Templater", `Initializing v${version}...`);
 
   // ============================
   // STORAGE WRAPPER (uses chrome.storage via message bridge)
@@ -158,21 +159,21 @@
   // ============================
 
   const DEFAULT_SHORTCUTS = {
-    togglePanel: "ctrl+shift+t",
-    minimizePanel: "ctrl+shift+m",
-    newTemplate: "ctrl+shift+n",
-    exportTemplates: "ctrl+shift+e",
-    importTemplates: "ctrl+shift+i",
-    showHelp: "ctrl+shift+h",
-    applyTemplate1: "ctrl+1",
-    applyTemplate2: "ctrl+2",
-    applyTemplate3: "ctrl+3",
-    applyTemplate4: "ctrl+4",
-    applyTemplate5: "ctrl+5",
-    applyTemplate6: "ctrl+6",
-    applyTemplate7: "ctrl+7",
-    applyTemplate8: "ctrl+8",
-    applyTemplate9: "ctrl+9",
+    togglePanel: "alt+shift+t",
+    minimizePanel: "alt+shift+m",
+    newTemplate: "alt+shift+n",
+    exportTemplates: "alt+shift+e",
+    importTemplates: "alt+shift+i",
+    showHelp: "alt+shift+h",
+    applyTemplate1: "alt+1",
+    applyTemplate2: "alt+2",
+    applyTemplate3: "alt+3",
+    applyTemplate4: "alt+4",
+    applyTemplate5: "alt+5",
+    applyTemplate6: "alt+6",
+    applyTemplate7: "alt+7",
+    applyTemplate8: "alt+8",
+    applyTemplate9: "alt+9",
   };
 
   // ============================
@@ -235,12 +236,12 @@
   async function resetStats() {
     if (
       confirm(
-        "⚠️ Tem certeza que deseja resetar todas as estatísticas?\n\nEsta ação não pode ser desfeita.",
+        t("messages.confirmClearStatsWarning"),
       )
     ) {
       await Storage.set("template_stats", "{}");
       // DEBUG: Removed verbose logs
-      alert("✓ Estatísticas resetadas com sucesso!");
+      alert(t("messages.statsCleared"));
       return true;
     }
     return false;
@@ -485,7 +486,6 @@
     a.click();
     URL.revokeObjectURL(url);
 
-    console.log("[Templater] Templates exported");
   }
 
   function importTemplates(file) {
@@ -522,18 +522,63 @@
         }
 
         alert(
-          `✓ Importação concluída!\n\nNovos: ${newCount}\nSubstituídos: ${overwriteCount}`,
+          t("messages.importComplete") + "\n\n" +
+          t("messages.importSuccessDetail", { newCount, updatedCount: overwriteCount })
         );
 
-        console.log("[Templater] Templates imported");
       } catch (error) {
-        alert(
-          "❌ Erro ao importar templates!\n\nVerifique se o arquivo JSON está correto.",
-        );
+        alert(t("messages.importErrorInvalid"));
         console.error("[Templater] Import error:", error);
       }
     };
     reader.readAsText(file);
+  }
+
+  // ============================
+  // TAG TRANSLATION
+  // ============================
+
+  /**
+   * Translate template tags using Danbooru API
+   * @param {object} template - Template with tags array
+   * @returns {Promise<object>} Template with translatedTags map added
+   */
+  async function translateTemplateTags(template) {
+    if (!template.tags || template.tags.length === 0) {
+      return { ...template, translatedTags: new Map() };
+    }
+
+    if (!window.PixivTagTranslator) {
+      console.warn("[Templater] Tag translator not available");
+      return { ...template, translatedTags: new Map() };
+    }
+
+    try {
+      const translations = await window.PixivTagTranslator.translateTags(template.tags);
+      return { ...template, translatedTags: translations };
+    } catch (error) {
+      console.error("[Templater] Failed to translate tags:", error);
+      return { ...template, translatedTags: new Map() };
+    }
+  }
+
+  /**
+   * Get translations for an array of tags
+   * @param {string[]} tags - Tags to translate
+   * @returns {Promise<Map<string, Array<{name: string, prettyName: string, category: number}>>>}
+   */
+  async function getTagTranslations(tags) {
+    if (!window.PixivTagTranslator) {
+      console.warn("[Templater] Tag translator not available");
+      return new Map();
+    }
+
+    try {
+      return await window.PixivTagTranslator.translateTags(tags);
+    } catch (error) {
+      console.error("[Templater] Failed to translate tags:", error);
+      return new Map();
+    }
   }
 
   // ============================
@@ -563,6 +608,10 @@
     DEFAULT_SHORTCUTS: DEFAULT_SHORTCUTS,
     loadShortcuts: loadShortcuts,
     saveShortcuts: saveShortcuts,
+
+    // Tag Translation
+    translateTemplateTags: translateTemplateTags,
+    getTagTranslations: getTagTranslations,
   };
 
   // ============================
@@ -570,8 +619,7 @@
   // ============================
 
   async function initialize() {
-    // ESSENTIAL LOG - Always shown
-    log.essential("Pixiv Templater", "Initializing...");
+    // Silent - version already logged at module load
 
     // Wait for page to be ready
     const checkReady = setInterval(async () => {

@@ -14,7 +14,7 @@
             console.log("[Pixiv Templater Background] Opening dashboard...");
 
             // Get the dashboard URL
-            const dashboardURL = chrome.runtime.getURL("browser-ui/options.html");
+            const dashboardURL = chrome.runtime.getURL("dashboard/dashboard.html");
 
             // Create a new tab with the dashboard
             chrome.tabs.create({ url: dashboardURL }, (tab) => {
@@ -27,5 +27,11 @@
         }
 
         return false;
+    });
+
+    // Open dashboard when the extension icon is clicked
+    chrome.action.onClicked.addListener(() => {
+        const dashboardURL = chrome.runtime.getURL("dashboard/dashboard.html");
+        chrome.tabs.create({ url: dashboardURL });
     });
 })();

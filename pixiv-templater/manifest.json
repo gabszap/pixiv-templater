@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Pixiv Templater",
-  "version": "2.0.10",
+  "version": "2.1.0",
   "description": "Auto-fill Pixiv upload page with predefined templates",
   "author": "gabszap",
   "browser_specific_settings": {
@@ -10,27 +10,53 @@
       "strict_min_version": "128.0",
       "update_url": "https://gabszap.github.io/pixiv-templater/pixiv-templater/updates.json",
       "data_collection_permissions": {
-        "required": ["none"]
+        "required": [
+          "none"
+        ]
       }
     }
   },
   "icons": {
-    "16": "icons/16.png",
-    "32": "icons/32.png",
-    "48": "icons/48.png",
-    "96": "icons/96.png",
-    "128": "icons/128.png"
+    "16": "assets/icons/16.png",
+    "32": "assets/icons/32.png",
+    "48": "assets/icons/48.png",
+    "96": "assets/icons/96.png",
+    "128": "assets/icons/128.png",
+    "256": "assets/icons/icon.svg"
   },
-  "permissions": ["storage", "tabs"],
+  "action": {
+    "default_icon": {
+      "16": "assets/icons/16.png",
+      "32": "assets/icons/32.png",
+      "48": "assets/icons/48.png",
+      "96": "assets/icons/96.png",
+      "128": "assets/icons/128.png",
+      "256": "assets/icons/icon.svg"
+    },
+    "default_title": "Pixiv Templater"
+  },
+  "permissions": [
+    "storage",
+    "tabs"
+  ],
   "background": {
-    "scripts": ["background.js"]
+    "scripts": [
+      "background.js"
+    ]
   },
-  "host_permissions": ["*://www.pixiv.net/*"],
-  "options_page": "browser-ui/options.html",
+  "host_permissions": [
+    "*://www.pixiv.net/*",
+    "*://danbooru.donmai.us/*"
+  ],
+  "options_page": "dashboard/dashboard.html",
   "content_scripts": [
     {
-      "matches": ["*://www.pixiv.net/illustration/create*"],
-      "js": ["content.js"],
+      "matches": [
+        "*://www.pixiv.net/*"
+      ],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_idle"
     }
   ],
@@ -40,15 +66,21 @@
         "browser-polyfill.js",
         "debug-logger.js",
         "page-logger.js",
+        "i18n.js",
+        "locales/*.json",
         "libs/jquery.min.js",
         "libs/emoji-mart.js",
         "libs/emoji-data.json",
         "templater.js",
-        "ui/ui.html",
-        "ui/ui.css",
-        "ui/ui.js"
+        "tag-translator.js",
+        "upload-translator.js",
+        "floating-panel/ui.html",
+        "floating-panel/ui.css",
+        "floating-panel/ui.js"
       ],
-      "matches": ["*://www.pixiv.net/*"]
+      "matches": [
+        "*://www.pixiv.net/*"
+      ]
     }
   ]
 }

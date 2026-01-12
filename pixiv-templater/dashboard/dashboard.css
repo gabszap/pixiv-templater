@@ -300,6 +300,9 @@ body {
 }
 
 .btn-primary:hover {
+    background: linear-gradient(135deg,
+            var(--primary-blue-hover) 0%,
+            var(--primary-blue-dark) 100%);
     box-shadow: var(--shadow-glow);
     transform: translateY(-2px);
 }
@@ -442,13 +445,28 @@ body {
 }
 
 .template-meta {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 11px;
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.meta-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 13px;
-    color: var(--text-muted);
-    padding-top: 12px;
-    border-top: 1px solid var(--border-color);
+}
+
+.meta-label {
+    opacity: 0.7;
+}
+
+.meta-value {
+    font-weight: 500;
 }
 
 .use-count {
@@ -533,7 +551,9 @@ body {
     font-size: 14px;
     font-weight: 600;
     text-align: center;
+    width: auto;
     min-width: 140px;
+    flex-shrink: 0;
     transition: all var(--transition-base);
     text-transform: uppercase;
 }
@@ -1137,7 +1157,61 @@ body {
     border-radius: 0 0 var(--radius-xl) var(--radius-xl);
 }
 
-/* Form Elements */
+/* Scoped Input Styles for Forms & Settings */
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="password"],
+.form-group input[type="email"],
+.form-group textarea,
+.form-group select,
+#language-select {
+    width: 100%;
+    background: var(--bg-input);
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-family: inherit;
+    transition: all var(--transition-base);
+    box-sizing: border-box;
+}
+
+.form-group input[type="text"]:focus,
+.form-group textarea:focus,
+.form-group select:focus,
+#language-select:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 4px rgba(0, 150, 250, 0.15);
+}
+
+/* Base Select Styles (shared) */
+select {
+    cursor: pointer;
+    appearance: none !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23b0b0b0' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 16px center !important;
+    padding-right: 44px !important;
+}
+
+select:hover {
+    border-color: var(--primary-blue-hover);
+    background-color: var(--bg-hover);
+}
+
+#language-select {
+    min-width: 220px;
+    width: auto;
+}
+
+option {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+}
+
+/* Form Specific */
 .form-group {
     margin-bottom: 24px;
 }
@@ -1148,43 +1222,6 @@ body {
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 8px;
-}
-
-.form-group input[type="text"],
-.form-group textarea,
-.form-group select {
-    width: 100%;
-    background: var(--bg-input);
-    border: 2px solid var(--border-color);
-    color: var(--text-primary);
-    padding: 12px 16px;
-    border-radius: var(--radius-md);
-    font-size: 15px;
-    font-family: inherit;
-    transition: all var(--transition-base);
-}
-
-.form-group input[type="text"]:focus,
-.form-group textarea:focus,
-.form-group select:focus {
-    outline: none;
-    border-color: var(--primary-blue);
-    box-shadow: 0 0 0 3px rgba(0, 150, 250, 0.2);
-}
-
-.form-group textarea {
-    resize: vertical;
-    min-height: 100px;
-    font-family: inherit;
-}
-
-.form-group select {
-    cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23b0b0b0'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 40px;
 }
 
 .form-note {
@@ -1198,25 +1235,30 @@ body {
     margin-left: 4px;
 }
 
-/* Tag Input */
-.tag-input-container {
+/* Tag Input Container */
+.tag-container {
     background: var(--bg-input);
     border: 2px solid var(--border-color);
     border-radius: var(--radius-md);
     padding: 12px;
     min-height: 100px;
     display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    align-items: center;
-    row-gap: 16px;
-    column-gap: 16px;
+    flex-direction: column;
+    gap: 12px;
     transition: all var(--transition-base);
 }
 
-.tag-input-container:focus-within {
+.tag-container:focus-within {
     border-color: var(--primary-blue);
     box-shadow: 0 0 0 3px rgba(0, 150, 250, 0.2);
+}
+
+/* Wrapper for tag chips */
+.tag-container .tag-chips-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
 }
 
 .tag-chip {
@@ -1226,7 +1268,7 @@ body {
     padding: 6px 12px;
     border-radius: 16px;
     font-size: 13px;
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: 8px;
     font-weight: 500;
@@ -1253,22 +1295,22 @@ body {
 }
 
 #tag-input {
-    flex: 1;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 6px;
+    width: 100% !important;
+    background: var(--bg-tertiary) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-sm);
+    box-shadow: none !important;
     color: var(--text-primary);
     font-size: 14px;
-    padding: 8px 12px;
+    padding: 10px 14px;
     outline: none;
-    min-width: 200px;
     transition: all var(--transition-fast);
-    margin-top: 8px;
+    margin-top: auto;
 }
 
 #tag-input:focus {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: var(--primary-blue);
+    background: var(--bg-hover) !important;
+    border-color: var(--primary-blue) !important;
 }
 
 #tag-input::placeholder {
@@ -1441,8 +1483,15 @@ body {
         grid-template-columns: 1fr;
     }
 
+    .shortcut-item,
     .setting-item {
         flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+    }
+
+    .shortcut-input {
+        width: 100%;
     }
 
     .modal-content {
@@ -1603,4 +1652,49 @@ body {
 #emoji-picker-container em-emoji-picker {
     width: 100%;
     --font-family: inherit;
+}
+
+/* Advanced Tab Specific Styles */
+.advanced-collapsible-container {
+    margin-top: 40px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 40px;
+}
+
+.advanced-header-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 12px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-base);
+}
+
+.advanced-header-toggle:hover {
+    background: var(--bg-hover);
+    border-color: var(--primary-blue);
+}
+
+.advanced-header-toggle h2 {
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-primary);
+}
+
+.advanced-content-body {
+    max-height: 1000px;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, margin-top 0.3s ease;
+    opacity: 1;
+}
+
+.advanced-content-body.collapsed {
+    max-height: 0;
+    opacity: 0;
+    margin-top: 0;
 }

@@ -1,4 +1,4 @@
-// Pixiv Templater Options Page Script
+// Pixiv Templater Dashboard Script
 
 (function () {
   "use strict";
@@ -10,7 +10,7 @@
       const result = await chrome.storage.local.get([fullKey]);
       const value = result[fullKey];
       console.log(
-        `[Options Storage] GET ${key}:`,
+        `[Dashboard Storage] GET ${key}:`,
         value !== undefined ? "found" : "not found",
       );
       return value !== undefined ? value : defaultValue;
@@ -18,12 +18,12 @@
     set: async function (key, value) {
       const fullKey = `pixiv_templater_${key}`;
       await chrome.storage.local.set({ [fullKey]: value });
-      console.log(`[Options Storage] SET ${key}`);
+      console.log(`[Dashboard Storage] SET ${key}`);
     },
     remove: async function (key) {
       const fullKey = `pixiv_templater_${key}`;
       await chrome.storage.local.remove([fullKey]);
-      console.log(`[Options Storage] REMOVE ${key}`);
+      console.log(`[Dashboard Storage] REMOVE ${key}`);
     },
   };
 
@@ -35,22 +35,41 @@
 
   // Default shortcuts
   const DEFAULT_SHORTCUTS = {
-    togglePanel: "ctrl+shift+t",
-    minimizePanel: "ctrl+shift+m",
-    newTemplate: "ctrl+shift+n",
-    exportTemplates: "ctrl+shift+e",
-    importTemplates: "ctrl+shift+i",
-    showHelp: "ctrl+shift+h",
-    applyTemplate1: "ctrl+1",
-    applyTemplate2: "ctrl+2",
-    applyTemplate3: "ctrl+3",
-    applyTemplate4: "ctrl+4",
-    applyTemplate5: "ctrl+5",
-    applyTemplate6: "ctrl+6",
-    applyTemplate7: "ctrl+7",
-    applyTemplate8: "ctrl+8",
-    applyTemplate9: "ctrl+9",
+    togglePanel: "alt+shift+t",
+    minimizePanel: "alt+shift+m",
+    newTemplate: "alt+shift+n",
+    exportTemplates: "alt+shift+e",
+    importTemplates: "alt+shift+i",
+    showHelp: "alt+shift+h",
+    applyTemplate1: "alt+1",
+    applyTemplate2: "alt+2",
+    applyTemplate3: "alt+3",
+    applyTemplate4: "alt+4",
+    applyTemplate5: "alt+5",
+    applyTemplate6: "alt+6",
+    applyTemplate7: "alt+7",
+    applyTemplate8: "alt+8",
+    applyTemplate9: "alt+9",
   };
+
+  /**
+   * Translation helper - shorthand for i18n.t()
+   */
+  function t(key, params) {
+    if (window.PixivTemplaterI18n) {
+      return window.PixivTemplaterI18n.t(key, params);
+    }
+    return key; // Fallback to key if i18n not loaded
+  }
+
+  // Translate about steps preserving code tags
+  function translateAboutSteps() {
+    const step1 = document.getElementById("about-step1");
+    const step4 = document.getElementById("about-step4");
+
+    if (step1) step1.innerHTML = t("about.step1").replace("pixiv.net/illustration/create", "<code>pixiv.net/illustration/create</code>");
+    if (step4) step4.innerHTML = t("about.step4").replace("ALT+Shift+T", "<code>ALT+Shift+T</code>");
+  }
 
   // Load version from manifest
   async function loadVersion() {
@@ -59,7 +78,7 @@
       document.getElementById("header-version").textContent =
         "v" + manifest.version;
       document.getElementById("about-version").textContent =
-        "Versão " + manifest.version;
+        t("common.version") + " " + manifest.version;
     } catch (err) {
       console.error("Failed to load version:", err);
     }
@@ -72,12 +91,12 @@
 
     if (templates !== null && templates !== "{}") {
       console.log(
-        "[Options] Templates already exist in chrome.storage, skipping migration",
+        "[Dashboard] Templates already exist in chrome.storage, skipping migration",
       );
       return;
     }
 
-    console.log("[Options] No templates found, initializing with defaults");
+    console.log("[Dashboard] No templates found, initializing with defaults");
 
     // Initialize with default templates if empty
     const defaultTemplates = {
@@ -114,12 +133,20 @@
       },
     };
     await Storage.set("templates", JSON.stringify(defaultTemplates));
-    console.log("[Options] Default templates initialized");
+    console.log("[Dashboard] Default templates initialized");
   }
 
   // Initialize on page load
   $(document).ready(async function () {
-    console.log("[Pixiv Templater Options] Initializing...");
+    console.log("[Pixiv Templater Dashboard] Initializing...");
+
+    // Initialize i18n system
+    if (window.PixivTemplaterI18n) {
+      await window.PixivTemplaterI18n.init();
+      window.PixivTemplaterI18n.translatePage();
+      translateAboutSteps();
+      console.log("[Pixiv Templater Dashboard] i18n initialized: " + window.PixivTemplaterI18n.getCurrentLanguage());
+    }
 
     // Load version
     await loadVersion();
@@ -130,11 +157,11 @@
     // Debug: Show what's in chrome.storage
     const allData = await chrome.storage.local.get(null);
     console.log(
-      "[Options] Storage keys:",
+      "[Dashboard] Storage keys:",
       Object.keys(allData).filter((k) => k.startsWith("pixiv_templater_")),
     );
-    console.log("[Options] Templates:", await Storage.get("templates", "{}"));
-    console.log("[Options] Stats:", await Storage.get("template_stats", "{}"));
+    console.log("[Dashboard] Templates:", await Storage.get("templates", "{}"));
+    console.log("[Dashboard] Stats:", await Storage.get("template_stats", "{}"));
 
     initializeTabs();
     setupEventHandlers();
@@ -142,7 +169,7 @@
     await loadShortcuts();
     await loadStats();
     await loadAdvancedSettings();
-    console.log("[Pixiv Templater Options] Initialized successfully");
+    console.log("[Pixiv Templater Dashboard] Initialized successfully");
   });
 
   // ============================
@@ -240,9 +267,16 @@
     $("#debug-mode-toggle").on("change", (e) =>
       handleDebugToggle(e).catch((err) => console.error(err)),
     );
+    $("#auto-translate-toggle").on("change", (e) =>
+      handleAutoTranslateToggle(e).catch((err) => console.error(err)),
+    );
     $("#clear-all-data-btn").on("click", () =>
       handleClearAllData().catch((err) => console.error(err)),
     );
+
+    // Settings (new)
+    $("#language-select").on("change", handleLanguageChange);
+    $("#advanced-settings-toggle").on("click", handleAdvancedToggle);
   }
 
   // ============================
@@ -263,7 +297,7 @@
         onEmojiSelect: (emoji) => {
           selectEmoji(emoji.native);
         },
-        locale: "pt",
+        locale: window.PixivTemplaterI18n?.getCurrentLanguage() === "pt-br" ? "pt" : "en",
         theme: "auto",
         previewPosition: "none",
         skinTonePosition: "none",
@@ -282,7 +316,7 @@
       const container = document.getElementById("emoji-picker-container");
       if (container) {
         container.innerHTML =
-          '<span style="color: #ef4444;">Erro ao carregar emojis</span>';
+          `<span style="color: #ef4444;">${t("messages.errorLoadingEmojis")}</span>`;
       }
     }
   }
@@ -348,29 +382,32 @@
       }
 
       const ageRatingLabels = {
-        general: "All ages",
-        r18: "R-18",
-        r18g: "R-18G",
+        general: t("form.ageRatingGeneral"),
+        r18: t("form.ageRatingR18"),
+        r18g: t("form.ageRatingR18G"),
       };
+
+      // Get locale for date formatting
+      const dateLocale = window.PixivTemplaterI18n?.getCurrentLanguage() === "pt-br" ? "pt-BR" : "en-US";
 
       const $card = $(`
         <div class="template-card" data-template-name="${name}">
           <div class="template-card-header">
             <div class="template-card-title">${icon} ${name}</div>
             <div class="template-card-actions">
-              <button class="template-action preview" title="Visualizar">
+              <button class="template-action preview" title="${t("preview.title")}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-icon lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
               </button>
-              <button class="template-action edit" title="Editar">
+              <button class="template-action edit" title="${t("modal.editTemplate")}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil-icon lucide-pencil"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
               </button>
-              <button class="template-action delete" title="Excluir">
+              <button class="template-action delete" title="${t("dashboard.deleteSelected")}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-icon lucide-trash"><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
               </button>
             </div>
           </div>
           <div class="template-card-info">
-            <div>${ageRatingLabels[template.ageRating] || "All ages"}</div>
+            <div>${ageRatingLabels[template.ageRating] || t("modal.ageRatingGeneral")}</div>
             <div>${template.tags.length} tag(s)</div>
           </div>
           <div class="template-card-tags">
@@ -381,18 +418,33 @@
             ${template.tags.length > 5 ? `<span class="template-tag">+${template.tags.length - 5}</span>` : ""}
           </div>
           <div class="template-meta">
-            <span title="Data de criação">${template.createdAt
-          ? "Data de criação: " +
-          new Date(template.createdAt).toLocaleString("pt-BR", {
+            <div class="meta-row" title="${t("preview.createdAt")}">
+              <span class="meta-label">${t("preview.createdAt")}</span>
+              <span class="meta-value">${template.createdAt
+          ? new Date(template.createdAt).toLocaleString(dateLocale, {
             day: "2-digit",
             month: "2-digit",
             year: "2-digit",
             hour: "2-digit",
             minute: "2-digit",
           })
-          : "Data de criação: None"
+          : t("preview.createdAtNone")
         }</span>
-            ${useCount > 0 ? `<span class="use-count">${useCount}× usado</span>` : ""}
+            </div>
+            <div class="meta-row" title="${t("preview.updatedAt")}">
+              <span class="meta-label">${t("preview.updatedAt")}</span>
+              <span class="meta-value">${template.updatedAt
+          ? new Date(template.updatedAt).toLocaleString(dateLocale, {
+            day: "2-digit",
+            month: "2-digit",
+            year: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+          : t("preview.updatedAtNone")
+        }</span>
+            </div>
+            ${useCount > 0 ? `<div class="use-count">${useCount}× ${t("preview.usedCount")}</div>` : ""}
           </div>
         </div>
       `);
@@ -420,7 +472,7 @@
   function handleNewTemplate() {
     editingTemplateName = null;
     currentTags = [];
-    $("#modal-title").text("Novo Template");
+    $("#modal-title").text(t("modal.newTemplate"));
     $("#template-form")[0].reset();
     renderTags();
     $("#template-emoji").val("📝");
@@ -434,12 +486,12 @@
 
     const name = $("#template-name").val().trim();
     if (!name) {
-      alert("Nome do template é obrigatório!");
+      alert(t("validation.templateNameRequired"));
       return;
     }
 
     if (currentTags.length === 0) {
-      alert("Adicione pelo menos 1 tag ao template!");
+      alert(t("validation.atLeastOneTag"));
       $("#tag-input").focus();
       return;
     }
@@ -449,7 +501,7 @@
 
     if (!editingTemplateName && templates[name]) {
       if (
-        !confirm(`Já existe um template chamado "${name}". Deseja substituir?`)
+        !confirm(t("validation.templateExists", { name: name }))
       ) {
         return;
       }
@@ -468,6 +520,7 @@
       });
     }
 
+    const now = new Date().toISOString();
     templates[name] = {
       title: $("#template-title").val().trim(),
       caption: $("#template-caption").val().trim(),
@@ -481,7 +534,8 @@
       createdAt:
         editingTemplateName && templates[editingTemplateName]?.createdAt
           ? templates[editingTemplateName].createdAt
-          : new Date().toISOString(),
+          : now,
+      updatedAt: now,
     };
 
     await Storage.set("templates", JSON.stringify(templates));
@@ -495,7 +549,7 @@
     editingTemplateName = name;
     currentTags = [...template.tags];
 
-    $("#modal-title").text("Editar Template");
+    $("#modal-title").text(t("modal.editTemplate"));
     $("#template-name").val(name);
     $("#template-title").val(template.title || "");
     $("#template-caption").val(template.caption || "");
@@ -526,7 +580,7 @@
   }
 
   async function deleteTemplate(name) {
-    if (!confirm(`Tem certeza que deseja deletar o template "${name}"?`)) {
+    if (!confirm(t("messages.confirmDeleteTemplate", { name: name }))) {
       return;
     }
 
@@ -549,22 +603,22 @@
         tagsHtml += `<span class="preview-tag">${tag}</span>`;
       });
     } else {
-      tagsHtml = '<span class="preview-empty">(sem tags)</span>';
+      tagsHtml = `<span class="preview-empty">(${t("preview.noTags")})</span>`;
     }
 
     // Age rating labels
     const ageRatingLabels = {
-      general: "All ages",
-      r18: "R-18",
-      r18g: "R-18G",
+      general: t("form.ageRatingGeneral"),
+      r18: t("form.ageRatingR18"),
+      r18g: t("form.ageRatingR18G"),
     };
 
     // Adult content info
     let adultContentHtml = "";
     if (template.ageRating === "general") {
       adultContentHtml = template.adultContent
-        ? "✓ Sim (conteúdo levemente sexual)"
-        : "✗ Não";
+        ? t("preview.adultContentYes")
+        : t("preview.adultContentNo");
     }
 
     // Mature content info
@@ -572,52 +626,51 @@
     if (template.ageRating === "r18" && template.matureContent) {
       if (template.matureContent.length > 0) {
         const labels = {
-          lo: "Menores",
-          furry: "Furry",
-          bl: "BL (Boys Love)",
-          yuri: "GL (Girls Love)",
+          lo: t("form.minors"),
+          furry: t("form.furry"),
+          bl: t("form.bl"),
+          yuri: t("form.gl"),
         };
         const items = template.matureContent
-          .map((c) => `✓ ${labels[c] || c}`)
+          .map((c) => `${labels[c] || c}`)
           .join("<br>");
         matureContentHtml = items;
       } else {
-        matureContentHtml = '<span class="preview-empty">(nenhuma)</span>';
+        matureContentHtml = `<span class="preview-empty">(${t("common.none")})</span>`;
       }
     }
 
-    // AI generated
     const aiGeneratedText =
-      template.aiGenerated === "aiGenerated" ? "✓ Sim" : "✗ Não";
+      template.aiGenerated === "aiGenerated" ? t("preview.yes") : t("preview.no");
 
     // Build complete preview HTML
     const previewHtml = `
       <div class="preview-section">
-        <h3>📄 Título</h3>
-        <div class="preview-content">${template.title || '<span class="preview-empty">(vazio)</span>'}</div>
+        <h3>📄 ${t("common.title")}</h3>
+        <div class="preview-content">${template.title || `<span class="preview-empty">(${t("common.empty")})</span>`}</div>
       </div>
 
       <div class="preview-section">
-        <h3>📝 Descrição</h3>
-        <div class="preview-content">${template.caption || '<span class="preview-empty">(vazio)</span>'}</div>
+        <h3>📝 ${t("common.description")}</h3>
+        <div class="preview-content">${template.caption || `<span class="preview-empty">(${t("common.empty")})</span>`}</div>
       </div>
 
       <div class="preview-section">
-        <h3>🏷️ Tags</h3>
+        <h3>🏷️ ${t("common.tags")}</h3>
         <div class="preview-tags">${tagsHtml}</div>
       </div>
 
       <div class="preview-section">
-        <h3>⚙️ Configurações</h3>
+        <h3>⚙️ ${t("common.settings")}</h3>
         <div class="preview-config">
           <div class="preview-config-item">
-            <span class="preview-config-label">Classificação:</span>
-            <span class="preview-config-value">${ageRatingLabels[template.ageRating] || "All ages"}</span>
+            <span class="preview-config-label">${t("common.rating")}:</span>
+            <span class="preview-config-value">${ageRatingLabels[template.ageRating] || t("modal.ageRatingGeneral")}</span>
           </div>
           ${template.ageRating === "general"
         ? `
           <div class="preview-config-item">
-            <span class="preview-config-label">Conteúdo adulto:</span>
+            <span class="preview-config-label">${t("common.adultContent")}:</span>
             <span class="preview-config-value">${adultContentHtml}</span>
           </div>
           `
@@ -626,14 +679,14 @@
           ${template.ageRating === "r18" && matureContentHtml
         ? `
           <div class="preview-config-item">
-            <span class="preview-config-label">Conteúdo sensível:</span>
+            <span class="preview-config-label">${t("common.sensitiveContent")}:</span>
             <span class="preview-config-value">${matureContentHtml}</span>
           </div>
           `
         : ""
       }
           <div class="preview-config-item">
-            <span class="preview-config-label">Gerado por IA:</span>
+            <span class="preview-config-label">${t("common.aiGenerated")}:</span>
             <span class="preview-config-value">${aiGeneratedText}</span>
           </div>
         </div>
@@ -670,16 +723,24 @@
     const $container = $("#tag-container");
     const $input = $("#tag-input");
 
-    $container.find(".tag-chip").remove();
+    // Ensure wrapper exists
+    let $wrapper = $container.find(".tag-chips-wrapper");
+    if ($wrapper.length === 0) {
+      $wrapper = $('<div class="tag-chips-wrapper"></div>');
+      $container.prepend($wrapper);
+    }
+
+    // Clear existing chips
+    $wrapper.empty();
 
     currentTags.forEach((tag, index) => {
       const $chip = $(`
-        <span class="tag-chip">
-          ${tag}
-          <span class="tag-chip-remove" data-index="${index}">×</span>
-        </span>
-      `);
-      $input.before($chip);
+      <span class="tag-chip">
+        ${tag}
+        <span class="tag-chip-remove" data-index="${index}">×</span>
+      </span>
+    `);
+      $wrapper.append($chip);
     });
   }
 
@@ -703,7 +764,7 @@
     const templates = JSON.parse(templatesJson);
 
     if (Object.keys(templates).length === 0) {
-      alert("Nenhum template para exportar!");
+      alert(t("messages.noTemplatesToExport"));
       return;
     }
 
@@ -746,9 +807,8 @@
         await loadTemplates();
 
         alert(
-          `✓ Importação concluída!\n\n` +
-          `Novos templates: ${newCount}\n` +
-          `Templates atualizados: ${updatedCount}`,
+          t("messages.importComplete") + "\n\n" +
+          t("messages.importSuccessDetail", { newCount, updatedCount: updatedCount })
         );
 
         console.log("[Options] Templates imported:", {
@@ -756,9 +816,7 @@
           updatedCount,
         });
       } catch (error) {
-        alert(
-          "❌ Erro ao importar templates!\n\nArquivo inválido ou corrompido.",
-        );
+        alert(t("messages.importErrorInvalid"));
         console.error("[Options] Import error:", error);
       }
     };
@@ -793,12 +851,12 @@
   function handleShortcutInputFocus() {
     recordingInput = $(this);
     $(this).addClass("recording");
-    $(this).val("Pressione as teclas...");
+    $(this).val(t("shortcuts.pressKeys"));
   }
 
   function handleShortcutInputBlur() {
     $(this).removeClass("recording");
-    if ($(this).val() === "Pressione as teclas...") {
+    if ($(this).val() === t("shortcuts.pressKeys")) {
       const action = $(this).data("action");
       $(this).val(currentShortcuts[action].toUpperCase().replace(/\+/g, "+"));
     }
@@ -832,7 +890,7 @@
   }
 
   async function handleResetShortcuts() {
-    if (!confirm("Restaurar todos os atalhos para o padrão?")) return;
+    if (!confirm(t("messages.confirmResetShortcuts"))) return;
 
     currentShortcuts = { ...DEFAULT_SHORTCUTS };
     await Storage.set("shortcuts", JSON.stringify(currentShortcuts));
@@ -842,7 +900,7 @@
       $(this).val(currentShortcuts[action].toUpperCase().replace(/\+/g, "+"));
     });
 
-    alert("✓ Atalhos restaurados para o padrão!");
+    alert(t("messages.shortcutsReset"));
     console.log("[Options] Shortcuts reset to default");
   }
 
@@ -906,19 +964,19 @@
     $("#stats-summary").html(`
       <div class="stat-card" style="background: linear-gradient(135deg, #0096fa 0%, #00d4ff 100%);">
         <div class="stat-number">${totalUses}</div>
-        <div class="stat-label">Total de Usos</div>
+        <div class="stat-label">${t("stats.totalUses")}</div>
       </div>
       <div class="stat-card" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">
         <div class="stat-number">${templatesUsed}</div>
-        <div class="stat-label">Templates Usados</div>
+        <div class="stat-label">${t("stats.templatesUsed")}</div>
       </div>
       <div class="stat-card" style="background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);">
         <div class="stat-number">${avgUses}</div>
-        <div class="stat-label">Média de Usos</div>
+        <div class="stat-label">${t("stats.averageUses")}</div>
       </div>
       <div class="stat-card" style="background: linear-gradient(135deg, #10b981 0%, #34d399 100%);">
         <div class="stat-number">${templateNames.length}</div>
-        <div class="stat-label">Total de Templates</div>
+        <div class="stat-label">${t("stats.totalTemplates")}</div>
       </div>
     `);
 
@@ -941,15 +999,16 @@
               ? "🥉"
               : `#${index + 1}`;
 
+      const localeCode = window.PixivTemplaterI18n?.getCurrentLanguage() === "pt-br" ? "pt-BR" : "en-US";
       const lastUsed = stat.lastUsed
-        ? new Date(stat.lastUsed).toLocaleString("pt-BR", {
+        ? new Date(stat.lastUsed).toLocaleString(localeCode, {
           day: "2-digit",
           month: "2-digit",
           year: "numeric",
           hour: "2-digit",
           minute: "2-digit",
         })
-        : "Nunca";
+        : t("stats.never");
 
       const percentage = Math.min(
         100,
@@ -963,7 +1022,7 @@
             <div class="stat-rank">${rank}</div>
             <div>
               <div class="stat-name">${stat.name}</div>
-              <div class="stat-details">Último uso: ${lastUsed}</div>
+              <div class="stat-details">${t("common.lastUsed")}: ${lastUsed}</div>
             </div>
           </div>
           <div class="stat-count">${stat.count}</div>
@@ -974,16 +1033,14 @@
 
   async function handleResetStats() {
     if (
-      !confirm(
-        "Tem certeza que deseja limpar todas as estatísticas?\n\nEsta ação não pode ser desfeita!",
-      )
+      !confirm(t("messages.confirmClearStatsWarning"))
     ) {
       return;
     }
 
     await Storage.set("template_stats", "{}");
     await loadStats();
-    alert("✓ Estatísticas limpas com sucesso!");
+    alert(t("messages.statsCleared"));
     console.log("[Options] Stats reset");
   }
 
@@ -1015,12 +1072,51 @@
     $("#debug-mode-toggle").prop("checked", debugMode);
     updateDebugStatus(debugMode);
 
+    // Load auto-translate tags status
+    const autoTranslate = await Storage.get("auto_translate_tags", true);
+    $("#auto-translate-toggle").prop("checked", autoTranslate);
+    updateAutoTranslateStatus(autoTranslate);
+
+    // Load language status
+    if (window.PixivTemplaterI18n) {
+      const langSetting = await window.PixivTemplaterI18n.getLanguageSetting();
+      $("#language-select").val(langSetting);
+    }
+
     // Load storage info
     await updateStorageInfo();
   }
 
+  async function handleLanguageChange() {
+    const lang = $("#language-select").val();
+    if (window.PixivTemplaterI18n) {
+      await window.PixivTemplaterI18n.setLanguage(lang);
+
+      // Re-translate page elements
+      window.PixivTemplaterI18n.translatePage();
+
+      // Refresh dynamic content
+      translateAboutSteps();
+      loadVersion();
+      loadTemplates();
+      loadStats();
+      loadShortcuts();
+      updateDebugStatus($("#debug-mode-toggle").is(":checked"));
+
+      console.log(`[Dashboard] Language changed to: ${lang}`);
+    }
+  }
+
+  function handleAdvancedToggle() {
+    const $container = $("#advanced-content-body");
+    const $button = $("#advanced-toggle-btn");
+
+    $container.toggleClass("collapsed");
+    $button.toggleClass("collapsed");
+  }
+
   function updateDebugStatus(enabled) {
-    const statusText = enabled ? "Ativado" : "Desativado";
+    const statusText = enabled ? t("advanced.enabled") : t("advanced.disabled");
     const statusColor = enabled
       ? "var(--success-color)"
       : "var(--text-secondary)";
@@ -1042,26 +1138,33 @@
     // Show notification
     alert(
       enabled
-        ? "✓ Modo Debug ativado!\n\nOs logs detalhados agora aparecerão no console."
-        : "✓ Modo Debug desativado!\n\nApenas logs essenciais serão exibidos.",
+        ? t("messages.debugEnabled")
+        : t("messages.debugDisabled"),
     );
   }
 
-  async function handleClearAllData() {
-    const confirmation = prompt(
-      "⚠️ ATENÇÃO: Esta ação irá deletar TODOS os dados da extensão!\n\n" +
-      "Isso inclui:\n" +
-      "• Todos os templates\n" +
-      "• Todas as estatísticas\n" +
-      "• Todas as configurações\n" +
-      "• Todos os atalhos personalizados\n\n" +
-      "Esta ação NÃO PODE ser desfeita!\n\n" +
-      'Digite "DELETAR" (em maiúsculas) para confirmar:',
-    );
+  function updateAutoTranslateStatus(enabled) {
+    const statusText = enabled ? t("advanced.enabled") : t("advanced.disabled");
+    const statusColor = enabled
+      ? "var(--success-color)"
+      : "var(--text-secondary)";
+    $("#auto-translate-status").text(statusText).css("color", statusColor);
+  }
 
-    if (confirmation !== "DELETAR") {
+  async function handleAutoTranslateToggle(e) {
+    const enabled = $(e.target).is(":checked");
+    await Storage.set("auto_translate_tags", enabled);
+    updateAutoTranslateStatus(enabled);
+    console.log(`[Options] Auto-translate tags ${enabled ? "ENABLED" : "DISABLED"}`);
+  }
+
+  async function handleClearAllData() {
+    const confirmation = prompt(t("messages.confirmClearAllDataFull"));
+
+    const expectedConfirmation = t("common.deleteConfirm");
+    if (confirmation !== expectedConfirmation && confirmation !== "DELETE") {
       if (confirmation !== null) {
-        alert("Ação cancelada. Nenhum dado foi removido.");
+        alert(t("messages.actionCancelled"));
       }
       return;
     }
@@ -1082,16 +1185,13 @@
         "keys removed",
       );
 
-      alert(
-        "✓ Todos os dados foram removidos com sucesso!\n\n" +
-        "A página será recarregada.",
-      );
+      alert(t("messages.allDataCleared"));
 
       // Reload page
       location.reload();
     } catch (err) {
       console.error("[Options] Error clearing data:", err);
-      alert("❌ Erro ao limpar dados: " + err.message);
+      alert("❌ " + t("messages.errorClearingData") + err.message);
     }
   }
 
@@ -1120,9 +1220,9 @@
       $("#storage-total").text(formatBytes(totalSize));
     } catch (err) {
       console.error("[Options] Error loading storage info:", err);
-      $("#storage-templates").text("Erro");
-      $("#storage-stats").text("Erro");
-      $("#storage-total").text("Erro");
+      $("#storage-templates").text(t("messages.importError"));
+      $("#storage-stats").text(t("messages.importError"));
+      $("#storage-total").text(t("messages.importError"));
     }
   }
 })();

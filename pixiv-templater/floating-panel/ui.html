@@ -1,0 +1,115 @@
+<!-- Pixiv Templater UI -->
+<div id="pixiv-templater">
+    <div id="pixiv-templater-header">
+        <div class="header-left">
+            <span class="header-title-with-icon">
+                <svg width="26" height="26" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg"
+                    style="vertical-align: middle;">
+                    <rect width="128" height="128" rx="28" fill="white"" fill-opacity=" 0.2" />
+                    <rect x="34" y="28" width="60" height="72" rx="4" fill="white" />
+                    <rect x="40" y="34" width="48" height="12" rx="2" fill="#0096FA" fill-opacity="0.3" />
+                    <rect x="40" y="52" width="14" height="42" rx="2" fill="#0096FA" fill-opacity="0.3" />
+                    <rect x="58" y="52" width="30" height="42" rx="2" fill="#0096FA" fill-opacity="0.5" />
+                </svg>
+                <span data-i18n="header.templates">Templates</span>
+            </span>
+        </div>
+        <div class="header-right">
+            <div class="settings-dropdown">
+                <button class="header-settings-btn" id="settings-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-menu-icon lucide-menu">
+                        <path d="M4 5h16" />
+                        <path d="M4 12h16" />
+                        <path d="M4 19h16" />
+                    </svg>
+                </button>
+                <div class="settings-menu" id="settings-menu">
+                    <div class="settings-menu-item" id="reset-position">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-move">
+                            <path d="M12 2v20" />
+                            <path d="m15 19-3 3-3-3" />
+                            <path d="m19 9 3 3-3 3" />
+                            <path d="m2 12 20 0" />
+                            <path d="m5 9-3 3 3 3" />
+                            <path d="m9 5 3-3 3 3" />
+                        </svg>
+                        <span data-i18n="menu.resetPosition">Reset Position</span>
+                    </div>
+                    <div class="settings-menu-item" id="refresh-data">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-rotate-cw-icon lucide-rotate-cw">
+                            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+                            <path d="M21 3v5h-5" />
+                        </svg>
+                        <span data-i18n="menu.refreshData">Refresh Data</span>
+                    </div>
+                    <div class="settings-menu-item" id="open-dashboard">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-external-link">
+                            <path d="M15 3h6v6" />
+                            <path d="M10 14 21 3" />
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                        </svg>
+                        <span data-i18n="menu.openDashboard">Open Dashboard</span>
+                    </div>
+                </div>
+            </div>
+            <span class="keyboard-hint" id="shortcuts-hint"><svg xmlns="http://www.w3.org/2000/svg" width="24"
+                    height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-circle-question-mark-icon lucide-circle-question-mark">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                    <path d="M12 17h.01" />
+                </svg></span>
+        </div>
+        <span id="pixiv-templater-toggle">−</span>
+    </div>
+    <div id="pixiv-templater-content">
+        <div id="template-list"></div>
+        <input type="file" id="import-input" accept=".json" style="display: none" />
+    </div>
+</div>
+
+<!-- Ícone Minimizado -->
+<div id="pixiv-templater-minimized">
+    <svg width="48" height="48" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="128" height="128" rx="28" fill="#0096FA" />
+        <rect x="34" y="28" width="60" height="72" rx="4" fill="white" />
+        <rect x="40" y="34" width="48" height="12" rx="2" fill="#0096FA" fill-opacity="0.2" />
+        <rect x="40" y="52" width="14" height="42" rx="2" fill="#0096FA" fill-opacity="0.2" />
+        <rect x="58" y="52" width="30" height="42" rx="2" fill="#0096FA" fill-opacity="0.4" />
+    </svg>
+</div>
+
+<!-- Modal de Preview -->
+<div id="template-preview-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="preview-title" data-i18n="preview.title">Template Preview</h2>
+            <button class="modal-close preview-close"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" class="lucide lucide-x-icon lucide-x">
+                    <path d="M18 6 6 18" />
+                    <path d="m6 6 12 12" />
+                </svg></button>
+        </div>
+        <div class="modal-body">
+            <div id="preview-body-content">
+                <!-- Conteúdo será preenchido dinamicamente -->
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-secondary preview-close" data-i18n="common.close">Close</button>
+            <button class="btn-primary" id="preview-apply" data-i18n="preview.apply">
+                Apply Template
+            </button>
+        </div>
+    </div>
+</div>

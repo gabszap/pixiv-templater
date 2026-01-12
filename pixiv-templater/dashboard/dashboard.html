@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="dashboard.title">Pixiv Templater - Settings</title>
+    <link rel="icon" type="image/png" href="../assets/icons/32.png">
+    <link rel="stylesheet" href="dashboard.css">
+    <script src="../libs/emoji-mart.js"></script>
+    <script src="../i18n.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-title">
+                    <h1>
+                        <svg width="64" height="64" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg"
+                            style="vertical-align: middle; margin-right: 8px;">
+                            <rect width="128" height="128" rx="28" fill="white" fill-opacity="0.2" />
+                            <rect x="34" y="28" width="60" height="72" rx="4" fill="white" />
+                            <rect x="40" y="34" width="48" height="12" rx="2" fill="#0096FA" fill-opacity="0.3" />
+                            <rect x="40" y="52" width="14" height="42" rx="2" fill="#0096FA" fill-opacity="0.3" />
+                            <rect x="58" y="52" width="30" height="42" rx="2" fill="#0096FA" fill-opacity="0.5" />
+                        </svg>
+                        Pixiv Templater
+                    </h1>
+                    <p class="version" id="header-version">v2.0.2</p>
+                </div>
+                <div class="header-actions">
+                    <button id="export-all" class="btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="icon">
+                            <path d="M12 15V3" />
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <path d="m7 10 5 5 5-5" />
+                        </svg>
+                        <span data-i18n="dashboard.export">Export</span>
+                    </button>
+                    <button id="import-templates" class="btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-upload-icon lucide-upload">
+                            <path d="M12 3v12" />
+                            <path d="m17 8-5-5-5 5" />
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        </svg>
+                        <span data-i18n="dashboard.import">Import</span>
+                    </button>
+                    <input type="file" id="import-input" accept=".json" style="display: none;">
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="tabs">
+            <button class="tab active" data-tab="templates">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-clipboard-list-icon lucide-clipboard-list">
+                    <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                    <path d="M12 11h4" />
+                    <path d="M12 16h4" />
+                    <path d="M8 11h.01" />
+                    <path d="M8 16h.01" />
+                </svg>
+                <span data-i18n="dashboard.tabTemplates">Templates</span>
+            </button>
+            <button class="tab" data-tab="stats">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-chart-column-increasing-icon lucide-chart-column-increasing">
+                    <path d="M13 17V9" />
+                    <path d="M18 17V5" />
+                    <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+                    <path d="M8 17v-3" />
+                </svg>
+                <span data-i18n="dashboard.tabStats">Statistics</span>
+            </button>
+            <button class="tab" data-tab="about">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-info-icon lucide-info">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 16v-4" />
+                    <path d="M12 8h.01" />
+                </svg>
+                <span data-i18n="dashboard.tabAbout">About</span>
+            </button>
+            <button class="tab" data-tab="shortcuts">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-keyboard-icon lucide-keyboard">
+                    <path d="M10 8h.01" />
+                    <path d="M12 12h.01" />
+                    <path d="M14 8h.01" />
+                    <path d="M16 12h.01" />
+                    <path d="M18 8h.01" />
+                    <path d="M6 8h.01" />
+                    <path d="M7 16h10" />
+                    <path d="M8 12h.01" />
+                    <rect width="20" height="16" x="2" y="4" rx="2" />
+                </svg>
+                <span data-i18n="dashboard.tabShortcuts">Shortcuts</span>
+            </button>
+            <button class="tab" data-tab="advanced">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-settings-icon lucide-settings">
+                    <path
+                        d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" />
+                    <circle cx="12" cy="12" r="3" />
+                </svg>
+                <span data-i18n="dashboard.tabSettings">Settings</span>
+            </button>
+        </nav>
+
+        <!-- Content Sections -->
+        <main class="content">
+            <!-- Templates Tab -->
+            <section id="templates-tab" class="tab-content active">
+                <div class="section-header">
+                    <h2 data-i18n="dashboard.manageTemplates">Manage Templates</h2>
+                    <button id="new-template" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-plus-icon lucide-plus">
+                            <path d="M5 12h14" />
+                            <path d="M12 5v14" />
+                        </svg>
+                        <span data-i18n="dashboard.newTemplate">New Template</span>
+                    </button>
+                </div>
+
+                <div id="templates-list" class="templates-grid">
+                    <!-- Templates will be rendered here -->
+                </div>
+
+                <div id="empty-state" class="empty-state" style="display: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-clipboard-list-icon lucide-clipboard-list">
+                        <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                        <path d="M12 11h4" />
+                        <path d="M12 16h4" />
+                        <path d="M8 11h.01" />
+                        <path d="M8 16h.01" />
+                    </svg>
+                    <h3 data-i18n="dashboard.noTemplates">No templates yet</h3>
+                    <p data-i18n="dashboard.noTemplatesHint">Create your first template to get started!</p>
+                    <button id="empty-create-btn" class="btn btn-primary" data-i18n="dashboard.createTemplate">
+                        Create Template
+                    </button>
+                </div>
+            </section>
+
+            <!-- Shortcuts Tab -->
+            <section id="shortcuts-tab" class="tab-content">
+                <div class="section-header">
+                    <h2 data-i18n="dashboard.keyboardShortcuts">Keyboard Shortcuts</h2>
+                    <button id="reset-shortcuts" class="btn btn-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-rotate-cw-icon lucide-rotate-cw">
+                            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+                            <path d="M21 3v5h-5" />
+                        </svg>
+                        <span data-i18n="dashboard.restoreDefault">Restore Default</span>
+                    </button>
+                </div>
+
+                <div class="shortcuts-grid">
+                    <div class="shortcut-item">
+                        <div class="shortcut-info">
+                            <strong data-i18n="shortcuts.togglePanel">Expand/Collapse Panel</strong>
+                            <span class="shortcut-desc" data-i18n="dashboard.togglePanelDesc">Shows or hides the panel
+                                on the Pixiv page</span>
+                        </div>
+                        <input type="text" class="shortcut-input" data-action="togglePanel" readonly>
+                    </div>
+
+                    <div class="shortcut-item">
+                        <div class="shortcut-info">
+                            <strong data-i18n="shortcuts.minimizePanel">Minimize Panel</strong>
+                            <span class="shortcut-desc" data-i18n="dashboard.minimizePanelDesc">Minimizes the side panel
+                                on the Pixiv page</span>
+                        </div>
+                        <input type="text" class="shortcut-input" data-action="minimizePanel" readonly>
+                    </div>
+
+                    <div class="shortcut-item">
+                        <div class="shortcut-info">
+                            <strong data-i18n="shortcuts.newTemplate">New Template</strong>
+                            <span class="shortcut-desc" data-i18n="dashboard.newTemplateDesc">Opens the modal to create
+                                a new template</span>
+                        </div>
+                        <input type="text" class="shortcut-input" data-action="newTemplate" readonly>
+                    </div>
+
+                    <div class="shortcut-item">
+                        <div class="shortcut-info">
+                            <strong data-i18n="shortcuts.exportTemplates">Export Templates</strong>
+                            <span class="shortcut-desc" data-i18n="dashboard.exportTemplatesDesc">Exports all templates
+                                to a JSON file</span>
+                        </div>
+                        <input type="text" class="shortcut-input" data-action="exportTemplates" readonly>
+                    </div>
+
+                    <div class="shortcut-item">
+                        <div class="shortcut-info">
+                            <strong data-i18n="shortcuts.importTemplates">Import Templates</strong>
+                            <span class="shortcut-desc" data-i18n="dashboard.importTemplatesDesc">Imports templates from
+                                a JSON file</span>
+                        </div>
+                        <input type="text" class="shortcut-input" data-action="importTemplates" readonly>
+                    </div>
+
+                    <div class="shortcut-item">
+                        <div class="shortcut-info">
+                            <strong data-i18n="shortcuts.showHelp">Show Help</strong>
+                            <span class="shortcut-desc" data-i18n="dashboard.showHelpDesc">Displays all available
+                                shortcuts</span>
+                        </div>
+                        <input type="text" class="shortcut-input" data-action="showHelp" readonly>
+                    </div>
+
+                    <div class="shortcuts-section-title" data-i18n="shortcuts.applyTemplates">Apply Quick Templates
+                        (1-9)</div>
+
+                    <div class="shortcut-item">
+                        <div class="shortcut-info">
+                            <strong>Apply Template 1-9</strong>
+                            <span class="shortcut-desc" data-i18n="shortcuts.applyTemplateDesc">Applies the template
+                                corresponding to the position in the list</span>
+                        </div>
+                        <input type="text" class="shortcut-input" data-action="applyTemplate1" readonly>
+                    </div>
+                </div>
+
+                <div class="shortcuts-help">
+                    <p><strong>💡 Tip:</strong> <span data-i18n="dashboard.shortcutsHint">Click on a field to record a
+                            new shortcut. Press the desired keys (e.g.: Ctrl+Shift+T).</span></p>
+                </div>
+            </section>
+
+            <!-- Stats Tab -->
+            <section id="stats-tab" class="tab-content">
+                <div class="section-header">
+                    <h2 data-i18n="stats.title">📊 Usage Statistics</h2>
+                    <div class="header-actions">
+                        <button id="refresh-stats" class="btn btn-secondary">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-rotate-cw-icon lucide-rotate-cw">
+                                <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+                                <path d="M21 3v5h-5" />
+                            </svg>
+                            <span data-i18n="stats.refresh">Refresh</span>
+                        </button>
+                        <button id="reset-stats" class="btn btn-danger">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-trash2-icon lucide-trash-2">
+                                <path d="M10 11v6" />
+                                <path d="M14 11v6" />
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                <path d="M3 6h18" />
+                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            </svg>
+                            <span data-i18n="stats.clear">Clear Statistics</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="stats-summary" class="stats-overview">
+                    <!-- Stats summary will be rendered here -->
+                </div>
+
+                <h3 style="font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;"
+                    data-i18n="stats.usageRanking">
+                    🏆 Usage Ranking
+                </h3>
+
+                <div id="stats-list" class="stats-list">
+                    <!-- Stats list will be rendered here -->
+                </div>
+
+                <div id="stats-empty" class="empty-state" style="display: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-chart-column-increasing-icon lucide-chart-column-increasing">
+                        <path d="M13 17V9" />
+                        <path d="M18 17V5" />
+                        <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+                        <path d="M8 17v-3" />
+                    </svg>
+                    <h3 data-i18n="stats.noStats">No statistics yet</h3>
+                    <p data-i18n="stats.noStatsHint">Use some templates on the Pixiv page to start collecting data!</p>
+                </div>
+            </section>
+
+            <!-- Settings Tab (formerly Advanced) -->
+            <section id="advanced-tab" class="tab-content">
+                <div class="section-header">
+                    <h2>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                            style="vertical-align: middle; margin-right: 1px; " stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide lucide-settings-icon lucide-settings">
+                            <path
+                                d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
+                        <span data-i18n="advanced.settingsTitle">General Settings</span>
+                    </h2>
+                </div>
+
+                <div class="settings-section">
+                    <!-- Language Setting -->
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3 style="display: flex; align-items: center; gap: 8px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-languages">
+                                    <path d="m5 8 6 6" />
+                                    <path d="m4 14 6-6 2-3" />
+                                    <path d="M2 5h12" />
+                                    <path d="M7 2h1" />
+                                    <path d="m22 22-5-10-5 10" />
+                                    <path d="M14 18h6" />
+                                </svg>
+                                <span data-i18n="advanced.language">Language</span>
+                            </h3>
+                            <p data-i18n="advanced.selectLanguage">Select display language</p>
+                        </div>
+                        <div class="setting-control">
+                            <select id="language-select">
+                                <option value="auto" data-i18n="advanced.autoBrowser">Automatic (Browser language)
+                                </option>
+                                <option value="en" data-i18n="advanced.english">English</option>
+                                <option value="pt-br" data-i18n="advanced.portuguese">Portuguese (Brazilian)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Auto-translate Tags Setting -->
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h3 style="display: flex; align-items: center; gap: 8px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-languages">
+                                    <path d="m5 8 6 6" />
+                                    <path d="m4 14 6-6 2-3" />
+                                    <path d="M2 5h12" />
+                                    <path d="M7 2h1" />
+                                    <path d="m22 22-5-10-5 10" />
+                                    <path d="M14 18h6" />
+                                </svg>
+                                <span data-i18n="advanced.autoTranslateTags">Auto-translate Tags</span>
+                            </h3>
+                            <p data-i18n="advanced.autoTranslateTagsDesc">Automatically translate Japanese tags to
+                                English on the upload page</p>
+                        </div>
+                        <div class="setting-control">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="auto-translate-toggle" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span id="auto-translate-status" class="status-text"
+                                data-i18n="advanced.enabled">Enabled</span>
+                        </div>
+                    </div>
+
+
+                    <!-- Advanced Settings (Collapsible) -->
+                    <div class="advanced-collapsible-container">
+                        <div class="advanced-header-toggle" id="advanced-settings-toggle">
+                            <h2 style="margin-bottom: 0;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" style="vertical-align: middle; margin-right: 4px; "
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-sliders-horizontal">
+                                    <path d="m21 4-7 0" />
+                                    <path d="m10 4-7 0" />
+                                    <path d="m12 2-2 4" />
+                                    <path d="m21 12-11 0" />
+                                    <path d="m6 12-3 0" />
+                                    <path d="m10 10-4 4" />
+                                    <path d="m21 20-4 0" />
+                                    <path d="m13 20-10 0" />
+                                    <path d="m17 18-4 4" />
+                                </svg>
+                                <span data-i18n="advanced.title">Advanced Settings</span>
+                            </h2>
+                            <button type="button" class="emoji-toggle-btn collapsed" id="advanced-toggle-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="chevron-icon">
+                                    <path d="m6 9 6 6 6-6" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="advanced-content-body collapsed" id="advanced-content-body">
+                            <div class="settings-section" style="margin-top: 24px;">
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <h3 style="display: flex; align-items: center; gap: 8px;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round"
+                                                class="lucide lucide-bug-icon lucide-bug">
+                                                <path d="M12 20v-9" />
+                                                <path d="M14 7a4 4 0 0 1 4 4v3a6 6 0 0 1-12 0v-3a4 4 0 0 1 4-4z" />
+                                                <path d="M14.12 3.88 16 2" />
+                                                <path d="M21 21a4 4 0 0 0-3.81-4" />
+                                                <path d="M21 5a4 4 0 0 1-3.55 3.97" />
+                                                <path d="M22 13h-4" />
+                                                <path d="M3 21a4 4 0 0 1 3.81-4" />
+                                                <path d="M3 5a4 4 0 0 0 3.55 3.97" />
+                                                <path d="M6 13H2" />
+                                                <path d="m8 2 1.88 1.88" />
+                                                <path d="M9 7.13V6a3 3 0 1 1 6 0v1.13" />
+                                            </svg>
+                                            <span data-i18n="advanced.debugMode">Debug Mode</span>
+                                        </h3>
+                                        <p data-i18n="advanced.debugModeDesc">Enables detailed logs in the browser
+                                            console for
+                                            troubleshooting.</p>
+                                        <p class="setting-note" data-i18n="advanced.debugModeWarning">⚠️ May affect
+                                            performance. Use
+                                            only for debugging.</p>
+                                    </div>
+                                    <div class="setting-control">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="debug-mode-toggle">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                        <span id="debug-status" class="status-text"
+                                            data-i18n="advanced.disabled">Disabled</span>
+                                    </div>
+                                </div>
+
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <h3 style="display: flex; align-items: center; gap: 8px;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round"
+                                                class="lucide lucide-trash2-icon lucide-trash-2">
+                                                <path d="M10 11v6" />
+                                                <path d="M14 11v6" />
+                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                                <path d="M3 6h18" />
+                                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                            </svg>
+                                            <span data-i18n="advanced.clearAllData">Clear All Data</span>
+                                        </h3>
+                                        <p data-i18n="advanced.clearAllDataDesc">Removes all templates, statistics, and
+                                            extension
+                                            settings.</p>
+                                        <p class="setting-note" data-i18n="advanced.clearAllDataWarning">⚠️ This action
+                                            cannot be
+                                            undone!</p>
+                                    </div>
+                                    <div class="setting-control">
+                                        <button id="clear-all-data-btn" class="btn btn-danger">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round"
+                                                class="lucide lucide-trash2-icon lucide-trash-2">
+                                                <path d="M10 11v6" />
+                                                <path d="M14 11v6" />
+                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                                <path d="M3 6h18" />
+                                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                            </svg>
+                                            <span data-i18n="advanced.clearAll">Clear All</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <h3 style="display: flex; align-items: center; gap: 8px;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round"
+                                                class="lucide lucide-package-icon lucide-package"
+                                                transform="scale(-1 1)">
+                                                <path
+                                                    d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73zm1 .27V12" />
+                                                <path d="M3.29 7 12 12l8.71-5M7.5 4.27l9 5.15" />
+                                            </svg>
+                                            <span data-i18n="advanced.storageInfo">Storage Information</span>
+                                        </h3>
+                                        <p data-i18n="advanced.storageInfoDesc">Space used by the extension in the
+                                            browser.</p>
+                                    </div>
+                                    <div class="setting-control">
+                                        <div class="storage-info">
+                                            <div class="storage-item">
+                                                <span class="storage-label"
+                                                    data-i18n="advanced.storageTemplates">Templates:</span>
+                                                <span id="storage-templates" class="storage-value">-</span>
+                                            </div>
+                                            <div class="storage-item">
+                                                <span class="storage-label"
+                                                    data-i18n="advanced.storageStats">Statistics:</span>
+                                                <span id="storage-stats" class="storage-value">-</span>
+                                            </div>
+                                            <div class="storage-item">
+                                                <span class="storage-label"
+                                                    data-i18n="advanced.storageTotal">Total:</span>
+                                                <span id="storage-total" class="storage-value">-</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- About Tab -->
+            <section id="about-tab" class="tab-content">
+                <div class="about-content">
+                    <div class="about-header">
+                        <h2>
+                            <svg width="64" height="64" viewBox="0 0 128 128" fill="none"
+                                xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 1px;">
+                                <rect width="128" height="128" rx="28" fill="#0096FA" />
+                                <rect x="34" y="28" width="60" height="72" rx="4" fill="white" />
+                                <rect x="40" y="34" width="48" height="12" rx="2" fill="#0096FA" fill-opacity="0.2" />
+                                <rect x="40" y="52" width="14" height="42" rx="2" fill="#0096FA" fill-opacity="0.2" />
+                                <rect x="58" y="52" width="30" height="42" rx="2" fill="#0096FA" fill-opacity="0.4" />
+                            </svg>
+                            Pixiv Templater
+                        </h2>
+                        <p class="about-version" id="about-version"><span data-i18n="common.version">Version</span>
+                            2.0.2</p>
+                    </div>
+
+                    <div class="about-section">
+                        <h3 data-i18n="about.title">About</h3>
+                        <p data-i18n="about.description">Pixiv Templater is an extension that makes uploading works to
+                            Pixiv easier.</p>
+                        <p data-i18n="about.description2">It allows you to create reusable templates with titles,
+                            descriptions, tags, and predefined settings.</p>
+                    </div>
+
+                    <div class="about-section">
+                        <h3 data-i18n="about.features">Features</h3>
+                        <ul class="features-list">
+                            <li data-i18n="about.feature1">✨ Template creation and management</li>
+                            <li data-i18n="about.feature2">⚡ Quick application with one click or keyboard shortcut</li>
+                            <li data-i18n="about.feature3">🏷️ Full support for Japanese tags</li>
+                            <li data-i18n="about.feature4">🔞 Age rating settings (All ages, R-18, R-18G)</li>
+                            <li data-i18n="about.feature5">🤖 AI-generated content marking</li>
+                            <li data-i18n="about.feature6">📊 Template usage statistics</li>
+                            <li data-i18n="about.feature7">💾 Import/Export templates in JSON</li>
+                            <li data-i18n="about.feature8">⌨️ Customizable keyboard shortcuts</li>
+                            <li data-i18n="about.feature9">🎨 Modern and responsive interface</li>
+                            <li data-i18n="about.feature10">🌙 Dark mode support</li>
+                        </ul>
+                    </div>
+
+                    <div class="about-section">
+                        <h3 data-i18n="about.howToUse">How to Use</h3>
+                        <ol class="usage-list">
+                            <li id="about-step1">Access the Pixiv upload page:
+                                <code>pixiv.net/illustration/create</code>
+                            </li>
+                            <li data-i18n="about.step2">The Pixiv Templater panel will appear automatically in the
+                                corner of the page</li>
+                            <li data-i18n="about.step3">Click on a template to apply it to the form</li>
+                            <li id="about-step4">Use <code>ALT+Shift+T</code> to view all available shortcuts
+                            </li>
+                            <li data-i18n="about.step5">Manage your templates on this settings page</li>
+                        </ol>
+                    </div>
+
+                    <div class="about-section">
+                        <h3 data-i18n="about.author">Author</h3>
+                        <p><strong>gabszap</strong></p>
+                        <p data-i18n="about.authorCredit">Created with ❤️ to make life easier for artists on Pixiv</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Template Editor Modal -->
+    <div id="template-modal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h2 id="modal-title" data-i18n="modal.newTemplate">New Template</h2>
+                <button class="modal-close"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" class="lucide lucide-x-icon lucide-x">
+                        <path d="M18 6 6 18" />
+                        <path d="m6 6 12 12" />
+                    </svg></button>
+            </div>
+            <div class="modal-body">
+                <form id="template-form">
+                    <div class="form-group">
+                        <label for="template-name" data-i18n="form.templateName">Template Name *</label>
+                        <input type="text" id="template-name" required
+                            data-i18n-placeholder="form.templateNamePlaceholder" placeholder="E.g.: Genshin Impact">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="template-title" data-i18n="form.workTitle">Work Title</label>
+                        <input type="text" id="template-title" data-i18n-placeholder="form.workTitlePlaceholder"
+                            placeholder="Title that will appear on the work">
+                    </div>
+
+                    <div class="form-group">
+                        <div class="emoji-label-container">
+                            <label for="template-emoji" data-i18n="form.emoji">Template Emoji</label>
+                            <button type="button" id="emoji-toggle-btn" class="emoji-toggle-btn"
+                                title="Minimize/Expand">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="chevron-icon">
+                                    <path d="m6 9 6 6 6-6" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="emoji-selector-container" id="emoji-selector-container">
+                            <div class="emoji-preview" id="emoji-preview">📝</div>
+                            <div id="emoji-picker-container"></div>
+                        </div>
+                        <input type="hidden" id="template-emoji" value="📝">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="template-caption" data-i18n="form.description">Description</label>
+                        <textarea id="template-caption" rows="4" data-i18n-placeholder="form.descriptionPlaceholder"
+                            placeholder="Work description (supports Pixiv formatting)"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tag-input" data-i18n="form.tags">Tags *</label>
+                        <div id="tag-container" class="tag-container">
+                            <input type="text" id="tag-input" data-i18n-placeholder="form.tagsPlaceholder"
+                                placeholder="Type a tag and press Enter">
+                        </div>
+                        <small style="opacity: 0.5;" data-i18n="form.tagsHint">Add at least 1 tag</small>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="template-age-rating" data-i18n="form.ageRating">Age Rating</label>
+                            <select id="template-age-rating">
+                                <option value="general" data-i18n="form.ageRatingGeneral">All ages</option>
+                                <option value="r18" data-i18n="form.ageRatingR18">R-18</option>
+                                <option value="r18g" data-i18n="form.ageRatingR18G">R-18G</option>
+                            </select>
+                        </div>
+
+                        <div id="adult-content-group" class="form-group">
+                            <label>
+                                <input type="checkbox" id="template-adult-content">
+                                <span data-i18n="form.adultContent">Adult content (slightly sexual)</span>
+                            </label>
+                            <small style="opacity: 0.5; font-size: 12px" data-i18n="form.adultContentHint">⚠️ If there's
+                                nothing adult/suggestive, leave unchecked</small>
+                        </div>
+
+                        <div id="mature-content-group" class="form-group" style="display: none;">
+                            <label data-i18n="form.matureCategories">Sensitive Content Categories</label>
+                            <small style="opacity: 0.5; font-size: 12px" data-i18n="form.matureCategoriesHint">⚠️ If
+                                there are none, leave unchecked</small>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" value="lo"> <span
+                                        data-i18n="form.minors">Minors</span></label>
+                                <label><input type="checkbox" value="furry"> <span
+                                        data-i18n="form.furry">Furry</span></label>
+                                <label><input type="checkbox" value="bl"> <span data-i18n="form.bl">BL (Boys
+                                        Love)</span></label>
+                                <label><input type="checkbox" value="yuri"> <span data-i18n="form.gl">GL (Girls
+                                        Love)</span></label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="template-ai-generated" data-i18n="form.aiContent">AI-Generated Content</label>
+                            <select id="template-ai-generated">
+                                <option value="notAiGenerated" data-i18n="form.no">No</option>
+                                <option value="aiGenerated" data-i18n="form.yes">Yes</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" id="modal-cancel" class="btn btn-secondary"
+                            data-i18n="form.cancel">Cancel</button>
+                        <button type="submit" class="btn btn-primary" data-i18n="form.saveTemplate">Save
+                            Template</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div id="preview-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="preview-title" data-i18n="preview.title">Template Preview</h2>
+                <button class="modal-close"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" class="lucide lucide-x-icon lucide-x">
+                        <path d="M18 6 6 18" />
+                        <path d="m6 6 12 12" />
+                    </svg></button>
+            </div>
+            <div class="modal-body">
+                <div id="preview-body-content">
+                    <!-- Content will be dynamically generated -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../debug-logger.js"></script>
+    <script src="../libs/jquery.min.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+
+</html>
