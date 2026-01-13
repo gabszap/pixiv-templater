@@ -1,15 +1,23 @@
-# Pixiv Templater
-
-![License](https://img.shields.io/github/license/gabszap/pixiv-templater)
-![Releases](https://img.shields.io/github/v/release/gabszap/pixiv-templater)
-![Platform](https://img.shields.io/badge/platform-Chrome%20%7C%20Firefox%20%7C%20Brave-lightgrey)
-
-<p align="left">
-  <a href="README.md"><img src="https://img.shields.io/badge/Language-English-blue?style=flat-square" alt="English"></a>
-  <a href="pixiv-templater/docs/README_PT.md"><img src="https://img.shields.io/badge/Idioma-Português-green?style=flat-square" alt="Português"></a>
-  <a href="pixiv-templater/docs/README_JP.md"><img src="https://img.shields.io/badge/言語-日本語-red?style=flat-square" alt="日本語"></a>
-  <a href="pixiv-templater/docs/README_ZH-CN.md"><img src="https://img.shields.io/badge/语言-简体中文-orange?style=flat-square" alt="简体中文"></a>
+<p align="center">
+  <img src="https://socialify.git.ci/gabszap/pixiv-templater/image?custom_description=A+browser+extension+that+automates+Pixiv+uploads+using+one-click+templates+for+titles%2C+tags%2C+and+settings.&description=1&font=Inter&logo=https%3A%2F%2Fgithub.com%2Fgabszap%2Fpixiv-templater%2Fraw%2Frefs%2Fheads%2Fmain%2Fpixiv-templater%2Fassets%2Ficons%2Ficon.svg&name=1&pattern=Solid&theme=Dark" alt="pixiv-templater">
 </p>
+
+<p align="center">
+  <img src="https://img.shields.io/github/v/release/gabszap/pixiv-templater?style=for-the-badge" alt="Releases">
+  <img src="https://img.shields.io/github/license/gabszap/pixiv-templater?style=for-the-badge" alt="License">
+  <img src="https://img.shields.io/badge/Built_With-Claude-orange?style=for-the-badge&logo=anthropic" alt="Built with Claude">
+  <img src="https://img.shields.io/github/last-commit/gabszap/pixiv-templater?style=for-the-badge&logo=github&logoColor=white&labelColor=black" alt="Last Commit">
+  <img src="https://img.shields.io/github/stars/gabszap/pixiv-templater?style=for-the-badge&logo=github&color=yellow" alt="Stars">
+</p>
+
+<p align="center">
+  <a href="README.md">English</a> | 
+  <a href="pixiv-templater/docs/README_PT.md">Português</a> | 
+  <a href="pixiv-templater/docs/README_JP.md">日本語</a> | 
+  <a href="pixiv-templater/docs/README_ZH-CN.md">中文</a>
+</p>
+
+---
 
 A browser extension to automate the illustration upload process on Pixiv. Save templates with titles, captions, tags, and settings, and apply them with a single click. It also automatically translates Japanese tags to Danbooru tags.
 
@@ -23,9 +31,7 @@ A browser extension to automate the illustration upload process on Pixiv. Save t
 
 ## About the Project
 
-Pixiv Templater was designed for artists who post frequently on Pixiv and find themselves filling in the same information repeatedly. Instead of manual typing or copy-pasting from external notes, you can save templates and apply them instantly.
-
-The tag translation feature was integrated from the [translate-pixiv-tags](https://github.com/evazion/translate-pixiv-tags) userscript, allowing you to see Japanese tags translated to their Danbooru equivalents.
+**Pixiv Templater** is a browser extension designed to streamline the routine of artists who frequently post on Pixiv. Instead of dealing with manual and repetitive data entry or relying on external notes for copy-pasting, the tool allows you to save complete templates and apply them instantly, ensuring speed and consistency in every post.
 
 ## Why I Created This?
 
@@ -33,10 +39,29 @@ The idea came from my own frustration with the Pixiv upload process. Since the s
 
 ## Showcase
 
-| Dashboard | Panel | Tag Translation |
-| :---: | :---: | :---: |
-| <img src="pixiv-templater/assets/dashboard.png" width="400"/> | <img src="pixiv-templater/assets/painel.png" width="300"/> | <img src="pixiv-templater/assets/translated-tags.png" width="400"/> |
-| Manage your templates and settings. | Floating panel on the upload page. | Automated colored translations. |
+<details>
+  <summary>Click to view screenshots</summary>
+
+  ### Video Demonstration
+  Watch the extension in action.
+
+  ![Demo](pixiv-templater/assets/demo.mp4)
+
+  ### Dashboard
+  Manage your templates and settings.
+  ![Dashboard](pixiv-templater/assets/dashboard.png)
+
+  ### Panel
+  Floating panel on the upload page.
+
+  ![Panel](pixiv-templater/assets/painel.png)
+
+  ### Tag Translation
+  Automated translations.
+
+  ![Tag Translation](pixiv-templater/assets/translated-tags.png)
+
+</details>
 
 ## Features
 
@@ -56,30 +81,33 @@ The idea came from my own frustration with the Pixiv upload process. Since the s
 
 ## Installation
 
-### Firefox (Manual)
+### Firefox & Firefox-based browsers
 1. Download the latest `.xpi` file from the [Releases](https://github.com/gabszap/pixiv-templater/releases) page.
 2. Open Firefox and type `about:addons` in the address bar.
 3. Click the gear icon and select **"Install Add-on From File..."**.
 4. Select the downloaded `.xpi` file.
 
-### Chrome / Brave / Edge (Developer Mode)
-1. Download the source code and unzip it.
+### Chrome & Chrome-based browsers
+1. Download the `.zip` file from the [Releases](https://github.com/gabszap/pixiv-templater/releases) page.
 2. Go to `chrome://extensions/`.
 3. Enable **"Developer mode"** in the top right corner.
-4. Click **"Load unpacked"** and select the extension folder.
+4. Click **"Load unpacked"** and select the downloaded `.zip` file.
+
+> [!IMPORTANT]
+> **Note:** Currently, only Firefox supports automatic updates. For Chromium-based browsers, automatic updates are not yet available for manual installations. Please check the [Releases](https://github.com/gabszap/pixiv-templater/releases) page periodically to ensure you have the latest version.
 
 ## Keyboard Shortcuts
 
 | Action | Default Shortcut |
 |------|---------------|
-| Open/Close Panel | `Ctrl+Shift+T` |
-| Minimize Panel | `Ctrl+Shift+M` |
-| New Template | `Ctrl+Shift+N` |
-| Apply Template 1-9 | `Ctrl+1` to `Ctrl+9` |
+| Open/Close Panel | `Alt+Shift+T` |
+| Minimize Panel | `Alt+Shift+M` |
+| New Template | `Alt+Shift+N` |
+| Apply Template 1-9 | `Alt+1` to `Alt+9` |
 
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+Any contributions are greatly appreciated.
 
 1. **Fork** the project
 2. Create a **Branch** for your Feature (`git checkout -b feature/AmazingFeature`)
@@ -90,6 +118,21 @@ Contributions are what make the open source community such an amazing place to l
 If you find a bug or have a suggestion, feel free to open an [Issue](https://github.com/gabszap/pixiv-templater/issues).
 
 Want to add translations for another language? Feel free to submit a Pull Request.
+
+<details>
+  <summary>How to add new languages</summary>
+If you want to contribute by adding a new language to the extension, follow these quick steps:
+
+1. **Create the locale file**: Go to `pixiv-templater/locales/` and create a new JSON file named after the [language code](https://developer.chrome.com/docs/extensions/reference/api/i18n#locales) (e.g., `fr.json` for French). You can use `en.json` as a base.
+2. **Register the language**: Open `pixiv-templater/locales/languages.json` and add your language code and its display name to the list:
+   ```json
+   "fr": "Français"
+   ```
+3. **Translate**: Fill the new JSON file with the translated strings.
+
+That's it! The extension will automatically detect the new language and show it in the settings menu. Feel free to submit a Pull Request with your translation!
+
+</details>
 
 ## Credits
 
