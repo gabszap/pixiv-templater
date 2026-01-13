@@ -6,8 +6,9 @@
 (function () {
     "use strict";
 
-    // Supported languages
-    const SUPPORTED_LANGUAGES = ["en", "pt-br"];
+    // Supported languages (will be loaded from languages.json)
+    let SUPPORTED_LANGUAGES = ["en"];
+    let LANGUAGE_NAMES = { "en": "English" };
     const DEFAULT_LANGUAGE = "en";
 
     // Cache for loaded translations
@@ -58,13 +59,39 @@
      */
     async function getStoredLanguage() {
         return new Promise((resolve) => {
-            if (typeof chrome !== "undefined" && chrome.storage) {
+            if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
                 chrome.storage.local.get(["pixiv_templater_language"], (result) => {
                     resolve(result.pixiv_templater_language || null);
                 });
             } else {
                 // Fallback for page context (use message bridge)
-                resolve(null);
+                const id = Math.random().toString(36);
+                const handler = (event) => {
+                    if (
+                        event.data.type === "PIXIV_TEMPLATER_STORAGE_GET_RESPONSE" &&
+                        event.data.id === id
+                    ) {
+                        window.removeEventListener("message", handler);
+                        resolve(event.data.value);
+                    }
+                };
+
+                window.addEventListener("message", handler);
+                window.postMessage(
+                    {
+                        type: "PIXIV_TEMPLATER_STORAGE_GET",
+                        id: id,
+                        key: "language",
+                        defaultValue: null,
+                    },
+                    "*"
+                );
+
+                // Timeout (increased for reliability)
+                setTimeout(() => {
+                    window.removeEventListener("message", handler);
+                    resolve(null);
+                }, 2000);
             }
         });
     }
@@ -87,6 +114,15 @@
 
         if (typeof chrome !== "undefined" && chrome.storage) {
             await chrome.storage.local.set({ pixiv_templater_language: lang });
+        } else {
+            // Page context fallback
+            const id = Math.random().toString(36);
+            window.postMessage({
+                type: "PIXIV_TEMPLATER_STORAGE_SET",
+                id: id,
+                key: "language",
+                value: lang
+            }, "*");
         }
 
         // Reload translations
@@ -94,6 +130,34 @@
         translatePage();
 
         return true;
+    }
+
+    /**
+     * Load the list of supported languages from languages.json
+     */
+    async function loadLanguageList() {
+        try {
+            let url;
+            if (window.__PIXIV_TEMPLATER_EXTENSION_URL__) {
+                url = window.__PIXIV_TEMPLATER_EXTENSION_URL__ + "locales/languages.json";
+            } else if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.getURL) {
+                url = chrome.runtime.getURL("locales/languages.json");
+            } else {
+                return false;
+            }
+
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("Failed to load languages.json");
+
+            const data = await response.json();
+            LANGUAGE_NAMES = data;
+            SUPPORTED_LANGUAGES = Object.keys(data);
+            return true;
+        } catch (error) {
+            console.error("[i18n] Error loading language list:", error);
+            // Keep defaults
+            return false;
+        }
     }
 
     /**
@@ -248,6 +312,7 @@
      * Initialize i18n system
      */
     async function init() {
+        await loadLanguageList();
         const lang = await detectLanguage();
         await loadLocale(lang);
         return currentLanguage;
@@ -274,6 +339,13 @@
         return [...SUPPORTED_LANGUAGES];
     }
 
+    /**
+     * Get names of supported languages
+     */
+    function getLanguageNames() {
+        return { ...LANGUAGE_NAMES };
+    }
+
     // Export to window for use in other scripts
     window.PixivTemplaterI18n = {
         init,
@@ -284,6 +356,7 @@
         getCurrentLanguage,
         getLanguageSetting,
         getSupportedLanguages,
+        getLanguageNames,
         loadLocale,
     };
 })();

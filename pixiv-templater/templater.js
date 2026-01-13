@@ -122,30 +122,20 @@
   // ============================
 
   const DEFAULT_TEMPLATES = {
-    "Genshin Impact": {
-      title: "",
-      caption: "Original character fan art\n#genshinimpact #fanart",
-      tags: ["原神", "Genshin Impact", "fan art"],
-      ageRating: "general",
-      adultContent: true,
-      matureContent: [],
-      aiGenerated: "aiGenerated",
-      allowTagEditing: true,
-    },
-    "Honkai Star Rail": {
-      title: "",
-      caption: "Fan art | Feel free to use with credit\n\nCommissions open!",
-      tags: ["崩壊スターレイル", "Honkai Star Rail", "commission"],
+    Demo: {
+      title: "Example Title",
+      caption: "This is an example caption.",
+      tags: ["Example", "Pixiv", "Art"],
       ageRating: "general",
       adultContent: false,
       matureContent: [],
       aiGenerated: "notAiGenerated",
       allowTagEditing: true,
     },
-    "R-18 Default": {
-      title: "",
-      caption: "",
-      tags: ["R-18"],
+    "Demo R-18": {
+      title: "R-18 Example",
+      caption: "Caption for adult content.",
+      tags: ["R-18", "Ecchi"],
       ageRating: "r18",
       adultContent: false,
       matureContent: [],

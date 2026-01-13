@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Pixiv Templater",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Auto-fill Pixiv upload page with predefined templates",
   "author": "gabszap",
   "browser_specific_settings": {
