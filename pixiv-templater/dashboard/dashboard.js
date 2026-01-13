@@ -67,8 +67,29 @@
     const step1 = document.getElementById("about-step1");
     const step4 = document.getElementById("about-step4");
 
-    if (step1) step1.innerHTML = t("about.step1").replace("pixiv.net/illustration/create", "<code>pixiv.net/illustration/create</code>");
-    if (step4) step4.innerHTML = t("about.step4").replace("ALT+Shift+T", "<code>ALT+Shift+T</code>");
+    if (step1) {
+      const text = t("about.step1");
+      const parts = text.split("pixiv.net/illustration/create");
+      step1.textContent = parts[0];
+      if (parts.length > 1) {
+        const code = document.createElement("code");
+        code.textContent = "pixiv.net/illustration/create";
+        step1.appendChild(code);
+        step1.appendChild(document.createTextNode(parts[1]));
+      }
+    }
+
+    if (step4) {
+      const text = t("about.step4");
+      const parts = text.split("ALT+Shift+T");
+      step4.textContent = parts[0];
+      if (parts.length > 1) {
+        const code = document.createElement("code");
+        code.textContent = "ALT+Shift+T";
+        step4.appendChild(code);
+        step4.appendChild(document.createTextNode(parts[1]));
+      }
+    }
   }
 
   // Load version from manifest
@@ -89,9 +110,9 @@
     // Verificar especificamente se já existem templates
     const templates = await Storage.get("templates", null);
 
-    if (templates !== null && templates !== "{}") {
+    if (templates !== null) {
       console.log(
-        "[Dashboard] Templates already exist in chrome.storage, skipping migration",
+        "[Dashboard] Templates already exist in chrome.storage (even if empty), skipping initialization",
       );
       return;
     }
@@ -100,31 +121,20 @@
 
     // Initialize with default templates if empty
     const defaultTemplates = {
-      "Genshin Impact": {
-        title: "",
-        caption: "Original character fan art\n#genshinimpact #fanart",
-        tags: ["原神", "Genshin Impact", "fan art"],
-        ageRating: "general",
-        adultContent: true,
-        matureContent: [],
-        aiGenerated: "aiGenerated",
-        allowTagEditing: true,
-      },
-      "Honkai Star Rail": {
-        title: "",
-        caption:
-          "Fan art | Feel free to use with credit\n\nCommissions open!",
-        tags: ["崩壊スターレイル", "Honkai Star Rail", "commission"],
+      Demo: {
+        title: "Example Title",
+        caption: "This is an example caption.",
+        tags: ["Example", "Pixiv", "Art"],
         ageRating: "general",
         adultContent: false,
         matureContent: [],
         aiGenerated: "notAiGenerated",
         allowTagEditing: true,
       },
-      "R-18 Default": {
-        title: "",
-        caption: "",
-        tags: ["R-18"],
+      "Demo R-18": {
+        title: "R-18 Example",
+        caption: "Caption for adult content.",
+        tags: ["R-18", "Ecchi"],
         ageRating: "r18",
         adultContent: false,
         matureContent: [],
@@ -143,6 +153,7 @@
     // Initialize i18n system
     if (window.PixivTemplaterI18n) {
       await window.PixivTemplaterI18n.init();
+      populateLanguageSelect();
       window.PixivTemplaterI18n.translatePage();
       translateAboutSteps();
       console.log("[Pixiv Templater Dashboard] i18n initialized: " + window.PixivTemplaterI18n.getCurrentLanguage());
@@ -169,8 +180,28 @@
     await loadShortcuts();
     await loadStats();
     await loadAdvancedSettings();
+
+    // Check for AI translation warning
+    checkAITranslationWarning();
+
     console.log("[Pixiv Templater Dashboard] Initialized successfully");
   });
+
+  // ============================
+  // AI TRANSLATION WARNING
+  // ============================
+
+  function checkAITranslationWarning() {
+    if (!window.PixivTemplaterI18n) return;
+
+    const currentLang = window.PixivTemplaterI18n.getCurrentLanguage();
+    const aiLanguages = ["jp", "zh-cn"];
+
+    if (aiLanguages.includes(currentLang)) {
+      $("#warning-modal-message").text(t("messages.aiTranslationWarning"));
+      $("#warning-modal").addClass("active");
+    }
+  }
 
   // ============================
   // TAB MANAGEMENT
@@ -277,6 +308,12 @@
     // Settings (new)
     $("#language-select").on("change", handleLanguageChange);
     $("#advanced-settings-toggle").on("click", handleAdvancedToggle);
+
+    // Warning Modal handlers
+    $("#warning-modal-ok").on("click", closeWarningModal);
+    $("#warning-modal-readme").on("click", () => {
+      window.open("https://github.com/gabszap/pixiv-templater#contributing", "_blank");
+    });
   }
 
   // ============================
@@ -292,12 +329,20 @@
       const response = await fetch("../libs/emoji-data.json");
       const data = await response.json();
 
+      const currentLang = window.PixivTemplaterI18n?.getCurrentLanguage();
+      const emojiLocaleMap = {
+        "pt-br": "pt",
+        "jp": "ja",
+        "zh-cn": "zh",
+        "en": "en"
+      };
+
       const pickerOptions = {
         data: data,
         onEmojiSelect: (emoji) => {
           selectEmoji(emoji.native);
         },
-        locale: window.PixivTemplaterI18n?.getCurrentLanguage() === "pt-br" ? "pt" : "en",
+        locale: emojiLocaleMap[currentLang] || "en",
         theme: "auto",
         previewPosition: "none",
         skinTonePosition: "none",
@@ -315,8 +360,11 @@
       console.error("Failed to load emoji picker:", error);
       const container = document.getElementById("emoji-picker-container");
       if (container) {
-        container.innerHTML =
-          `<span style="color: #ef4444;">${t("messages.errorLoadingEmojis")}</span>`;
+        container.textContent = "";
+        const span = document.createElement("span");
+        span.style.color = "#ef4444";
+        span.textContent = t("messages.errorLoadingEmojis");
+        container.appendChild(span);
       }
     }
   }
@@ -372,14 +420,7 @@
       const template = templates[name];
       const stat = stats[name];
       const useCount = stat ? stat.count : 0;
-
       let icon = template.emoji || "📝";
-      if (!template.emoji) {
-        if (name.includes("R-18")) icon = "🔞";
-        else if (name.includes("Genshin")) icon = "⚔️";
-        else if (name.includes("Honkai")) icon = "🚂";
-        else if (name.includes("Star Rail")) icon = "🌟";
-      }
 
       const ageRatingLabels = {
         general: t("form.ageRatingGeneral"),
@@ -388,7 +429,23 @@
       };
 
       // Get locale for date formatting
-      const dateLocale = window.PixivTemplaterI18n?.getCurrentLanguage() === "pt-br" ? "pt-BR" : "en-US";
+      const currentLang = window.PixivTemplaterI18n?.getCurrentLanguage();
+      const dateLocaleMap = {
+        "pt-br": "pt-BR",
+        "jp": "ja-JP",
+        "zh-cn": "zh-CN",
+        "en": "en-US"
+      };
+      const dateLocale = dateLocaleMap[currentLang] || "en-US";
+
+      const dateOptions = {
+        day: "2-digit",
+        month: "2-digit",
+        year: (currentLang === "jp" || currentLang === "zh-cn") ? "numeric" : "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: currentLang === "en"
+      };
 
       const $card = $(`
         <div class="template-card" data-template-name="${name}">
@@ -408,7 +465,7 @@
           </div>
           <div class="template-card-info">
             <div>${ageRatingLabels[template.ageRating] || t("modal.ageRatingGeneral")}</div>
-            <div>${template.tags.length} tag(s)</div>
+            <div>${t("common.tagsCount", { count: template.tags.length })}</div>
           </div>
           <div class="template-card-tags">
             ${template.tags
@@ -421,26 +478,14 @@
             <div class="meta-row" title="${t("preview.createdAt")}">
               <span class="meta-label">${t("preview.createdAt")}</span>
               <span class="meta-value">${template.createdAt
-          ? new Date(template.createdAt).toLocaleString(dateLocale, {
-            day: "2-digit",
-            month: "2-digit",
-            year: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-          })
+          ? new Date(template.createdAt).toLocaleString(dateLocale, dateOptions)
           : t("preview.createdAtNone")
         }</span>
             </div>
             <div class="meta-row" title="${t("preview.updatedAt")}">
               <span class="meta-label">${t("preview.updatedAt")}</span>
               <span class="meta-value">${template.updatedAt
-          ? new Date(template.updatedAt).toLocaleString(dateLocale, {
-            day: "2-digit",
-            month: "2-digit",
-            year: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-          })
+          ? new Date(template.updatedAt).toLocaleString(dateLocale, dateOptions)
           : t("preview.updatedAtNone")
         }</span>
             </div>
@@ -594,7 +639,7 @@
   }
 
   function showPreview(name, template) {
-    $("#preview-title").text(`Preview: ${name}`);
+    $("#preview-title").text(t("preview.title", { name: name }));
 
     // Build tags HTML
     let tagsHtml = "";
@@ -1062,6 +1107,10 @@
     editingTemplateName = null;
   }
 
+  function closeWarningModal() {
+    $("#warning-modal").removeClass("active");
+  }
+
   // ============================
   // ADVANCED TAB MANAGEMENT
   // ============================
@@ -1087,6 +1136,26 @@
     await updateStorageInfo();
   }
 
+  function populateLanguageSelect() {
+    if (!window.PixivTemplaterI18n) return;
+
+    const $select = $("#language-select");
+    const languages = window.PixivTemplaterI18n.getLanguageNames();
+
+    // Keep "auto" option
+    const $autoOption = $select.find('option[value="auto"]');
+    $select.empty().append($autoOption);
+
+    Object.keys(languages).forEach(code => {
+      const name = languages[code];
+      const $option = $("<option></option>")
+        .val(code)
+        .text(name)
+        .attr("data-i18n", `advanced.${code}`); // Optional: in case we want to translate the language name itself
+      $select.append($option);
+    });
+  }
+
   async function handleLanguageChange() {
     const lang = $("#language-select").val();
     if (window.PixivTemplaterI18n) {
@@ -1104,6 +1173,9 @@
       updateDebugStatus($("#debug-mode-toggle").is(":checked"));
 
       console.log(`[Dashboard] Language changed to: ${lang}`);
+
+      // Check for AI translation warning after change
+      checkAITranslationWarning();
     }
   }
 
@@ -1178,6 +1250,10 @@
 
       // Remove all data
       await chrome.storage.local.remove(keysToRemove);
+
+      // Explicitly set templates to empty object string so it stays empty on next load
+      // rather than being null and triggering default initialization
+      await chrome.storage.local.set({ pixiv_templater_templates: "{}" });
 
       console.log(
         "[Options] All data cleared:",

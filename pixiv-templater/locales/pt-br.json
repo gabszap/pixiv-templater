@@ -8,7 +8,7 @@
         "openDashboard": "Abrir Dashboard"
     },
     "preview": {
-        "title": "Preview do Template",
+        "title": "Preview: {{name}}",
         "workTitle": "Título:",
         "description": "Descrição:",
         "tags": "Tags:",
@@ -113,6 +113,8 @@
         "selectLanguage": "Selecione o idioma de exibição",
         "english": "Inglês",
         "portuguese": "Português (Brasil)",
+        "japanese": "Japonês",
+        "chinese": "Chinês (Simplificado)",
         "autoTranslateTags": "Traduzir Tags Automaticamente",
         "autoTranslateTagsDesc": "Traduz automaticamente as tags japonesas para inglês na página de upload",
         "title": "Configurações Avançadas",
@@ -222,7 +224,9 @@
         "errorClearingData": "Erro ao limpar dados: ",
         "errorLoadingEmojis": "Erro ao carregar emojis",
         "translationEnabled": "Tradução de tags ativada",
-        "translationDisabled": "Tradução de tags desativada"
+        "translationDisabled": "Tradução de tags desativada",
+        "aiTranslationWarning": "As traduções para este idioma foram geradas por IA e podem conter erros. Você pode seguir o guia no README para ajudar a melhorá-las.",
+        "aiTranslationWarningTitle": "Aviso de Tradução por IA"
     },
     "validation": {
         "templateNameRequired": "Nome do template é obrigatório!",
@@ -238,6 +242,7 @@
         "title": "Título",
         "description": "Descrição",
         "tags": "Tags",
+        "tagsCount": "{{count}} tag(s)",
         "settings": "Configurações",
         "rating": "Classificação",
         "adultContent": "Conteúdo adulto",

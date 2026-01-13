@@ -478,6 +478,8 @@ body {
     border-radius: 12px;
     font-weight: 600;
     font-size: 12px;
+    width: fit-content;
+    margin-top: 4px;
 }
 
 /* Empty State */
