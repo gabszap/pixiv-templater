@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://socialify.git.ci/gabszap/pixiv-templater/image?custom_description=A+browser+extension+that+automates+Pixiv+uploads+using+one-click+templates+for+titles%2C+tags%2C+and+settings.&description=1&font=Inter&logo=https%3A%2F%2Fgithub.com%2Fgabszap%2Fpixiv-templater%2Fraw%2Frefs%2Fheads%2Fmain%2Fpixiv-templater%2Fassets%2Ficons%2Ficon.svg&name=1&pattern=Solid&theme=Dark" alt="pixiv-templater">
+  <img src="https://socialify.git.ci/gabszap/pixiv-templater/image?custom_description=A+browser+extension+that+automates+Pixiv+uploads+using+one-click+templates+for+titles%2C+tags%2C+and+settings.&description=1&font=Inter&logo=https%3A%2F%2Fgithub.com%2Fgabszap%2Fpixiv-templater%2Fraw%2Frefs%2Fheads%2Fmain%2Fassets%2Ficons%2Ficon.svg&name=1&pattern=Solid&theme=Dark" alt="pixiv-templater">
 </p>
 
 <p align="center">
@@ -12,9 +12,9 @@
 
 <p align="center">
   <a href="README.md">English</a> | 
-  <a href="pixiv-templater/docs/README_PT.md">Português</a> | 
-  <a href="pixiv-templater/docs/README_JP.md">日本語</a> | 
-  <a href="pixiv-templater/docs/README_ZH-CN.md">中文</a>
+  <a href="docs/README_PT.md">Português</a> | 
+  <a href="docs/README_JP.md">日本語</a> | 
+  <a href="docs/README_ZH-CN.md">中文</a>
 </p>
 
 > [!WARNING]
@@ -48,21 +48,21 @@ The idea came from my own frustration with the Pixiv upload process. Since the s
   ### Video Demonstration
   Watch the extension in action.
 
-  ![Demo](pixiv-templater/assets/demo.mp4)
+  ![Demo](assets/demo.mp4)
 
   ### Dashboard
   Manage your templates and settings.
-  ![Dashboard](pixiv-templater/assets/dashboard.png)
+  ![Dashboard](assets/dashboard.png)
 
   ### Panel
   Floating panel on the upload page.
 
-  ![Panel](pixiv-templater/assets/painel.png)
+  ![Panel](assets/painel.png)
 
   ### Tag Translation
   Automated translations.
 
-  ![Tag Translation](pixiv-templater/assets/translated-tags.png)
+  ![Tag Translation](assets/translated-tags.png)
 
 </details>
 
@@ -126,8 +126,8 @@ Want to add translations for another language? Feel free to submit a Pull Reques
   <summary>How to add new languages</summary>
 If you want to contribute by adding a new language to the extension, follow these quick steps:
 
-1. **Create the locale file**: Go to `pixiv-templater/locales/` and create a new JSON file named after the [language code](https://developer.chrome.com/docs/extensions/reference/api/i18n#locales) (e.g., `fr.json` for French). You can use `en.json` as a base.
-2. **Register the language**: Open `pixiv-templater/locales/languages.json` and add your language code and its display name to the list:
+1. **Create the locale file**: Go to `locales/` and create a new JSON file named after the [language code](https://developer.chrome.com/docs/extensions/reference/api/i18n#locales) (e.g., `fr.json` for French). You can use `en.json` as a base.
+2. **Register the language**: Open `locales/languages.json` and add your language code and its display name to the list:
    ```json
    "fr": "Français"
    ```

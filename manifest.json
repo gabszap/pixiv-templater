@@ -7,8 +7,8 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "pixiv-templater@gabszap",
-      "strict_min_version": "128.0",
-      "update_url": "https://gabszap.github.io/pixiv-templater/pixiv-templater/updates.json",
+      "strict_min_version": "140.0",
+      "update_url": "https://gabszap.github.io/pixiv-templater/updates.json",
       "data_collection_permissions": {
         "required": [
           "none"
@@ -41,21 +41,21 @@
   ],
   "background": {
     "scripts": [
-      "background.js"
+      "src/background.js"
     ]
   },
   "host_permissions": [
     "*://www.pixiv.net/*",
     "*://danbooru.donmai.us/*"
   ],
-  "options_page": "dashboard/dashboard.html",
+  "options_page": "src/dashboard/dashboard.html",
   "content_scripts": [
     {
       "matches": [
         "*://www.pixiv.net/*"
       ],
       "js": [
-        "content.js"
+        "src/content.js"
       ],
       "run_at": "document_idle"
     }
@@ -63,20 +63,20 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "browser-polyfill.js",
-        "debug-logger.js",
-        "page-logger.js",
-        "i18n.js",
+        "src/utils/browser-polyfill.js",
+        "src/utils/debug-logger.js",
+        "src/utils/page-logger.js",
+        "src/core/i18n.js",
         "locales/*.json",
         "libs/jquery.min.js",
         "libs/emoji-mart.js",
         "libs/emoji-data.json",
-        "templater.js",
-        "tag-translator.js",
-        "upload-translator.js",
-        "floating-panel/ui.html",
-        "floating-panel/ui.css",
-        "floating-panel/ui.js"
+        "src/core/templater.js",
+        "src/core/tag-translator.js",
+        "src/core/upload-translator.js",
+        "src/floating-panel/ui.html",
+        "src/floating-panel/ui.css",
+        "src/floating-panel/ui.js"
       ],
       "matches": [
         "*://www.pixiv.net/*"

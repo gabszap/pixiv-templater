@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://socialify.git.ci/gabszap/pixiv-templater/image?custom_description=Uma+extens%C3%A3o+de+navegador+que+automatiza+uploads+no+Pixiv+usando+templates+de+um+clique+para+t%C3%ADtulos%2C+tags+e+configura%C3%A7%C3%B5es.&description=1&font=Inter&logo=https%3A%2F%2Fgithub.com%2Fgabszap%2Fpixiv-templater%2Fraw%2Frefs%2Fheads%2Fmain%2Fpixiv-templater%2Fassets%2Ficons%2Ficon.svg&name=1&pattern=Solid&theme=Dark" alt="pixiv-templater">
+  <img src="https://socialify.git.ci/gabszap/pixiv-templater/image?custom_description=Uma+extens%C3%A3o+de+navegador+que+automatiza+uploads+no+Pixiv+usando+templates+de+um+clique+para+t%C3%ADtulos%2C+tags+e+configura%C3%A7%C3%B5es.&description=1&font=Inter&logo=https%3A%2F%2Fgithub.com%2Fgabszap%2Fpixiv-templater%2Fraw%2Frefs%2Fheads%2Fmain%2Fassets%2Ficons%2Ficon.svg&name=1&pattern=Solid&theme=Dark" alt="pixiv-templater">
 </p>
 
 <p align="center">
@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="../../README.md">English</a> | 
+  <a href="../README.md">English</a> | 
   <a href="README_PT.md">Português</a> | 
   <a href="README_JP.md">日本語</a> | 
   <a href="README_ZH-CN.md">中文</a>
@@ -123,8 +123,8 @@ Quer adicionar traduções para outro idioma? Sinta-se à vontade para enviar um
   <summary>Como adicionar novos idiomas</summary>
 Se você quiser contribuir adicionando um novo idioma à extensão, siga estas etapas rápidas:
 
-1. **Crie o arquivo de locale**: Vá para `pixiv-templater/locales/` e crie um novo arquivo JSON nomeado com o [código do idioma](https://developer.chrome.com/docs/extensions/reference/api/i18n#locales) (ex: `fr.json` para Francês). Você pode usar `en.json` como base.
-2. **Registre o idioma**: Abra `pixiv-templater/locales/languages.json` e adicione o código do seu idioma e o nome de exibição à lista:
+1. **Crie o arquivo de locale**: Vá para `locales/` e crie um novo arquivo JSON nomeado com o [código do idioma](https://developer.chrome.com/docs/extensions/reference/api/i18n#locales) (ex: `fr.json` para Francês). Você pode usar `en.json` como base.
+2. **Registre o idioma**: Abra `locales/languages.json` e adicione o código do seu idioma e o nome de exibição à lista:
    ```json
    "fr": "Français"
    ```

@@ -91,7 +91,7 @@
   async function loadUIResources() {
     try {
       // Load CSS
-      const cssResponse = await fetch(chrome.runtime.getURL("floating-panel/ui.css"));
+      const cssResponse = await fetch(chrome.runtime.getURL("src/floating-panel/ui.css"));
       const css = await cssResponse.text();
       const style = document.createElement("style");
       style.textContent = css;
@@ -99,7 +99,7 @@
       log.debug("✓ CSS injected");
 
       // Load HTML
-      const htmlResponse = await fetch(chrome.runtime.getURL("floating-panel/ui.html"));
+      const htmlResponse = await fetch(chrome.runtime.getURL("src/floating-panel/ui.html"));
       const html = await htmlResponse.text();
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, "text/html");
@@ -266,10 +266,10 @@
       await injectExtensionConfig();
 
       // 0. Browser polyfill for Firefox compatibility
-      await injectScript("browser-polyfill.js", 5000);
+      await injectScript("src/utils/browser-polyfill.js", 5000);
 
       // 1. Page logger for debug mode support
-      await injectScript("page-logger.js", 5000);
+      await injectScript("src/utils/page-logger.js", 5000);
 
       // 2. Lucide icons library - REMOVED (file doesn't exist)
       // await injectScript("libs/lucide.min.js", 5000);
@@ -281,22 +281,22 @@
       await injectScript("libs/jquery.min.js", 5000);
 
       // 5. i18n module (must load before UI)
-      await injectScript("i18n.js", 5000);
+      await injectScript("src/core/i18n.js", 5000);
 
       // 6. UI resources (HTML and CSS)
       await loadUIResources();
 
       // 7. UI script
-      await injectScript("floating-panel/ui.js", 5000);
+      await injectScript("src/floating-panel/ui.js", 5000);
 
       // 8. Tag translator module
-      await injectScript("tag-translator.js", 5000);
+      await injectScript("src/core/tag-translator.js", 5000);
 
       // 9. Main templater script
-      await injectScript("templater.js", 5000);
+      await injectScript("src/core/templater.js", 5000);
 
       // 10. Upload page tag translator (translates recommended tags)
-      await injectScript("upload-translator.js", 5000);
+      await injectScript("src/core/upload-translator.js", 5000);
 
       // Show single success message
       log.essential("Pixiv Templater loaded");
