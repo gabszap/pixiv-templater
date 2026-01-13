@@ -3,7 +3,7 @@ name: Release Extension (dev)
 on:
   push:
     paths:
-      - 'pixiv-templater/manifest.json'
+      - 'manifest.json'
     branches:
       - dev
 
@@ -12,9 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    defaults:
-      run:
-        working-directory: pixiv-templater
+
 
     steps:
       - name: Checkout repository

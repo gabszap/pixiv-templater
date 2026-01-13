@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://socialify.git.ci/gabszap/pixiv-templater/image?custom_description=%E4%B8%80%E4%B8%AA%E8%83%BD%E5%A4%9F%E9%80%9A%E8%BF%87%E4%B8%80%E9%94%AE%E5%BA%94%E7%94%A8%E6%A0%87%E9%A2%98%E3%80%81%E6%A0%87%E7%AD%BE%E5%92%8C%E8%AE%BE%E7%BD%AE%E6%A8%A1%E6%9D%BF%E6%9D%A5%E8%87%AA%E5%8A%A8%E5%8C%96+Pixiv+%E6%8A%95%E7%A8%BF%E6%B5%81%E7%A8%8B%E7%9A%84%E6%B5%81%E8%A7%88%E5%99%A8%E6%89%A9%E5%B1%95%E3%80%82&description=1&font=Inter&logo=https%3A%2F%2Fgithub.com%2Fgabszap%2Fpixiv-templater%2Fraw%2Frefs%2Fheads%2Fmain%2Fpixiv-templater%2Fassets%2Ficons%2Ficon.svg&name=1&pattern=Solid&theme=Dark" alt="pixiv-templater">
+  <img src="https://socialify.git.ci/gabszap/pixiv-templater/image?custom_description=%E4%B8%80%E4%B8%AA%E8%83%BD%E5%A4%9F%E9%80%9A%E8%BF%87%E4%B8%80%E9%94%AE%E5%BA%94%E7%94%A8%E6%A0%87%E9%A2%98%E3%80%81%E6%A0%87%E7%AD%BE%E5%92%8C%E8%AE%BE%E7%BD%AE%E6%A8%A1%E6%9D%BF%E6%9D%A5%E8%87%AA%E5%8A%A8%E5%8C%96+Pixiv+%E6%8A%95%E7%A8%BF%E6%B5%81%E7%A8%8B%E7%9A%84%E6%B5%81%E8%A7%88%E5%99%A8%E6%89%A9%E5%B1%95%E3%80%82&description=1&font=Inter&logo=https%3A%2F%2Fgithub.com%2Fgabszap%2Fpixiv-templater%2Fraw%2Frefs%2Fheads%2Fmain%2Fassets%2Ficons%2Ficon.svg&name=1&pattern=Solid&theme=Dark" alt="pixiv-templater">
 </p>
 
 <p align="center">
@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="../../README.md">English</a> | 
+  <a href="../README.md">English</a> | 
   <a href="README_PT.md">Português</a> | 
   <a href="README_JP.md">日本語</a> | 
   <a href="README_ZH-CN.md">中文</a>
@@ -126,8 +126,8 @@
   <summary>如何添加新语言</summary>
 如果您想通过添加新语言来贡献力量，请按照以下简单步骤操作：
 
-1. **创建语言文件**：前往 `pixiv-templater/locales/` 并根据[语言代码](https://developer.chrome.com/docs/extensions/reference/api/i18n#locales)创建一个新的 JSON 文件（例如，法语为 `fr.json`）。您可以使用 `en.json` 作为模板。
-2. **注册语言**：打开 `pixiv-templater/locales/languages.json` 并将您的语言代码和显示名称添加到列表中：
+1. **创建语言文件**：前往 `locales/` 并根据[语言代码](https://developer.chrome.com/docs/extensions/reference/api/i18n#locales)创建一个新的 JSON 文件（例如，法语为 `fr.json`）。您可以使用 `en.json` 作为模板。
+2. **注册语言**：打开 `locales/languages.json` 并将您的语言代码和显示名称添加到列表中：
    ```json
    "fr": "Français"
    ```

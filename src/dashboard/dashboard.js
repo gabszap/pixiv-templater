@@ -326,7 +326,7 @@
     if (emojiPicker) return;
 
     try {
-      const response = await fetch("../libs/emoji-data.json");
+      const response = await fetch("../../libs/emoji-data.json");
       const data = await response.json();
 
       const currentLang = window.PixivTemplaterI18n?.getCurrentLanguage();

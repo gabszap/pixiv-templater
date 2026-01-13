@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://socialify.git.ci/gabszap/pixiv-templater/image?custom_description=%E3%82%BF%E3%82%A4%E3%83%88%E3%83%AB%E3%80%81%E3%82%BF%E3%82%B0%E3%80%81%E8%A8%AD%E5%AE%99%E7%94%A8%E3%81%AE%E3%83%AF%E3%83%B3%E3%82%AF%E3%83%AA%E3%83%83%E3%82%AF%E3%83%86%E3%83%B3%E3%83%97%E3%83%AC%E3%83%BC%E3%83%88%E3%82%92%E4%BD%BF%E7%94%A8%E3%81%97%E3%81%A6%E3%80%81Pixiv%E3%81%B8%E3%81%AE%E6%8A%95%E7%A8%BF%E3%82%92%E8%87%AA%E5%8B%95%E5%8C%96%E3%81%99%E3%82%8B%E3%83%96%E3%83%A9%E3%82%A6%E3%82%B6%E6%8B%A1%E5%BC%B5%E6%A9%9F%E8%83%BD%E3%81%A7%E3%81%99%E3%80%82&description=1&font=Inter&logo=https%3A%2F%2Fgithub.com%2Fgabszap%2Fpixiv-templater%2Fraw%2Frefs%2Fheads%2Fmain%2Fpixiv-templater%2Fassets%2Ficons%2Ficon.svg&name=1&pattern=Solid&theme=Dark" alt="pixiv-templater">
+  <img src="https://socialify.git.ci/gabszap/pixiv-templater/image?custom_description=%E3%82%BF%E3%82%A4%E3%83%88%E3%83%AB%E3%80%81%E3%82%BF%E3%82%B0%E3%80%81%E8%A8%AD%E5%AE%99%E7%94%A8%E3%81%AE%E3%83%AF%E3%83%B3%E3%82%AF%E3%83%AA%E3%83%83%E3%82%AF%E3%83%86%E3%83%B3%E3%83%97%E3%83%AC%E3%83%BC%E3%83%88%E3%82%92%E4%BD%BF%E7%94%A8%E3%81%97%E3%81%A6%E3%80%81Pixiv%E3%81%B8%E3%81%AE%E6%8A%95%E7%A8%BF%E3%82%92%E8%87%AA%E5%8B%95%E5%8C%96%E3%81%99%E3%82%8B%E3%83%96%E3%83%A9%E3%82%A6%E3%82%B6%E6%8B%A1%E5%BC%B5%E6%A9%9F%E8%83%BD%E3%81%A7%E3%81%99%E3%80%82&description=1&font=Inter&logo=https%3A%2F%2Fgithub.com%2Fgabszap%2Fpixiv-templater%2Fraw%2Frefs%2Fheads%2Fmain%2Fassets%2Ficons%2Ficon.svg&name=1&pattern=Solid&theme=Dark" alt="pixiv-templater">
 </p>
 
 <p align="center">
@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="../../README.md">English</a> | 
+  <a href="../README.md">English</a> | 
   <a href="README_PT.md">Português</a> | 
   <a href="README_JP.md">日本語</a> | 
   <a href="README_ZH-CN.md">中文</a>
@@ -126,8 +126,8 @@ Pixivでのイラスト投稿プロセスを自動化するためのブラウザ
   <summary>新しい言語を追加する方法</summary>
 新しい言語の追加で貢献したい場合は、以下の手順に従ってください：
 
-1. **ロケールファイルの作成**: `pixiv-templater/locales/` に移動し、[言語コード](https://developer.chrome.com/docs/extensions/reference/api/i18n#locales)に基づいた新しいJSONファイルを作成します（例：フランス語なら `fr.json`）。`en.json` をベースとして使用できます。
-2. **言語の登録**: `pixiv-templater/locales/languages.json` を開き、言語コードと表示名をリストに追加します：
+1. **ロケールファイルの作成**: `locales/` に移動し、[言語コード](https://developer.chrome.com/docs/extensions/reference/api/i18n#locales)に基づいた新しいJSONファイルを作成します（例：フランス語なら `fr.json`）。`en.json` をベースとして使用できます。
+2. **言語の登録**: `locales/languages.json` を開き、言語コードと表示名をリストに追加します：
    ```json
    "fr": "Français"
    ```
