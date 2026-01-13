@@ -17,6 +17,9 @@
   <a href="pixiv-templater/docs/README_ZH-CN.md">中文</a>
 </p>
 
+> [!WARNING]
+> **This is a development branch.** Do not use the files from this branch unless strictly necessary. Otherwise, use the production files in the [**main**](https://github.com/gabszap/pixiv-templater/tree/main) branch.
+
 ---
 
 A browser extension to automate the illustration upload process on Pixiv. Save templates with titles, captions, tags, and settings, and apply them with a single click. It also automatically translates Japanese tags to Danbooru tags.
