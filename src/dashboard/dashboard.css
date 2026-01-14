@@ -1566,11 +1566,20 @@ option {
 .emoji-selector-container {
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 12px;
     background: var(--bg-secondary);
     padding: 16px;
     border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
+    max-height: 800px;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+        padding 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+        border-width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.3s ease,
+        margin-bottom 0.4s ease;
+    opacity: 1;
 }
 
 .emoji-preview {
@@ -1632,27 +1641,31 @@ option {
 }
 
 /* Emoji Selector Container */
-.emoji-selector-container {
-    max-height: 500px;
-    overflow: hidden;
-    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
-    opacity: 1;
-}
+/* Ocupa o espaço do bloco removido para manter a correcão de linha se necessário, 
+   mas aqui estamos apenas removendo a duplicata */
 
 .emoji-selector-container.collapsed {
     max-height: 0;
     opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-width: 0;
+}
+
+/* Reduz o espaço abaixo do label quando o seletor está fechado */
+.emoji-label-container:has(+ .emoji-selector-container.collapsed) {
+    margin-bottom: 0;
 }
 
 #emoji-picker-container {
     display: flex;
     justify-content: center;
+    width: 100%;
     max-height: 400px;
     overflow-y: auto;
 }
 
 #emoji-picker-container em-emoji-picker {
-    width: 100%;
     --font-family: inherit;
 }
 

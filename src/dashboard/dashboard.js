@@ -353,7 +353,7 @@
       emojiPicker = new EmojiMart.Picker(pickerOptions);
       const container = document.getElementById("emoji-picker-container");
       if (container) {
-        container.innerHTML = "";
+        container.textContent = "";
         container.appendChild(emojiPicker);
       }
     } catch (error) {
@@ -640,105 +640,85 @@
 
   function showPreview(name, template) {
     $("#preview-title").text(t("preview.title", { name: name }));
+    const $container = $("#preview-body-content");
+    $container.empty();
 
-    // Build tags HTML
-    let tagsHtml = "";
-    if (template.tags && template.tags.length > 0) {
-      template.tags.forEach((tag) => {
-        tagsHtml += `<span class="preview-tag">${tag}</span>`;
-      });
-    } else {
-      tagsHtml = `<span class="preview-empty">(${t("preview.noTags")})</span>`;
+    function createSection(title, content) {
+      const $section = $('<div class="preview-section"></div>');
+      const $h3 = $("<h3></h3>").text(title);
+      const $content = $('<div class="preview-content"></div>');
+
+      if (content) {
+        $content.text(content);
+      } else {
+        $content.append($('<span class="preview-empty"></span>').text(`(${t("common.empty")})`));
+      }
+
+      $section.append($h3).append($content);
+      return $section;
     }
 
-    // Age rating labels
+    // Title Section
+    $container.append(createSection(`📄 ${t("common.title")}`, template.title));
+
+    // Description Section
+    $container.append(createSection(`📝 ${t("common.description")}`, template.caption));
+
+    // Tags Section
+    const $tagsContainer = $('<div class="preview-tags"></div>');
+    if (template.tags && template.tags.length > 0) {
+      template.tags.forEach((tag) => {
+        $tagsContainer.append($('<span class="preview-tag"></span>').text(tag));
+      });
+    } else {
+      $tagsContainer.append($('<span class="preview-empty"></span>').text(`(${t("preview.noTags")})`));
+    }
+    const $tagsSection = $('<div class="preview-section"></div>');
+    $tagsSection.append($("<h3></h3>").text(`🏷️ ${t("common.tags")}`));
+    $tagsSection.append($tagsContainer);
+    $container.append($tagsSection);
+
+    // Settings Section
     const ageRatingLabels = {
       general: t("form.ageRatingGeneral"),
       r18: t("form.ageRatingR18"),
       r18g: t("form.ageRatingR18G"),
     };
 
-    // Adult content info
-    let adultContentHtml = "";
+    const $config = $('<div class="preview-config"></div>');
+
+    function addConfigItem(label, value) {
+      const $item = $('<div class="preview-config-item"></div>');
+      $item.append($('<span class="preview-config-label"></span>').text(`${label}:`));
+      $item.append($('<span class="preview-config-value"></span>').text(value));
+      $config.append($item);
+    }
+
+    addConfigItem(t("common.rating"), ageRatingLabels[template.ageRating] || t("modal.ageRatingGeneral"));
+
     if (template.ageRating === "general") {
-      adultContentHtml = template.adultContent
-        ? t("preview.adultContentYes")
-        : t("preview.adultContentNo");
+      addConfigItem(t("common.adultContent"), template.adultContent ? t("preview.adultContentYes") : t("preview.adultContentNo"));
     }
 
-    // Mature content info
-    let matureContentHtml = "";
-    if (template.ageRating === "r18" && template.matureContent) {
-      if (template.matureContent.length > 0) {
-        const labels = {
-          lo: t("form.minors"),
-          furry: t("form.furry"),
-          bl: t("form.bl"),
-          yuri: t("form.gl"),
-        };
-        const items = template.matureContent
-          .map((c) => `${labels[c] || c}`)
-          .join("<br>");
-        matureContentHtml = items;
-      } else {
-        matureContentHtml = `<span class="preview-empty">(${t("common.none")})</span>`;
-      }
+    if (template.ageRating === "r18" && template.matureContent && template.matureContent.length > 0) {
+      const labels = {
+        lo: t("form.minors"),
+        furry: t("form.furry"),
+        bl: t("form.bl"),
+        yuri: t("form.gl"),
+      };
+      const items = template.matureContent.map((c) => labels[c] || c).join(", ");
+      addConfigItem(t("common.sensitiveContent"), items);
     }
 
-    const aiGeneratedText =
-      template.aiGenerated === "aiGenerated" ? t("preview.yes") : t("preview.no");
+    const aiGeneratedText = template.aiGenerated === "aiGenerated" ? t("preview.yes") : t("preview.no");
+    addConfigItem(t("common.aiGenerated"), aiGeneratedText);
 
-    // Build complete preview HTML
-    const previewHtml = `
-      <div class="preview-section">
-        <h3>📄 ${t("common.title")}</h3>
-        <div class="preview-content">${template.title || `<span class="preview-empty">(${t("common.empty")})</span>`}</div>
-      </div>
+    const $settingsSection = $('<div class="preview-section"></div>');
+    $settingsSection.append($("<h3></h3>").text(`⚙️ ${t("common.settings")}`));
+    $settingsSection.append($config);
+    $container.append($settingsSection);
 
-      <div class="preview-section">
-        <h3>📝 ${t("common.description")}</h3>
-        <div class="preview-content">${template.caption || `<span class="preview-empty">(${t("common.empty")})</span>`}</div>
-      </div>
-
-      <div class="preview-section">
-        <h3>🏷️ ${t("common.tags")}</h3>
-        <div class="preview-tags">${tagsHtml}</div>
-      </div>
-
-      <div class="preview-section">
-        <h3>⚙️ ${t("common.settings")}</h3>
-        <div class="preview-config">
-          <div class="preview-config-item">
-            <span class="preview-config-label">${t("common.rating")}:</span>
-            <span class="preview-config-value">${ageRatingLabels[template.ageRating] || t("modal.ageRatingGeneral")}</span>
-          </div>
-          ${template.ageRating === "general"
-        ? `
-          <div class="preview-config-item">
-            <span class="preview-config-label">${t("common.adultContent")}:</span>
-            <span class="preview-config-value">${adultContentHtml}</span>
-          </div>
-          `
-        : ""
-      }
-          ${template.ageRating === "r18" && matureContentHtml
-        ? `
-          <div class="preview-config-item">
-            <span class="preview-config-label">${t("common.sensitiveContent")}:</span>
-            <span class="preview-config-value">${matureContentHtml}</span>
-          </div>
-          `
-        : ""
-      }
-          <div class="preview-config-item">
-            <span class="preview-config-label">${t("common.aiGenerated")}:</span>
-            <span class="preview-config-value">${aiGeneratedText}</span>
-          </div>
-        </div>
-      </div>
-    `;
-
-    $("#preview-body-content").html(previewHtml);
     openPreviewModal();
   }
 
