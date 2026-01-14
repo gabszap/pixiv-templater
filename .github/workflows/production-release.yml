@@ -1,0 +1,121 @@
+name: Release Extension
+
+on:
+  push:
+    paths:
+      - 'manifest.json'
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version from manifest
+        id: version
+        run: |
+          VERSION=$(jq -r '.version' manifest.json)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Detected version: $VERSION"
+
+      - name: Check if release already exists
+        id: check_release
+        run: |
+          if gh release view "v${{ steps.version.outputs.version }}" > /dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create ZIP for AMO
+        if: steps.check_release.outputs.exists == 'false'
+        run: |
+          zip -r pixiv-templater.zip . \
+            -x "*.git*" \
+            -x "*.github*" \
+            -x "updates.json" \
+            -x "*.md"
+
+      - name: Sign extension with AMO
+        if: steps.check_release.outputs.exists == 'false'
+        id: sign
+        run: |
+          npm install -g web-ext
+
+          web-ext sign \
+            --api-key="${{ secrets.AMO_API_KEY }}" \
+            --api-secret="${{ secrets.AMO_API_SECRET }}" \
+            --channel=unlisted \
+            --source-dir=. \
+            --artifacts-dir=./artifacts \
+            --ignore-files=".git/*" ".github/*" "updates.json" "*.md"
+
+          # Find the signed xpi file
+          XPI_FILE=$(find ./artifacts -name "*.xpi" | head -1)
+          echo "xpi_file=$XPI_FILE" >> $GITHUB_OUTPUT
+
+      - name: Rename XPI file
+        if: steps.check_release.outputs.exists == 'false'
+        run: |
+          mv ${{ steps.sign.outputs.xpi_file }} ./artifacts/pixiv-templater.xpi
+
+      - name: Chrome Release
+        if: steps.check_release.outputs.exists == 'false'
+        run: |
+          web-ext build --source-dir . --artifacts-dir ./artifacts --filename pixiv-templater-chrome.zip --overwrite-dest
+
+      - name: Update updates.json
+        if: steps.check_release.outputs.exists == 'false'
+        run: |
+          cat > updates.json <<EOF
+          {
+            "addons": {
+              "pixiv-templater@gabszap": {
+                "updates": [
+                  {
+                    "version": "${{ steps.version.outputs.version }}",
+                    "update_link": "https://github.com/gabszap/pixiv-templater/releases/download/v${{ steps.version.outputs.version }}/pixiv-templater.xpi"
+                  }
+                ]
+              }
+            }
+          }
+          EOF
+
+      - name: Commit updates
+        if: steps.check_release.outputs.exists == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add updates.json
+          git commit --amend --no-edit || echo "No changes to commit"
+          git push --force
+
+      - name: Create GitHub Release
+        if: steps.check_release.outputs.exists == 'false'
+        run: |
+          echo "Release v${{ steps.version.outputs.version }}" > release_notes.md
+          echo "![Downloads](https://img.shields.io/github/downloads/gabszap/pixiv-templater/v${{ steps.version.outputs.version }}/total?style=for-the-badge&logo=github&label=Downloads&color=green)" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "**Changelog:** ${{ github.event.head_commit.message }}" >> release_notes.md
+          echo "" >> release_notes.md
+
+          gh release create "v${{ steps.version.outputs.version }}" \
+            ./artifacts/pixiv-templater.xpi \
+            ./artifacts/pixiv-templater-chrome.zip \
+            --title "v${{ steps.version.outputs.version }}" \
+            --notes-file release_notes.md \
+            --latest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
