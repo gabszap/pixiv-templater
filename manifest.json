@@ -7,7 +7,7 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "pixiv-templater@gabszap",
-      "strict_min_version": "140.0",
+      "strict_min_version": "142.0",
       "update_url": "https://gabszap.github.io/pixiv-templater/updates.json",
       "data_collection_permissions": {
         "required": [
@@ -42,7 +42,8 @@
   "background": {
     "scripts": [
       "src/background.js"
-    ]
+    ],
+    "service_worker": "src/background.js"
   },
   "host_permissions": [
     "*://www.pixiv.net/*",
@@ -68,7 +69,7 @@
         "src/utils/page-logger.js",
         "src/core/i18n.js",
         "locales/*.json",
-        "libs/jquery.min.js",
+        "libs/jquery.js",
         "libs/emoji-mart.js",
         "libs/emoji-data.json",
         "src/core/templater.js",
