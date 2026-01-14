@@ -278,7 +278,7 @@
       // await injectScript("page-lucide-bridge.js", 5000);
 
       // 4. jQuery
-      await injectScript("libs/jquery.min.js", 5000);
+      await injectScript("libs/jquery.js", 5000);
 
       // 5. i18n module (must load before UI)
       await injectScript("src/core/i18n.js", 5000);
