@@ -1,0 +1,16 @@
+{
+    "name": "build-extensions",
+    "version": "1.0.0",
+    "description": "Build extensions for Pixiv Templater",
+    "scripts": {
+        "lint": "web-ext lint --source-dir . --self-hosted",
+        "build-firefox": "web-ext build --source-dir . --artifacts-dir ./artifacts -i manifest.chrome.json --filename pixiv-templater-firefox.zip --overwrite-dest",
+        "build-chrome": "node scripts/build-chrome.js",
+        "build": "npm run build-firefox && npm run build-chrome"
+    },
+    "author": "gabszap",
+    "license": "MIT",
+    "devDependencies": {
+        "web-ext": "^8.0.0"
+    }
+}

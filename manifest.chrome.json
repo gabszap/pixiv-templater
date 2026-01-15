@@ -3,19 +3,6 @@
   "name": "Pixiv Templater",
   "version": "2.1.3",
   "description": "Auto-fill Pixiv upload page with predefined templates",
-  "author": "gabszap",
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "pixiv-templater@gabszap",
-      "strict_min_version": "142.0",
-      "update_url": "https://gabszap.github.io/pixiv-templater/updates.json",
-      "data_collection_permissions": {
-        "required": [
-          "none"
-        ]
-      }
-    }
-  },
   "icons": {
     "16": "assets/icons/16.png",
     "32": "assets/icons/32.png",
@@ -37,15 +24,13 @@
     "storage",
     "tabs"
   ],
-  "background": {
-    "scripts": [
-      "src/background.js"
-    ]
-  },
   "host_permissions": [
     "*://www.pixiv.net/*",
     "*://danbooru.donmai.us/*"
   ],
+  "background": {
+    "service_worker": "src/background.js"
+  },
   "options_page": "src/dashboard/dashboard.html",
   "content_scripts": [
     {

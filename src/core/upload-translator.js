@@ -295,8 +295,9 @@
             return;
         }
 
-        // Check if auto-translate is enabled via global flag (set by content.js)
-        if (window.__PIXIV_TEMPLATER_AUTO_TRANSLATE__ === false) {
+        // Check if auto-translate is enabled via data attribute (CSP-safe)
+        const dataValue = document.body?.dataset?.pixivTemplaterAutoTranslate;
+        if (dataValue === 'false' || dataValue === false) {
             console.log("[Translator] Auto-translate tags is disabled in settings");
             isTranslationEnabled = false;
             return;

@@ -138,8 +138,10 @@
     async function loadLanguageList() {
         try {
             let url;
-            if (window.__PIXIV_TEMPLATER_EXTENSION_URL__) {
-                url = window.__PIXIV_TEMPLATER_EXTENSION_URL__ + "locales/languages.json";
+            // Try data attribute first (CSP-safe), then chrome API
+            const extensionUrl = document.body?.dataset?.pixivTemplaterUrl;
+            if (extensionUrl) {
+                url = extensionUrl + "locales/languages.json";
             } else if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.getURL) {
                 url = chrome.runtime.getURL("locales/languages.json");
             } else {
@@ -172,9 +174,10 @@
             // Get the extension URL base
             let url;
 
-            // Check if we have the base URL injected by content script
-            if (window.__PIXIV_TEMPLATER_EXTENSION_URL__) {
-                url = window.__PIXIV_TEMPLATER_EXTENSION_URL__ + `locales/${lang}.json`;
+            // Check data attribute first (CSP-safe), then chrome API
+            const extensionUrl = document.body?.dataset?.pixivTemplaterUrl;
+            if (extensionUrl) {
+                url = extensionUrl + `locales/${lang}.json`;
             } else if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.getURL) {
                 // Direct access to chrome.runtime (extension context)
                 url = chrome.runtime.getURL(`locales/${lang}.json`);

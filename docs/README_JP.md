@@ -31,6 +31,7 @@ Pixivでのイラスト投稿プロセスを自動化するためのブラウザ
 - [機能](#機能)
 - [インストール](#インストール)
 - [キーボードショートカット](#キーボードショートカット)
+- [開発](#開発)
 
 ## プロジェクトについて
 
@@ -92,9 +93,10 @@ Pixivでのイラスト投稿プロセスを自動化するためのブラウザ
 
 ### Chrome & Chromeベースのブラウザ
 1. [Releases](https://github.com/gabszap/pixiv-templater/releases) ページから `.zip` ファイルをダウンロードします。
-2. `chrome://extensions/` を開きます。
-3. 右上の **「デベロッパーモード」** を有効にします。
-4. **「パッケージ化されていない拡張機能を読み込む」** をクリックし、ダウンロードして解凍した `.zip` フォルダを選択します。
+2. `.zip` ファイルの内容をフォルダに解凍します。
+3. `chrome://extensions/` を開きます。
+4. 右上の **「デベロッパーモード」** を有効にします。
+5. **「パッケージ化されていない拡張機能を読み込む」** をクリックし、解凍したフォルダを選択します。
 
 > [!IMPORTANT]
 > **注意:** 現在、自動アップデートをサポートしているのは Firefox のみです。Chromiumベースのブラウザでの手動インストールでは、自動アップデートはまだ利用できません。最新バージョンを使用しているか確認するため、定期的に [Releases](https://github.com/gabszap/pixiv-templater/releases) ページをチェックしてください。
@@ -107,6 +109,50 @@ Pixivでのイラスト投稿プロセスを自動化するためのブラウザ
 | パネルを最小化 | `Alt+Shift+M` |
 | 新規テンプレート | `Alt+Shift+N` |
 | テンプレート1-9を適用 | `Alt+1` ～ `Alt+9` |
+
+## 開発
+
+### 前提条件
+- [Node.js](https://nodejs.org/) (v18+)
+- [web-ext](https://github.com/mozilla/web-ext) (npm経由でインストール)
+
+### セットアップ
+```bash
+# リポジトリをクローン
+git clone https://github.com/gabszap/pixiv-templater.git
+cd pixiv-templater
+
+# 依存関係をインストール
+npm install
+```
+
+### ビルドコマンド
+```bash
+# Lintで確認
+npm run lint
+
+# Firefox用ビルド
+npm run build-firefox
+
+# Chrome用ビルド
+npm run build-chrome
+
+# 両方をビルド
+npm run build
+```
+
+### 拡張機能の読み込み
+
+**Firefox:**
+1. `about:debugging#/runtime/this-firefox` を開く
+2. 「一時的なアドオンを読み込む」をクリック
+3. プロジェクトフォルダ内の任意のファイルを選択
+
+**Chrome:**
+1. `chrome://extensions/` を開く
+2. 「デベロッパーモード」を有効にする
+3. 「パッケージ化されていない拡張機能を読み込む」をクリック
+4. プロジェクトフォルダを選択（またはビルド後は `artifacts/pixiv-templater-chrome/`）
 
 ## 🤝 貢献 (Contributing)
 
@@ -144,4 +190,4 @@ Pixivでのイラスト投稿プロセスを自動化するためのブラウザ
 
 ## ライセンス
 
-MIT License - [LICENSE](../../LICENSE) を参照してください。
+MIT License - [LICENSE](./LICENSE) を参照してください。

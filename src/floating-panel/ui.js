@@ -133,8 +133,9 @@
    */
   function showTranslationStatusToast() {
     try {
-      // Use global flag set by content.js
-      const isEnabled = window.__PIXIV_TEMPLATER_AUTO_TRANSLATE__ !== false;
+      // Read from data attribute (CSP-safe)
+      const dataValue = document.body?.dataset?.pixivTemplaterAutoTranslate;
+      const isEnabled = dataValue !== 'false' && dataValue !== false;
 
       const message = isEnabled
         ? t("messages.translationEnabled")

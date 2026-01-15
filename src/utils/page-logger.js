@@ -16,8 +16,13 @@
     user: "color: #00bcd4",
   };
 
-  // Check if debug mode is enabled
+  // Check if debug mode is enabled (read from data attribute, CSP-safe)
   function isDebugEnabled() {
+    // Try data attribute first, then global variable as fallback
+    const fromDataAttr = document.body?.dataset?.pixivTemplaterDebug;
+    if (fromDataAttr !== undefined) {
+      return fromDataAttr === 'true';
+    }
     return window.PIXIV_TEMPLATER_DEBUG_MODE === true;
   }
 

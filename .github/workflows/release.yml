@@ -38,28 +38,61 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create ZIP for AMO
-        if: steps.check_release.outputs.exists == 'false'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Sync manifest versions
         run: |
-          zip -r pixiv-templater.zip . \
-            -x "*.git*" \
-            -x "*.github*" \
-            -x "updates.json" \
-            -x "*.md"
+          FIREFOX_VERSION=$(jq -r '.version' manifest.json)
+          CHROME_VERSION=$(jq -r '.version' manifest.chrome.json)
+          
+          echo "Firefox manifest version: $FIREFOX_VERSION"
+          echo "Chrome manifest version: $CHROME_VERSION"
+          
+          if [ "$FIREFOX_VERSION" != "$CHROME_VERSION" ]; then
+            HIGHER_VERSION=$(printf '%s\n' "$FIREFOX_VERSION" "$CHROME_VERSION" | sort -V | tail -1)
+            echo "Version mismatch! Using higher version: $HIGHER_VERSION"
+            
+            UPDATED=false
+            if [ "$FIREFOX_VERSION" != "$HIGHER_VERSION" ]; then
+              echo "Updating Firefox manifest..."
+              jq --arg v "$HIGHER_VERSION" '.version = $v' manifest.json > tmp.json && mv tmp.json manifest.json
+              UPDATED=true
+            fi
+            if [ "$CHROME_VERSION" != "$HIGHER_VERSION" ]; then
+              echo "Updating Chrome manifest..."
+              jq --arg v "$HIGHER_VERSION" '.version = $v' manifest.chrome.json > tmp.json && mv tmp.json manifest.chrome.json
+              UPDATED=true
+            fi
+            
+            if [ "$UPDATED" = true ]; then
+              git config user.name "github-actions[bot]"
+              git config user.email "github-actions[bot]@users.noreply.github.com"
+              git add manifest.json manifest.chrome.json
+              git commit --amend --no-edit
+              git push --force
+              echo "Manifest versions synced to $HIGHER_VERSION!"
+            fi
+          else
+            echo "Versions are already in sync!"
+          fi
 
       - name: Sign extension with AMO
         if: steps.check_release.outputs.exists == 'false'
         id: sign
         run: |
-          npm install -g web-ext
-
-          web-ext sign \
+          npx web-ext sign \
             --api-key="${{ secrets.AMO_API_KEY }}" \
             --api-secret="${{ secrets.AMO_API_SECRET }}" \
             --channel=unlisted \
             --source-dir=. \
             --artifacts-dir=./artifacts \
-            --ignore-files=".git/*" ".github/*" "updates.json" "*.md"
+            --ignore-files=".git/*" ".github/*" "updates.json" "*.md" "manifest.chrome.json"
 
           # Find the signed xpi file
           XPI_FILE=$(find ./artifacts -name "*.xpi" | head -1)
@@ -68,14 +101,13 @@ jobs:
       - name: Rename XPI file
         if: steps.check_release.outputs.exists == 'false'
         run: |
-          mv ${{ steps.sign.outputs.xpi_file }} ./artifacts/pixiv-templater.xpi
+          mv ${{ steps.sign.outputs.xpi_file }} ./artifacts/pixiv-templater-firefox.xpi
 
-      - name: Chrome Release
+      - name: Build Chrome Extension
         if: steps.check_release.outputs.exists == 'false'
-        run: |
-          web-ext build --source-dir . --artifacts-dir ./artifacts --filename pixiv-templater-chrome.zip --overwrite-dest
+        run: npm run build-chrome
 
-      - name: Update updates.json
+      - name: Launch update
         if: steps.check_release.outputs.exists == 'false'
         run: |
           cat > updates.json <<EOF
@@ -85,7 +117,7 @@ jobs:
                 "updates": [
                   {
                     "version": "${{ steps.version.outputs.version }}",
-                    "update_link": "https://github.com/gabszap/pixiv-templater/releases/download/v${{ steps.version.outputs.version }}/pixiv-templater.xpi"
+                    "update_link": "https://github.com/gabszap/pixiv-templater/releases/download/v${{ steps.version.outputs.version }}/pixiv-templater-firefox.xpi"
                   }
                 ]
               }
@@ -112,7 +144,7 @@ jobs:
           echo "" >> release_notes.md
 
           gh release create "v${{ steps.version.outputs.version }}" \
-            ./artifacts/pixiv-templater.xpi \
+            ./artifacts/pixiv-templater-firefox.xpi \
             ./artifacts/pixiv-templater-chrome.zip \
             --title "v${{ steps.version.outputs.version }}" \
             --notes-file release_notes.md \
