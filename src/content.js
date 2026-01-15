@@ -114,35 +114,40 @@
   }
 
   // Inject extension URL, version, debug mode and other settings into page context
+  // Uses data attributes instead of inline script to avoid CSP issues
   async function injectExtensionConfig() {
     const extensionUrl = chrome.runtime.getURL("");
     const manifest = chrome.runtime.getManifest();
     const version = manifest.version;
 
-    // Load auto-translate setting
-    let autoTranslateTags = true; // default enabled
+    // Load auto-translate setting (default is enabled)
+    let autoTranslateTags = true;
     try {
       const result = await chrome.storage.local.get(["pixiv_templater_auto_translate_tags"]);
-      if (result.pixiv_templater_auto_translate_tags === false) {
+      const value = result.pixiv_templater_auto_translate_tags;
+      // Explicitly check for false (could be boolean or string "false")
+      if (value === false || value === "false") {
         autoTranslateTags = false;
       }
     } catch (err) {
       log.warn("Could not load auto_translate_tags setting, using default (enabled)");
     }
 
-    const script = document.createElement("script");
-    script.textContent = `
-      // Extension URL base accessible by page scripts (for i18n)
-      window.__PIXIV_TEMPLATER_EXTENSION_URL__ = "${extensionUrl}";
-      // Extension version
-      window.__PIXIV_TEMPLATER_VERSION__ = "${version}";
-      // Debug mode flag accessible by page scripts
-      window.PIXIV_TEMPLATER_DEBUG_MODE = ${debugMode};
-      // Auto-translate tags flag
-      window.__PIXIV_TEMPLATER_AUTO_TRANSLATE__ = ${autoTranslateTags};
-    `;
-    (document.head || document.documentElement).appendChild(script);
-    script.remove();
+    // Use data attributes on body instead of inline script (CSP-safe)
+    document.body.dataset.pixivTemplaterUrl = extensionUrl;
+    document.body.dataset.pixivTemplaterVersion = version;
+    document.body.dataset.pixivTemplaterDebug = debugMode;
+    document.body.dataset.pixivTemplaterAutoTranslate = autoTranslateTags;
+
+    // Also dispatch a custom event for scripts that need to listen
+    window.dispatchEvent(new CustomEvent('pixivTemplaterConfigReady', {
+      detail: {
+        extensionUrl,
+        version,
+        debugMode,
+        autoTranslateTags
+      }
+    }));
   }
 
   // Storage bridge - runs as content script (has access to chrome.storage)
@@ -309,8 +314,8 @@
         try {
           log.debug("Retry attempt...");
           await loadUIResources();
-          await injectScript("floating-panel/ui.js", 5000);
-          await injectScript("templater.js", 5000);
+          await injectScript("src/floating-panel/ui.js", 5000);
+          await injectScript("src/core/templater.js", 5000);
           log.debug("Retry successful");
         } catch (retryError) {
           log.error("Retry failed:", retryError);

@@ -28,6 +28,7 @@ Uma extensão de navegador para automatizar o processo de upload de ilustraçõe
 - [Recursos](#recursos)
 - [Instalação](#instalação)
 - [Atalhos de Teclado](#atalhos-de-teclado)
+- [Desenvolvimento](#desenvolvimento)
 
 ## Sobre o Projeto
 
@@ -89,9 +90,10 @@ A ideia surgiu da minha própria frustração com o processo de upload no Pixiv.
 
 ### Chrome & Navegadores baseados em Chrome
 1. Baixe o arquivo `.zip` na página de [Releases](https://github.com/gabszap/pixiv-templater/releases).
-2. Vá para `chrome://extensions/`.
-3. Ative o **"Modo do desenvolvedor"** no canto superior direito.
-4. Clique em **"Carregar sem compactação"** e selecione a pasta do arquivo `.zip` baixado (após extrair).
+2. Extraia o conteúdo do arquivo `.zip` em uma pasta.
+3. Vá para `chrome://extensions/`.
+4. Ative o **"Modo do desenvolvedor"** no canto superior direito.
+5. Clique em **"Carregar sem compactação"** e selecione a pasta extraída.
 
 > [!IMPORTANT]
 > **Nota:** Atualmente, apenas o Firefox suporta atualizações automáticas. Para navegadores baseados em Chromium, as atualizações automáticas ainda não estão disponíveis para instalações manuais. Verifique a página de [Releases](https://github.com/gabszap/pixiv-templater/releases) periodicamente para garantir que você tenha a versão mais recente.
@@ -104,6 +106,50 @@ A ideia surgiu da minha própria frustração com o processo de upload no Pixiv.
 | Minimizar Painel | `Alt+Shift+M` |
 | Novo Template | `Alt+Shift+N` |
 | Aplicar Template 1-9 | `Alt+1` a `Alt+9` |
+
+## Desenvolvimento
+
+### Pré-requisitos
+- [Node.js](https://nodejs.org/) (v18+)
+- [web-ext](https://github.com/mozilla/web-ext) (instalado via npm)
+
+### Configuração
+```bash
+# Clone o repositório
+git clone https://github.com/gabszap/pixiv-templater.git
+cd pixiv-templater
+
+# Instale as dependências
+npm install
+```
+
+### Comandos de Build
+```bash
+# Verificar erros de lint
+npm run lint
+
+# Build para Firefox
+npm run build-firefox
+
+# Build para Chrome
+npm run build-chrome
+
+# Build ambos
+npm run build
+```
+
+### Carregando a Extensão
+
+**Firefox:**
+1. Vá para `about:debugging#/runtime/this-firefox`
+2. Clique em "Carregar extensão temporária"
+3. Selecione qualquer arquivo na pasta do projeto
+
+**Chrome:**
+1. Vá para `chrome://extensions/`
+2. Ative o "Modo do desenvolvedor"
+3. Clique em "Carregar sem compactação"
+4. Selecione a pasta do projeto (ou `artifacts/pixiv-templater-chrome/` após o build)
 
 ## Contribuição
 
@@ -141,4 +187,4 @@ Isso é tudo! A extensão detectará automaticamente o novo idioma e o mostrará
 
 ## Licença
 
-MIT License - veja [LICENSE](../../LICENSE)
+MIT License - veja [LICENSE](./LICENSE)

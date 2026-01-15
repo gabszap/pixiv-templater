@@ -14,8 +14,8 @@
     error: (c, m, e) => console.error(`[${c}] ❌ ${m}`, e || ""),
   };
 
-  // ESSENTIAL LOG - Always shown
-  const version = window.__PIXIV_TEMPLATER_VERSION__ || "?";
+  // ESSENTIAL LOG - Always shown (read version from data attribute, CSP-safe)
+  const version = document.body?.dataset?.pixivTemplaterVersion || "?";
   log.essential("Pixiv Templater", `Initializing v${version}...`);
 
   // ============================
@@ -52,21 +52,17 @@
           "*",
         );
 
-        // Fallback timeout
+        // Timeout increased for slow connections
         setTimeout(() => {
           window.removeEventListener("message", handler);
-          console.warn(
-            "[Templater] Storage get timeout, using localStorage fallback for key:",
-            key,
-          );
+          // Silent fallback - use localStorage without warning (expected behavior)
           try {
             const value = localStorage.getItem("pixiv_templater_" + key);
-            // DEBUG: Removed verbose logs
             resolve(value !== null ? value : defaultValue);
           } catch (e) {
             resolve(defaultValue);
           }
-        }, 1000);
+        }, 3000);
       });
     },
     set: async function (key, value) {
@@ -98,21 +94,17 @@
           "*",
         );
 
-        // Fallback timeout
+        // Timeout increased for slow connections
         setTimeout(() => {
           window.removeEventListener("message", handler);
-          console.warn(
-            "[Templater] Storage set timeout, using localStorage fallback for key:",
-            key,
-          );
+          // Silent fallback - use localStorage without warning (expected behavior)
           try {
             localStorage.setItem("pixiv_templater_" + key, value);
-            // DEBUG: Removed verbose logs
           } catch (e) {
             console.error("[Templater] Storage set error:", e);
           }
           resolve(false);
-        }, 1000);
+        }, 3000);
       });
     },
   };

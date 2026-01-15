@@ -28,6 +28,7 @@ A browser extension to automate the illustration upload process on Pixiv. Save t
 - [Features](#features)
 - [Installation](#installation)
 - [Keyboard Shortcuts](#keyboard-shortcuts)
+- [Development](#development)
 
 ## About the Project
 
@@ -89,9 +90,10 @@ The idea came from my own frustration with the Pixiv upload process. Since the s
 
 ### Chrome & Chrome-based browsers
 1. Download the `.zip` file from the [Releases](https://github.com/gabszap/pixiv-templater/releases) page.
-2. Go to `chrome://extensions/`.
-3. Enable **"Developer mode"** in the top right corner.
-4. Click **"Load unpacked"** and select the downloaded `.zip` file.
+2. Extract the contents of the `.zip` file into a folder.
+3. Go to `chrome://extensions/`.
+4. Enable **"Developer mode"** in the top right corner.
+5. Click **"Load unpacked"** and select the extracted folder.
 
 > [!IMPORTANT]
 > **Note:** Currently, only Firefox supports automatic updates. For Chromium-based browsers, automatic updates are not yet available for manual installations. Please check the [Releases](https://github.com/gabszap/pixiv-templater/releases) page periodically to ensure you have the latest version.
@@ -104,6 +106,50 @@ The idea came from my own frustration with the Pixiv upload process. Since the s
 | Minimize Panel | `Alt+Shift+M` |
 | New Template | `Alt+Shift+N` |
 | Apply Template 1-9 | `Alt+1` to `Alt+9` |
+
+## Development
+
+### Prerequisites
+- [Node.js](https://nodejs.org/) (v18+)
+- [web-ext](https://github.com/mozilla/web-ext) (installed via npm)
+
+### Setup
+```bash
+# Clone the repository
+git clone https://github.com/gabszap/pixiv-templater.git
+cd pixiv-templater
+
+# Install dependencies
+npm install
+```
+
+### Build Commands
+```bash
+# Lint the extension
+npm run lint
+
+# Build for Firefox
+npm run build-firefox
+
+# Build for Chrome
+npm run build-chrome
+
+# Build both
+npm run build
+```
+
+### Loading the Extension
+
+**Firefox:**
+1. Go to `about:debugging#/runtime/this-firefox`
+2. Click "Load Temporary Add-on"
+3. Select any file in the project folder
+
+**Chrome:**
+1. Go to `chrome://extensions/`
+2. Enable "Developer mode"
+3. Click "Load unpacked"
+4. Select the project folder (or `artifacts/pixiv-templater-chrome/` after build)
 
 ## Contributing
 
