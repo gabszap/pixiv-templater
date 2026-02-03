@@ -23,6 +23,61 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
         });
         return true; // CRÍTICO pro Chrome MV3
     }
+
+    // Handle fetch requests from content scripts (CORS-free in background)
+    if (message.type === "FETCH_REQUEST") {
+        console.log("[Pixiv Templater Background] Fetch request:", message.url);
+
+        // Headers mínimos para evitar problemas
+        const options = {
+            method: message.options?.method || "GET",
+            headers: {
+                "Accept": "application/json",
+                ...(message.options?.headers || {})
+            },
+            mode: "cors"
+        };
+
+        console.log("[Pixiv Templater Background] Fetch options:", options);
+
+        fetch(message.url, options)
+            .then(async (response) => {
+                console.log("[Pixiv Templater Background] Response status:", response.status, response.statusText);
+                console.log("[Pixiv Templater Background] Response headers:", [...response.headers.entries()]);
+                
+                const contentType = response.headers.get("content-type") || "";
+                let data;
+
+                try {
+                    if (contentType.includes("application/json")) {
+                        data = await response.json();
+                    } else {
+                        data = await response.text();
+                        console.log("[Pixiv Templater Background] Response text (first 500 chars):", data.substring(0, 500));
+                    }
+                } catch (parseError) {
+                    console.error("[Pixiv Templater Background] Parse error:", parseError);
+                    data = null;
+                }
+
+                sendResponse({
+                    success: response.ok,
+                    status: response.status,
+                    statusText: response.statusText,
+                    data: data
+                });
+            })
+            .catch((error) => {
+                console.error("[Pixiv Templater Background] Fetch error:", error);
+                sendResponse({
+                    success: false,
+                    error: error.message
+                });
+            });
+
+        return true; // CRÍTICO - indica resposta assíncrona
+    }
+
     return false;
 });
 

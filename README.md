@@ -110,7 +110,7 @@ The idea came from my own frustration with the Pixiv upload process. Since the s
 ## Development
 
 ### Prerequisites
-- [Node.js](https://nodejs.org/) (v18+)
+- [Node.js](https://nodejs.org/) (v22+)
 - [web-ext](https://github.com/mozilla/web-ext) (installed via npm)
 
 ### Setup

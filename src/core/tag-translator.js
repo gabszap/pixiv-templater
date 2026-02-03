@@ -136,6 +136,62 @@
     // ============================
 
     /**
+     * Generate a unique request ID for message passing
+     * @returns {string}
+     */
+    function generateRequestId() {
+        return `danbooru_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+    }
+
+    /**
+     * Fetch via content script bridge (bypasses CORS)
+     * @param {string} url - URL to fetch
+     * @param {RequestInit} options - Fetch options
+     * @returns {Promise<any>}
+     */
+    function fetchViaBridge(url, options = {}) {
+        return new Promise((resolve, reject) => {
+            const requestId = generateRequestId();
+
+            const handler = (event) => {
+                if (event.source !== window) return;
+                const response = event.data;
+
+                if (response.type === "PIXIV_TEMPLATER_FETCH_RESPONSE" && response.id === requestId) {
+                    window.removeEventListener("message", handler);
+
+                    if (response.success) {
+                        resolve(response.data);
+                    } else if (response.error) {
+                        reject(new Error(response.error));
+                    } else {
+                        reject(new Error(`HTTP ${response.status}: ${response.statusText}`));
+                    }
+                }
+            };
+
+            window.addEventListener("message", handler);
+
+            // Send request to content script
+            window.postMessage({
+                type: "PIXIV_TEMPLATER_FETCH",
+                id: requestId,
+                url: url,
+                options: {
+                    method: options.method || "GET",
+                    headers: options.headers || {}
+                }
+            }, "*");
+
+            // Timeout after 30 seconds
+            setTimeout(() => {
+                window.removeEventListener("message", handler);
+                reject(new Error("Fetch bridge timeout"));
+            }, 30000);
+        });
+    }
+
+    /**
      * Make a request to Danbooru API
      * @param {string} endpoint
      * @param {Record<string, any>} params
@@ -175,18 +231,15 @@
 
         for (let attempt = 0; attempt < CONFIG.MAX_RETRIES; attempt++) {
             try {
-                const response = await fetch(url.toString(), {
+                // Use the bridge for CORS-free requests
+                const data = await fetchViaBridge(url.toString(), {
                     method: "GET",
                     headers: {
                         Accept: "application/json",
                     },
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-
-                return await response.json();
+                return data;
             } catch (error) {
                 console.warn(
                     `[TagTranslator] API request failed (attempt ${attempt + 1}/${CONFIG.MAX_RETRIES}):`,
@@ -206,56 +259,68 @@
 
     /**
      * Search wiki pages by other names (for Japanese → English translation)
+     * Processes in small chunks to avoid URL size limits
      * @param {string[]} tags - Normalized tags to search
      * @returns {Promise<Map<string, TranslatedTag[]>>}
      */
     async function searchWikiPages(tags) {
         if (tags.length === 0) return new Map();
 
-        try {
-            const response = await fetchDanbooru("/wiki_pages", {
-                search: {
-                    other_names_include_any_lower_array: tags,
-                    is_deleted: false,
-                },
-                only: "title,other_names,tag[category]",
-                limit: CONFIG.API_LIMIT,
-            });
+        /** @type {Map<string, TranslatedTag[]>} */
+        const results = new Map();
 
-            /** @type {Map<string, TranslatedTag[]>} */
-            const results = new Map();
+        // Initialize all tags with empty arrays
+        tags.forEach((tag) => results.set(tag.toLowerCase(), []));
 
-            // Initialize all tags with empty arrays
-            tags.forEach((tag) => results.set(tag.toLowerCase(), []));
+        // Process in small chunks to avoid URL length issues (Cloudflare blocks long URLs)
+        const CHUNK_SIZE = 10; // Max tags per request
 
-            // Map responses to their original tags
-            for (const wiki of response) {
-                if (!wiki.tag) continue;
+        for (let i = 0; i < tags.length; i += CHUNK_SIZE) {
+            const chunk = tags.slice(i, i + CHUNK_SIZE);
 
-                const translation = {
-                    name: wiki.title,
-                    prettyName: wiki.title.replace(/_/g, " "),
-                    category: wiki.tag.category,
-                };
+            try {
+                const response = await fetchDanbooru("/wiki_pages", {
+                    search: {
+                        other_names_include_any_lower_array: chunk,
+                        is_deleted: false,
+                    },
+                    only: "title,other_names,tag[category]",
+                    limit: CONFIG.API_LIMIT,
+                });
 
-                // Find which of our requested tags match this wiki's other_names
-                for (const otherName of wiki.other_names || []) {
-                    const normalizedOther = otherName.toLowerCase();
-                    if (results.has(normalizedOther)) {
-                        const existing = results.get(normalizedOther);
-                        // Avoid duplicates
-                        if (!existing.some((t) => t.name === translation.name)) {
-                            existing.push(translation);
+                // Map responses to their original tags
+                for (const wiki of response) {
+                    if (!wiki.tag) continue;
+
+                    const translation = {
+                        name: wiki.title,
+                        prettyName: wiki.title.replace(/_/g, " "),
+                        category: wiki.tag.category,
+                    };
+
+                    // Find which of our requested tags match this wiki's other_names
+                    for (const otherName of wiki.other_names || []) {
+                        const normalizedOther = otherName.toLowerCase();
+                        if (results.has(normalizedOther)) {
+                            const existing = results.get(normalizedOther);
+                            // Avoid duplicates
+                            if (!existing.some((t) => t.name === translation.name)) {
+                                existing.push(translation);
+                            }
                         }
                     }
                 }
-            }
 
-            return results;
-        } catch (error) {
-            console.error("[TagTranslator] Wiki pages search failed:", error);
-            return new Map();
+                // Small delay between chunks to avoid rate limiting
+                if (i + CHUNK_SIZE < tags.length) {
+                    await new Promise((resolve) => setTimeout(resolve, 100));
+                }
+            } catch (error) {
+                console.error(`[TagTranslator] Wiki pages search failed for chunk ${i}-${i + CHUNK_SIZE}:`, error);
+            }
         }
+
+        return results;
     }
 
     /**

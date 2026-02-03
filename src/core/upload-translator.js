@@ -56,6 +56,31 @@
       text-decoration: underline;
     }
 
+    /* Loading indicator */
+    .ptpt-loading {
+      display: inline-block;
+      margin-left: 0.5em;
+      font-size: 11px;
+      color: #888;
+    }
+
+    .ptpt-loading::after {
+      content: '';
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-left: 4px;
+      border: 2px solid #ddd;
+      border-top-color: #0096fa;
+      border-radius: 50%;
+      animation: ptpt-spin 0.8s linear infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes ptpt-spin {
+      to { transform: rotate(360deg); }
+    }
+
     /* Category colors (Danbooru standard) */
     .ptpt-tag-category-0 { color: #0075f8 !important; } /* General */
     .ptpt-tag-category-1 { color: #c00004 !important; } /* Artist */
@@ -64,6 +89,8 @@
     .ptpt-tag-category-5 { color: #fd9200 !important; } /* Meta */
 
     /* Dark mode support - Pixiv uses data-theme="dark" */
+    [data-theme="dark"] .ptpt-loading { color: #aaa; }
+    [data-theme="dark"] .ptpt-loading::after { border-color: #555; border-top-color: #0096fa; }
     [data-theme="dark"] .ptpt-tag-category-0 { color: #009be6 !important; }
     [data-theme="dark"] .ptpt-tag-category-1 { color: #ff8a8b !important; }
     [data-theme="dark"] .ptpt-tag-category-3 { color: #c797ff !important; }
@@ -72,6 +99,8 @@
 
     /* Fallback media query dark mode */
     @media (prefers-color-scheme: dark) {
+      .ptpt-loading { color: #aaa; }
+      .ptpt-loading::after { border-color: #555; border-top-color: #0096fa; }
       .ptpt-tag-category-0 { color: #009be6 !important; }
       .ptpt-tag-category-1 { color: #ff8a8b !important; }
       .ptpt-tag-category-3 { color: #c797ff !important; }
@@ -146,17 +175,25 @@
         // Skip if doesn't have non-Latin characters (no need to translate "fan art")
         if (!hasNonLatinChars(tagText)) return;
 
-        // Skip if already translated
+        // Skip if already translated or has loading indicator
         if (button.dataset.ptptTranslated === "true") return;
-        if (button.nextElementSibling?.classList.contains("ptpt-translated-tags"))
-            return;
+        if (button.nextElementSibling?.classList.contains("ptpt-translated-tags")) return;
+        if (button.nextElementSibling?.classList.contains("ptpt-loading")) return;
 
         // Mark as being translated
         button.dataset.ptptTranslated = "true";
 
+        // Show loading indicator
+        const loadingEl = document.createElement("span");
+        loadingEl.className = "ptpt-loading";
+        button.insertAdjacentElement("afterend", loadingEl);
+
         try {
             const translations =
                 await window.PixivTagTranslator.translateTag(tagText);
+
+            // Remove loading indicator
+            loadingEl.remove();
 
             if (translations && translations.length > 0) {
                 const translationEl = createTranslationElement(translations);
@@ -164,6 +201,8 @@
             }
         } catch (error) {
             console.warn(`[Translator] Failed to translate: ${tagText}`, error.message);
+            // Remove loading indicator on error
+            loadingEl.remove();
             // Reset flag to allow retry
             button.dataset.ptptTranslated = "false";
         }

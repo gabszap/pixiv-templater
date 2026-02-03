@@ -3,8 +3,8 @@
     "pixiv-templater@gabszap": {
       "updates": [
         {
-          "version": "2.1.3",
-          "update_link": "https://github.com/gabszap/pixiv-templater/releases/download/v2.1.3/pixiv-templater-firefox.xpi"
+          "version": "2.1.4",
+          "update_link": "https://github.com/gabszap/pixiv-templater/releases/download/v2.1.4/pixiv-templater-firefox.xpi"
         }
       ]
     }
