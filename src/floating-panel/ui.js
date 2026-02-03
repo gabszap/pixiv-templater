@@ -239,6 +239,12 @@
       async () => await handlePreviewApply(),
     );
 
+    // Help modal
+    $(document).on("click", ".help-close", closeHelpModal);
+    $(document).on("click", "#keyboard-help-modal", function (e) {
+      if (e.target === this) closeHelpModal();
+    });
+
     // Window resize
     $(window).on("resize", handleWindowResize);
   }
@@ -642,14 +648,10 @@
     $list.empty();
 
     Object.keys(templates).forEach((name) => {
+      const template = templates[name];
       const stat = stats[name];
       const useCount = stat ? stat.count : 0;
-
-      let icon = "📝";
-      if (name.includes("R-18")) icon = "🔞";
-      else if (name.includes("Genshin")) icon = "⚔️";
-      else if (name.includes("Honkai")) icon = "🚂";
-      else if (name.includes("Star Rail")) icon = "🌟";
+      let icon = template.emoji || "📝";
 
       const useBadge =
         useCount > 0
@@ -879,6 +881,13 @@
 
       if (e.key === "Escape") {
 
+        if ($("#keyboard-help-modal").hasClass("active")) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          closeHelpModal();
+          return;
+        }
+
         if ($("#template-preview-modal").hasClass("active")) {
           e.preventDefault();
           e.stopImmediatePropagation();
@@ -923,31 +932,78 @@
     const shortcuts = await window.PixivTemplater.loadShortcuts();
     const formatShortcut = (s) => s.toUpperCase().replace(/\+/g, " + ");
 
-    const helpText = `${t("shortcuts.help.title")}
+    const helpHtml = `
+      <div class="help-section">
+        <h3 class="help-section-title">${t("shortcuts.help.panelSection")}</h3>
+        <div class="help-shortcut-list">
+          <div class="help-shortcut-item">
+            <span class="help-shortcut-key">${formatShortcut(shortcuts.togglePanel)}</span>
+            <span class="help-shortcut-desc">${t("shortcuts.help.expandCollapse")}</span>
+          </div>
+          <div class="help-shortcut-item">
+            <span class="help-shortcut-key">${formatShortcut(shortcuts.minimizePanel)}</span>
+            <span class="help-shortcut-desc">${t("shortcuts.help.minimizeMaximize")}</span>
+          </div>
+        </div>
+      </div>
 
-${t("shortcuts.help.panelSection")}
-• ${formatShortcut(shortcuts.togglePanel)} → ${t("shortcuts.help.expandCollapse")}
-• ${formatShortcut(shortcuts.minimizePanel)} → ${t("shortcuts.help.minimizeMaximize")}
+      <div class="help-section">
+        <h3 class="help-section-title">${t("shortcuts.help.templatesSection")}</h3>
+        <div class="help-shortcut-list">
+          <div class="help-shortcut-item">
+            <span class="help-shortcut-key">${formatShortcut(shortcuts.applyTemplate1)} a ${formatShortcut(shortcuts.applyTemplate9)}</span>
+            <span class="help-shortcut-desc">${t("shortcuts.help.applyTemplates19")}</span>
+          </div>
+          <div class="help-shortcut-item">
+            <span class="help-shortcut-key">${formatShortcut(shortcuts.newTemplate)}</span>
+            <span class="help-shortcut-desc">${t("shortcuts.help.createNew")}</span>
+          </div>
+          <div class="help-shortcut-item">
+            <span class="help-shortcut-key">${formatShortcut(shortcuts.exportTemplates)}</span>
+            <span class="help-shortcut-desc">${t("shortcuts.help.export")}</span>
+          </div>
+          <div class="help-shortcut-item">
+            <span class="help-shortcut-key">${formatShortcut(shortcuts.importTemplates)}</span>
+            <span class="help-shortcut-desc">${t("shortcuts.help.import")}</span>
+          </div>
+        </div>
+      </div>
 
+      <div class="help-section">
+        <h3 class="help-section-title">${t("shortcuts.help.modalsSection")}</h3>
+        <div class="help-shortcut-list">
+          <div class="help-shortcut-item">
+            <span class="help-shortcut-key">ESC</span>
+            <span class="help-shortcut-desc">${t("shortcuts.help.closeModal")}</span>
+          </div>
+        </div>
+      </div>
 
-${t("shortcuts.help.templatesSection")}
-• ${formatShortcut(shortcuts.applyTemplate1)} a ${formatShortcut(shortcuts.applyTemplate9)} → ${t("shortcuts.help.applyTemplates19")}
-• ${formatShortcut(shortcuts.newTemplate)} → ${t("shortcuts.help.createNew")}
-• ${formatShortcut(shortcuts.exportTemplates)} → ${t("shortcuts.help.export")}
-• ${formatShortcut(shortcuts.importTemplates)} → ${t("shortcuts.help.import")}
+      <div class="help-section">
+        <h3 class="help-section-title">${t("shortcuts.help.helpSection")}</h3>
+        <div class="help-shortcut-list">
+          <div class="help-shortcut-item">
+            <span class="help-shortcut-key">${formatShortcut(shortcuts.showHelp)}</span>
+            <span class="help-shortcut-desc">${t("shortcuts.help.showThisHelp")}</span>
+          </div>
+        </div>
+      </div>
 
-${t("shortcuts.help.modalsSection")}
-• ESC → ${t("shortcuts.help.closeModal")}
+      <div class="help-tip">
+        <span>${t("shortcuts.help.tip")}</span>
+      </div>
+    `;
 
-${t("shortcuts.help.helpSection")}
-• ${formatShortcut(shortcuts.showHelp)} → ${t("shortcuts.help.showThisHelp")}
+    $("#help-body-content").html(helpHtml);
+    openHelpModal();
+  }
 
-${t("shortcuts.help.configSection")}
-${t("shortcuts.help.configHint")}
+  function openHelpModal() {
+    $("#keyboard-help-modal").addClass("active");
+  }
 
-${t("shortcuts.help.tip")}`;
-
-    alert(helpText);
+  function closeHelpModal() {
+    $("#keyboard-help-modal").removeClass("active");
   }
 
   async function updateShortcutHint() {

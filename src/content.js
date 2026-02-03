@@ -150,13 +150,51 @@
     }));
   }
 
-  // Storage bridge - runs as content script (has access to chrome.storage)
-  // Listens for messages from page context and responds with storage data
+  // Storage bridge and API bridge - runs as content script
+  // Listens for messages from page context and responds with storage data or API responses
+  // The content script context has access to chrome.storage AND can make cross-origin requests
   window.addEventListener("message", async function (event) {
     // Only accept messages from same window
     if (event.source !== window) return;
 
     const message = event.data;
+
+    // Handle fetch requests from page context - route through background script
+    if (message.type === "PIXIV_TEMPLATER_FETCH") {
+      log.debug("Fetch request from page, routing to background:", message.url);
+
+      // Send to background script which can make CORS-free requests
+      chrome.runtime.sendMessage(
+        {
+          type: "FETCH_REQUEST",
+          url: message.url,
+          options: message.options || {}
+        },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            log.error("Background fetch error:", chrome.runtime.lastError);
+            window.postMessage({
+              type: "PIXIV_TEMPLATER_FETCH_RESPONSE",
+              id: message.id,
+              success: false,
+              error: chrome.runtime.lastError.message
+            }, "*");
+            return;
+          }
+
+          window.postMessage({
+            type: "PIXIV_TEMPLATER_FETCH_RESPONSE",
+            id: message.id,
+            success: response.success,
+            status: response.status,
+            statusText: response.statusText,
+            data: response.data,
+            error: response.error
+          }, "*");
+        }
+      );
+      return;
+    }
 
     // Handle dashboard open request
     if (message.type === "PIXIV_TEMPLATER_OPEN_DASHBOARD") {

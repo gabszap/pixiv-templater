@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Pixiv Templater",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "description": "Auto-fill Pixiv upload page with predefined templates",
   "icons": {
     "16": "assets/icons/16.png",
