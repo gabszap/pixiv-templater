@@ -1,193 +1,177 @@
-<p align="center">
-  <img src="https://socialify.git.ci/gabszap/pixiv-templater/image?custom_description=A+browser+extension+that+automates+Pixiv+uploads+using+one-click+templates+for+titles%2C+tags%2C+and+settings.&description=1&font=Inter&logo=https%3A%2F%2Fgithub.com%2Fgabszap%2Fpixiv-templater%2Fraw%2Frefs%2Fheads%2Fmain%2Fassets%2Ficons%2Ficon.svg&name=1&pattern=Solid&theme=Dark" alt="pixiv-templater">
-</p>
+# 🧪 Pixiv Templater - Beta Version
 
-<p align="center">
-  <img src="https://img.shields.io/github/v/release/gabszap/pixiv-templater?style=for-the-badge" alt="Releases">
-  <img src="https://img.shields.io/github/license/gabszap/pixiv-templater?style=for-the-badge" alt="License">
-  <img src="https://img.shields.io/badge/Built_With-Claude-orange?style=for-the-badge&logo=anthropic" alt="Built with Claude">
-  <img src="https://img.shields.io/github/last-commit/gabszap/pixiv-templater?style=for-the-badge&logo=github&logoColor=white&labelColor=black" alt="Last Commit">
-  <img src="https://img.shields.io/github/stars/gabszap/pixiv-templater?style=for-the-badge&logo=github&color=yellow" alt="Stars">
-</p>
-
-<p align="center">
-  <a href="README.md">English</a> | 
-  <a href="docs/README_PT.md">Português</a> | 
-  <a href="docs/README_JP.md">日本語</a> | 
-  <a href="docs/README_ZH-CN.md">中文</a>
-</p>
-
-> [!WARNING]
-> **This is a development branch.** Do not use the files from this branch unless strictly necessary. Otherwise, use the production files in the [**main**](https://github.com/gabszap/pixiv-templater/tree/main) branch.
+> **⚠️ WARNING**: This is the **beta/development version**. It contains the latest features but may be unstable, have bugs, or incomplete functionality. For a stable experience, use the [**main**](https://github.com/gabszap/pixiv-templater/tree/main) branch.
 
 ---
 
-A browser extension to automate the illustration upload process on Pixiv. Save templates with titles, captions, tags, and settings, and apply them with a single click. It also automatically translates Japanese tags to Danbooru tags.
+## 📥 Installation (Beta Version)
 
-## 📌 Table of Contents
-- [About the Project](#about-the-project)
-- [Why I Created This?](#why-i-created-this)
-- [Showcase](#showcase)
-- [Features](#features)
-- [Installation](#installation)
-- [Keyboard Shortcuts](#keyboard-shortcuts)
-- [Development](#development)
+### Chrome / Edge / Brave / Chromium-based browsers
 
-## About the Project
+**Method 1: Direct ZIP (Easiest)**
 
-**Pixiv Templater** is a browser extension designed to streamline the routine of artists who frequently post on Pixiv. Instead of dealing with manual and repetitive data entry or relying on external notes for copy-pasting, the tool allows you to save complete templates and apply them instantly, ensuring speed and consistency in every post.
+1. Download the `Pre-release` ZIP from the [Releases](https://github.com/gabszap/pixiv-templater/releases)
+2. Extract the ZIP file to a folder
+3. Open your browser and go to `chrome://extensions/`
+4. Enable **"Developer mode"** (toggle in top right)
+5. Click **"Load unpacked"**
+6. Select the extracted folder
+7. The extension icon should appear in your toolbar
 
-## Why I Created This?
+> 💡 **Note**: You'll need to manually update by re-downloading when new changes are pushed to this branch. Recommended making a backup of your settings before updating.
 
-The idea came from my own frustration with the Pixiv upload process. Since the site doesn't offer templates, I had to keep my descriptions pinned to my Windows clipboard and manually paste them for every post. Additionally, wasting time researching the meaning of every suggested Japanese tag made the process exhausting. I decided to build this extension to turn this manual labor into a one-click task, letting artists focus on what really matters: posting their art and moving on.
+---
 
-## Showcase
+### Firefox / Firefox-based browsers
 
-<details>
-  <summary>Click to view screenshots</summary>
+#### ⚠️ Important: Extension Signing
 
-  ### Video Demonstration
-  Watch the extension in action.
+Firefox only allows **signed extensions** by default. For beta testing we need to disable this verification:
 
-  ![Demo](assets/demo.mp4)
+This is the easiest way to test beta versions:
 
-  ### Dashboard
-  Manage your templates and settings.
-  ![Dashboard](assets/dashboard.png)
+1. Open Firefox and type `about:config` in the address bar
+2. Search for `xpinstall.signatures.required`
+3. Double-click to set it to `false`
+4. Restart Firefox
+5. Download the `Pre-release` xpi file from the [Releases](https://github.com/gabszap/pixiv-templater/releases)
+6. Go to `about:addons`
+7. Click the gear icon ⚙️ → **"Install Add-on From File..."**
+8. Select the downloaded xpi file
 
-  ### Panel
-  Floating panel on the upload page.
+## 🔄 Updating the Beta Version
 
-  ![Panel](assets/painel.png)
+### Chrome / Chromium browsers
 
-  ### Tag Translation
-  Automated translations.
+The beta version **does not auto-update**. To get the latest beta:
 
-  ![Tag Translation](assets/translated-tags.png)
+1. Re-download the ZIP from this branch
+2. Remove the old extension: Go to `chrome://extensions/` → click "Remove"
+3. Follow the installation steps above again
 
-</details>
+### Firefox
 
-## Features
+**✅ Firefox supports auto-update for beta versions!** When a new Pre-release is published, Firefox will automatically update the extension. You'll see a notification in `about:addons` when an update is available.
 
-### Templates
-- 📝 Save templates with title, caption, tags, age rating, and AI-generated status.
-- 🔄 Apply templates with one click or via keyboard shortcuts.
-- 📂 Export and import templates (JSON) for backup or sharing.
+If you prefer to manually update:
+1. Go to `about:addons`
+2. Find Pixiv Templater and click "Remove"
+3. Download the latest `Pre-release` xpi from [Releases](https://github.com/gabszap/pixiv-templater/releases)
+4. Install the new version following the steps above
 
-### Tag Translation
-- 🏷️ Automatically translates Japanese tags on the upload page to Danbooru tags.
-- 🎨 Color-coded by category (artist, character, copyright, general, meta).
+---
 
-### Ease of Use
-- ⚡ Floating panel that can be minimized.
-- ⌨️ Fully customizable keyboard shortcuts.
-- 🌙 Native Dark Mode support.
+## 🐛 Reporting Bugs
 
-## Installation
+Found an issue in the beta? Please help us improve!
 
-### Firefox & Firefox-based browsers
-1. Download the latest `.xpi` file from the [Releases](https://github.com/gabszap/pixiv-templater/releases) page.
-2. Open Firefox and type `about:addons` in the address bar.
-3. Click the gear icon and select **"Install Add-on From File..."**.
-4. Select the downloaded `.xpi` file.
+1. Check if the bug exists in the [Issues](https://github.com/gabszap/pixiv-templater/issues) tab
+2. If not reported yet, create a new issue with:
+   - **Title**: Start with `[BETA]` 
+   - **Browser**: Which browser and version?
+   - **Steps to reproduce**: What did you do?
+   - **Expected vs Actual**: What should happen vs what happened?
+   - **Screenshots**: If applicable
 
-### Chrome & Chrome-based browsers
-1. Download the `.zip` file from the [Releases](https://github.com/gabszap/pixiv-templater/releases) page.
-2. Extract the contents of the `.zip` file into a folder.
-3. Go to `chrome://extensions/`.
-4. Enable **"Developer mode"** in the top right corner.
-5. Click **"Load unpacked"** and select the extracted folder.
+---
 
-> [!IMPORTANT]
-> **Note:** Currently, only Firefox supports automatic updates. For Chromium-based browsers, automatic updates are not yet available for manual installations. Please check the [Releases](https://github.com/gabszap/pixiv-templater/releases) page periodically to ensure you have the latest version.
+## 📋 What's New in Beta?
 
-## Keyboard Shortcuts
+Check the commit history in this branch to see recent changes. The beta includes:
+- Latest features being tested
+- Bug fixes not yet in stable
+- Experimental functionality
 
-| Action | Default Shortcut |
-|------|---------------|
-| Open/Close Panel | `Alt+Shift+T` |
-| Minimize Panel | `Alt+Shift+M` |
-| New Template | `Alt+Shift+N` |
-| Apply Template 1-9 | `Alt+1` to `Alt+9` |
+---
 
-## Development
+## 🚀 Want to Contribute?
+
+Interested in helping develop this extension? See our [Contributing Guide](#contributing) below.
+
+---
+
+## 📁 Project Structure (For Developers)
+
+```
+pixiv-templater/
+├── src/
+│   ├── background/           # Service worker scripts
+│   ├── content/              # Content scripts (injected into Pixiv pages)
+│   ├── popup/                # Extension popup UI
+│   ├── panel/                # Floating panel components
+│   ├── dashboard/            # Options/dashboard page
+│   ├── utils/                # Shared utilities
+│   └── locales/              # i18n translation files
+├── assets/                   # Static assets (icons, images)
+├── docs/                     # Documentation in multiple languages
+├── manifest-firefox.json     # Firefox manifest
+├── manifest-chrome.json      # Chrome manifest
+└── package.json
+```
+
+---
+
+## 🤝 Contributing
 
 ### Prerequisites
-- [Node.js](https://nodejs.org/) (v22+)
-- [web-ext](https://github.com/mozilla/web-ext) (installed via npm)
+- [Node.js](https://nodejs.org/) v22+
+- [Git](https://git-scm.com/)
 
-### Setup
+### Setup for Development
+
 ```bash
 # Clone the repository
 git clone https://github.com/gabszap/pixiv-templater.git
 cd pixiv-templater
 
+# Switch to dev branch
+git checkout dev
+
 # Install dependencies
 npm install
+
+# Build extension
+npm run build-firefox # or npm run build-chrome
 ```
 
-### Build Commands
-```bash
-# Lint the extension
-npm run lint
+### Available Scripts
 
-# Build for Firefox
-npm run build-firefox
+| Command | Description |
+|---------|-------------|
+| `npm run build-firefox` | Build production `.xpi` |
+| `npm run build-chrome` | Build production `.zip` |
+| `npm run build` | Build both firefox and chrome |
+| `npm run lint` | Run code linter |
 
-# Build for Chrome
-npm run build-chrome
+---
 
-# Build both
-npm run build
+### Branch Strategy
+
+- **`main`**: Stable production releases
+- **`dev`**: Beta/development branch (you are here)
+- **`feature/*`**: Individual feature branches
+
+### Commit Convention
+
+We use [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+feat: add new template feature
+fix: resolve tag translation bug
+docs: update README
 ```
 
-### Loading the Extension
+---
 
-**Firefox:**
-1. Go to `about:debugging#/runtime/this-firefox`
-2. Click "Load Temporary Add-on"
-3. Select any file in the project folder
+## 📚 Documentation
 
-**Chrome:**
-1. Go to `chrome://extensions/`
-2. Enable "Developer mode"
-3. Click "Load unpacked"
-4. Select the project folder (or `artifacts/pixiv-templater-chrome/` after build)
+- **User Guide**: Available in multiple languages in `/docs/` folder
+- **Adding Translations**: 
+  1. Create `locales/[code].json` (use `en.json` as template)
+  2. Add to `locales/languages.json`
 
-## Contributing
+---
 
-Any contributions are greatly appreciated.
-
-1. **Fork** the project
-2. Create a **Branch** for your Feature (`git checkout -b feature/AmazingFeature`)
-3. **Commit** your changes (`git commit -m 'Add some AmazingFeature'`)
-4. **Push** to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a **Pull Request**
-
-If you find a bug or have a suggestion, feel free to open an [Issue](https://github.com/gabszap/pixiv-templater/issues).
-
-Want to add translations for another language? Feel free to submit a Pull Request.
-
-<details>
-  <summary>How to add new languages</summary>
-If you want to contribute by adding a new language to the extension, follow these quick steps:
-
-1. **Create the locale file**: Go to `locales/` and create a new JSON file named after the [language code](https://developer.chrome.com/docs/extensions/reference/api/i18n#locales) (e.g., `fr.json` for French). You can use `en.json` as a base.
-2. **Register the language**: Open `locales/languages.json` and add your language code and its display name to the list:
-   ```json
-   "fr": "Français"
-   ```
-3. **Translate**: Fill the new JSON file with the translated strings.
-
-That's it! The extension will automatically detect the new language and show it in the settings menu. Feel free to submit a Pull Request with your translation!
-
-</details>
-
-## Credits
-
-- Tag translation based on [translate-pixiv-tags](https://github.com/evazion/translate-pixiv-tags) by evazion.
-- Tag API: [Danbooru](https://danbooru.donmai.us).
-
-## License
+## 📄 License
 
 MIT License - see [LICENSE](LICENSE)

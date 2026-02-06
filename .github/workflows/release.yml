@@ -110,7 +110,8 @@ jobs:
       - name: Launch update
         if: steps.check_release.outputs.exists == 'false'
         run: |
-          cat > updates.json <<EOF
+          mkdir -p dist-stable
+          cat > dist-stable/updates.json <<EOF
           {
             "addons": {
               "pixiv-templater@gabszap": {
@@ -125,14 +126,14 @@ jobs:
           }
           EOF
 
-      - name: Commit updates
+      - name: Deploy Stable Metadata to Pages
         if: steps.check_release.outputs.exists == 'false'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add updates.json
-          git commit --amend --no-edit || echo "No changes to commit"
-          git push --force
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist-stable
+          branch: gh-pages
+          target-folder: .
+          clean: false
 
       - name: Create GitHub Release
         if: steps.check_release.outputs.exists == 'false'

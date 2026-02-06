@@ -184,8 +184,113 @@
     // Check for AI translation warning
     checkAITranslationWarning();
 
+    // Load changelog when switching to changelog tab
+    $(document).on('click', '.tab[data-tab="changelog"]', function() {
+      loadChangelog().catch((err) => console.error("[Options] Error loading changelog:", err));
+    });
+
+    // Check for changelog popup on load (after a small delay)
+    setTimeout(() => {
+      checkChangelogPopup().catch((err) => console.error("[Options] Error checking changelog popup:", err));
+    }, 500);
+
     console.log("[Pixiv Templater Dashboard] Initialized successfully");
   });
+
+  // ============================
+  // CHANGELOG POPUP
+  // ============================
+  
+  async function checkChangelogPopup() {
+    try {
+      const manifest = chrome.runtime.getManifest();
+      const currentVersion = manifest.version;
+      
+      // Check if debug mode is enabled (for testing - always shows popup)
+      const debugMode = await Storage.get("debug_mode", false);
+      
+      if (debugMode) {
+        console.log("[Dashboard] DEBUG MODE: Showing changelog popup for testing");
+        const response = await fetch('https://api.github.com/repos/gabszap/pixiv-templater/releases/latest');
+        if (response.ok) {
+          const release = await response.json();
+          showChangelogPopup(release, currentVersion, true);
+        }
+        return;
+      }
+      
+      // Check if user already dismissed this version
+      const lastShownVersion = await Storage.get("changelog_popup_shown", "");
+      const dontShowAgain = await Storage.get("changelog_popup_dismissed_" + currentVersion, false);
+      
+      if (dontShowAgain || lastShownVersion === currentVersion) {
+        console.log("[Dashboard] Changelog popup already shown for version", currentVersion);
+        return;
+      }
+      
+      // Fetch latest release from GitHub
+      const response = await fetch('https://api.github.com/repos/gabszap/pixiv-templater/releases/latest');
+      
+      if (!response.ok) {
+        console.log("[Dashboard] Could not fetch latest release");
+        return;
+      }
+      
+      const release = await response.json();
+      const releaseVersion = release.tag_name.replace(/^v/, '');
+      
+      // Only show if there's a newer version or it's the current version
+      // We show it to announce the current version's changes
+      showChangelogPopup(release, currentVersion, false);
+      
+    } catch (error) {
+      console.error("[Dashboard] Error checking for changelog popup:", error);
+    }
+  }
+
+  function showChangelogPopup(release, currentVersion, isDebug) {
+    const releaseVersion = release.tag_name.replace(/^v/, '');
+    const isCurrent = releaseVersion === currentVersion;
+    const isBeta = release.prerelease || releaseVersion.includes('beta');
+    
+    // Build version tag
+    let versionTagContent = `${release.tag_name}`;
+    
+    if (isDebug) {
+      versionTagContent += ` <span class="beta-badge">DEBUG MODE</span>`;
+    } else if (isCurrent) {
+      versionTagContent += ` <span class="${isBeta ? 'beta-badge' : 'stable-badge'}">${isBeta ? 'BETA' : 'STABLE'}</span>`;
+    } else {
+      versionTagContent += ` <span class="beta-badge" style="background: var(--primary-blue); color: white;">NEW</span>`;
+    }
+    
+    $("#changelog-popup-version").html(versionTagContent);
+    
+    // Format and set body content
+    const formattedBody = formatChangelogBody(release.body || '');
+    $("#changelog-popup-body").html(formattedBody);
+    
+    // Show modal
+    $("#changelog-popup-modal").addClass("active");
+    
+    // Mark as shown (only if not in debug mode)
+    if (!isDebug) {
+      Storage.set("changelog_popup_shown", currentVersion);
+    }
+    
+    console.log("[Dashboard] Changelog popup shown for version", releaseVersion, isDebug ? "(DEBUG MODE)" : "");
+  }
+
+  function closeChangelogPopup() {
+    const currentVersion = chrome.runtime.getManifest().version;
+    const dontShowAgain = $("#changelog-popup-dont-show").is(":checked");
+    
+    if (dontShowAgain) {
+      Storage.set("changelog_popup_dismissed_" + currentVersion, true);
+    }
+    
+    $("#changelog-popup-modal").removeClass("active");
+  }
 
   // ============================
   // AI TRANSLATION WARNING
@@ -294,6 +399,14 @@
       handleResetStats().catch((err) => console.error(err)),
     );
 
+    // Changelog
+    $("#refresh-changelog").on("click", () =>
+      loadChangelog().catch((err) => console.error(err)),
+    );
+    $("#retry-changelog").on("click", () =>
+      loadChangelog().catch((err) => console.error(err)),
+    );
+
     // Advanced settings
     $("#debug-mode-toggle").on("change", (e) =>
       handleDebugToggle(e).catch((err) => console.error(err)),
@@ -313,6 +426,19 @@
     $("#warning-modal-ok").on("click", closeWarningModal);
     $("#warning-modal-readme").on("click", () => {
       window.open("https://github.com/gabszap/pixiv-templater#contributing", "_blank");
+    });
+
+    // Changelog Popup handlers
+    $("#changelog-popup-close").on("click", closeChangelogPopup);
+    $("#changelog-popup-ok").on("click", closeChangelogPopup);
+    $("#changelog-popup-modal").on("click", function (e) {
+      if (e.target === this) closeChangelogPopup();
+    });
+    $("#changelog-popup-view-all").on("click", function (e) {
+      e.preventDefault();
+      closeChangelogPopup();
+      switchTab('changelog');
+      loadChangelog().catch((err) => console.error("[Options] Error loading changelog:", err));
     });
   }
 
@@ -1067,6 +1193,210 @@
     await loadStats();
     alert(t("messages.statsCleared"));
     console.log("[Options] Stats reset");
+  }
+
+  // ============================
+  // CHANGELOG MANAGEMENT
+  // ============================
+
+  async function loadChangelog() {
+    console.log("[Options] Loading changelog...");
+    
+    const $list = $("#changelog-list");
+    const $loading = $("#changelog-loading");
+    const $error = $("#changelog-error");
+    const $empty = $("#changelog-empty");
+    
+    // Show loading, hide others
+    $list.hide();
+    $error.hide();
+    $empty.hide();
+    $loading.show();
+    
+    try {
+      // Fetch releases from GitHub API
+      const response = await fetch('https://api.github.com/repos/gabszap/pixiv-templater/releases');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const releases = await response.json();
+      
+      if (releases.length === 0) {
+        $loading.hide();
+        $empty.show();
+        return;
+      }
+      
+      // Get current version
+      const manifest = chrome.runtime.getManifest();
+      const currentVersion = manifest.version;
+      
+      // Display current version info
+      const versionInfoHtml = `
+        <div class="current-version">
+          <div class="version-badge ${currentVersion.includes('beta') ? 'beta' : 'stable'}">
+            ${currentVersion.includes('beta') ? 'BETA' : 'STABLE'}
+          </div>
+          <div class="version-number">${currentVersion}</div>
+          <div class="version-label">${t('changelog.currentVersion')}</div>
+        </div>
+      `;
+      $("#current-version-info").html(versionInfoHtml);
+      
+      // Render changelog entries
+      $list.empty();
+      
+      releases.forEach(release => {
+        const isCurrent = release.tag_name === `v${currentVersion}` || release.tag_name === currentVersion;
+        const isBeta = release.prerelease || release.tag_name.includes('beta');
+        const releaseDate = new Date(release.published_at).toLocaleDateString(
+          window.PixivTemplaterI18n?.getCurrentLanguage() === 'pt-br' ? 'pt-BR' : 'en-US',
+          { year: 'numeric', month: 'long', day: 'numeric' }
+        );
+        
+        const $entry = $(`
+          <div class="changelog-entry ${isCurrent ? 'current' : ''} ${isBeta ? 'beta' : 'stable'}">
+            <div class="changelog-header">
+              <div class="changelog-version">
+                <span class="version-tag">${release.tag_name}</span>
+                ${isCurrent ? '<span class="current-badge">' + t('changelog.current') + '</span>' : ''}
+                ${isBeta ? '<span class="beta-badge">BETA</span>' : ''}
+              </div>
+              <div class="changelog-date">${releaseDate}</div>
+            </div>
+            <div class="changelog-body">
+              ${release.body ? formatChangelogBody(release.body) : '<p class="no-notes">' + t('changelog.noNotes') + '</p>'}
+            </div>
+            <div class="changelog-footer">
+              <a href="${release.html_url}" target="_blank" class="btn btn-secondary btn-small">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/>
+                  <path d="M9 18c-4.51 2-5-2-7-2"/>
+                </svg>
+                ${t('changelog.viewRelease')}
+              </a>
+            </div>
+          </div>
+        `);
+        
+        $list.append($entry);
+      });
+      
+      $loading.hide();
+      $list.show();
+      
+      console.log("[Options] Changelog loaded:", releases.length, "releases");
+    } catch (error) {
+      console.error("[Options] Failed to load changelog:", error);
+      $loading.hide();
+      $error.show();
+    }
+  }
+
+  function formatChangelogBody(body) {
+    if (!body || body.trim() === '') {
+      return '<p class="no-notes">' + t('changelog.noNotes') + '</p>';
+    }
+    
+    // Remove shields.io badges and other images (they don't render in dashboard)
+    let formatted = body
+      .replace(/!\[([^\]]*)\]\((https:\/\/img\.shields\.io[^)]+)\)/gi, '')
+      .replace(/!\[([^\]]*)\]\([^)]+\)/g, '');
+    
+    // Escape HTML to prevent XSS
+    formatted = formatted
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    
+    // Format markdown headers
+    formatted = formatted
+      .replace(/^#{1,2}\s+(.+)$/gm, '<h4>$1</h4>')
+      .replace(/^#{3,6}\s+(.+)$/gm, '<h5>$1</h5>');
+    
+    // Format bold and italic
+    formatted = formatted
+      .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/___(.+?)___/g, '<strong><em>$1</em></strong>')
+      .replace(/__(.+?)__/g, '<strong>$1</strong>')
+      .replace(/_(.+?)_/g, '<em>$1</em>');
+    
+    // Format code
+    formatted = formatted
+      .replace(/`([^`]+)`/g, '<code>$1</code>');
+    
+    // Format links [text](url)
+    formatted = formatted
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    
+    // Format lists
+    // First, wrap consecutive list items in <ul>
+    const lines = formatted.split('\n');
+    let inList = false;
+    let result = [];
+    
+    for (let line of lines) {
+      const trimmed = line.trim();
+      
+      // Check if line is a list item
+      if (trimmed.match(/^[-\*•]\s/)) {
+        const content = trimmed.replace(/^[-\*•]\s+/, '');
+        if (!inList) {
+          result.push('<ul>');
+          inList = true;
+        }
+        result.push('<li>' + content + '</li>');
+      } else if (trimmed.match(/^\d+[\.\)]\s/)) {
+        const content = trimmed.replace(/^\d+[\.\)]\s+/, '');
+        if (!inList) {
+          result.push('<ol>');
+          inList = true;
+        }
+        result.push('<li>' + content + '</li>');
+      } else {
+        if (inList) {
+          // Close the previous list
+          const lastTag = result[result.length - 1];
+          if (lastTag && lastTag.startsWith('<li>')) {
+            // Check if the last opened tag was <ul> or <ol>
+            const openTag = result.findLast(tag => tag === '<ul>' || tag === '<ol>');
+            result.push(openTag === '<ol>' ? '</ol>' : '</ul>');
+          }
+          inList = false;
+        }
+        
+        // Check if it's a heading (already processed) or just text
+        if (trimmed.startsWith('<h')) {
+          result.push(line);
+        } else if (trimmed !== '') {
+          // Regular paragraph
+          result.push('<p>' + line + '</p>');
+        } else {
+          // Empty line - add spacing
+          result.push('');
+        }
+      }
+    }
+    
+    // Close any open list at the end
+    if (inList) {
+      const openTag = result.findLast(tag => tag === '<ul>' || tag === '<ol>');
+      result.push(openTag === '<ol>' ? '</ol>' : '</ul>');
+    }
+    
+    // Join and clean up
+    formatted = result.join('\n');
+    
+    // Remove empty paragraphs and fix spacing
+    formatted = formatted
+      .replace(/<p><\/p>/g, '')
+      .replace(/\n{3,}/g, '\n\n');
+    
+    return formatted;
   }
 
   // ============================

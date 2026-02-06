@@ -89,6 +89,7 @@
         "tabStats": "Estatísticas",
         "tabAbout": "Sobre",
         "tabShortcuts": "Atalhos",
+        "tabChangelog": "Changelog",
         "tabSettings": "Configurações",
         "manageTemplates": "Gerenciar Templates",
         "newTemplate": "Novo Template",
@@ -254,6 +255,25 @@
         "cancel": "Cancelar",
         "close": "Fechar",
         "save": "Salvar",
-        "deleteConfirm": "DELETAR"
+        "deleteConfirm": "DELETAR",
+        "gotIt": "Entendi! 👍"
+    },
+    "changelog": {
+        "title": "Changelog",
+        "refresh": "Atualizar",
+        "viewOnGitHub": "Ver no GitHub",
+        "loading": "Carregando changelog...",
+        "error": "Falha ao carregar changelog",
+        "errorHint": "Verifique sua conexão com a internet ou tente novamente mais tarde.",
+        "retry": "Tentar Novamente",
+        "noReleases": "Nenhum release encontrado",
+        "noReleasesHint": "Não há releases disponíveis no momento.",
+        "currentVersion": "Versão Atual",
+        "current": "ATUAL",
+        "viewRelease": "Ver Release",
+        "noNotes": "Notas de release não disponíveis",
+        "popupTitle": "Novidades",
+        "dontShowAgain": "Não mostrar novamente para esta versão",
+        "viewAllChanges": "Ver Todas as Mudanças"
     }
 }

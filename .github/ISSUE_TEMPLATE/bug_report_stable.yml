@@ -1,0 +1,138 @@
+name: 🐛 Bug Report - Stable Version
+description: Report a bug in the stable release version
+title: "[BUG] "
+labels: ["bug", "stable"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug in the stable version! Please fill out this form to help us fix the issue.
+
+  - type: checkboxes
+    id: version-check
+    attributes:
+      label: Version Check
+      description: Please confirm you are using the stable version
+      options:
+        - label: I am using the latest stable release (main branch or latest release)
+          required: true
+        - label: I have checked that this bug has not been fixed in a newer release
+          required: true
+
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      description: Which browser are you using?
+      options:
+        - Chrome
+        - Firefox
+        - Edge
+        - Brave
+        - Opera
+        - Safari
+        - Other (specify in description)
+    validations:
+      required: true
+
+  - type: input
+    id: browser-version
+    attributes:
+      label: Browser Version
+      description: What version of the browser? (e.g., 120.0.1)
+      placeholder: "120.0.1"
+    validations:
+      required: true
+
+  - type: input
+    id: extension-version
+    attributes:
+      label: Extension Version
+      description: What version of the extension? (check in browser extensions page or releases)
+      placeholder: "e.g., 1.2.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: installation-method
+    attributes:
+      label: Installation Method
+      description: How did you install the extension?
+      options:
+        - Firefox Add-ons Store
+        - GitHub Releases (manual install)
+        - Built from source
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear description of what the bug is
+      placeholder: Describe the bug here...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this bug?
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Scroll down to '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: Describe what should have happened...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: Describe what actually happened...
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots to help explain your problem
+      placeholder: Drag and drop images here or describe what you see
+    validations:
+      required: false
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Workaround
+      description: Have you found any way to work around this bug?
+      placeholder: Describe any temporary solutions you've found...
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: additional
+    attributes:
+      label: Additional Information
+      options:
+        - label: This bug started happening recently (worked before)
+        - label: This bug happens consistently
+        - label: This bug prevents me from using the extension
+        - label: I have tested this in an incognito/private window
+        - label: I have disabled other extensions to rule out conflicts

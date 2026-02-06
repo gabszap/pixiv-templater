@@ -1,0 +1,205 @@
+name: Dev/Beta Production Release
+
+on:
+  push:
+    paths:
+      - 'manifest.json'
+    branches:
+      - dev
+  workflow_dispatch:
+    inputs:
+      beta_version:
+        description: 'Beta version suffix (e.g., 1 for v1.2.0-beta.1)'
+        required: true
+        default: '1'
+      release_notes:
+        description: 'Release notes for this beta version'
+        required: false
+        default: 'Beta release with latest features and fixes from dev branch.'
+
+jobs:
+  beta-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Get base version and create beta tag
+        id: version
+        run: |
+          # Get raw version from manifest
+          RAW_VERSION=$(jq -r '.version' manifest.json)
+          echo "Raw version from manifest: $RAW_VERSION"
+          
+          # Extract base version (remove any existing -beta.X suffix)
+          # If version is "2.1.5-beta.3", extract "2.1.5"
+          # If version is "2.1.5", keep "2.1.5"
+          if [[ "$RAW_VERSION" =~ ^(.+)-beta\. ]]; then
+            BASE_VERSION="${BASH_REMATCH[1]}"
+            echo "Detected existing beta suffix, extracted base: $BASE_VERSION"
+          else
+            BASE_VERSION="$RAW_VERSION"
+            echo "No beta suffix found, using full version: $BASE_VERSION"
+          fi
+          
+          # Count commits on dev branch for auto-incrementing beta number
+          COMMIT_COUNT=$(git rev-list --count HEAD)
+          
+          # Determine beta version
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            BETA_NUM="${{ github.event.inputs.beta_version }}"
+          else
+            BETA_NUM="$COMMIT_COUNT"
+          fi
+          
+          BETA_VERSION="${BASE_VERSION}-beta.${BETA_NUM}"
+          echo "beta_version=$BETA_VERSION" >> $GITHUB_OUTPUT
+          echo "Created beta version: $BETA_VERSION"
+
+      - name: Update manifest versions for beta
+        run: |
+          BETA_VERSION="${{ steps.version.outputs.beta_version }}"
+          
+          # Update Firefox manifest
+          jq --arg v "$BETA_VERSION" '.version = $v' manifest.json > tmp.json && mv tmp.json manifest.json
+          
+          # Update Chrome manifest
+          jq --arg v "$BETA_VERSION" '.version = $v' manifest.chrome.json > tmp.json && mv tmp.json manifest.chrome.json
+          
+          echo "Updated manifests to version: $BETA_VERSION"
+
+      - name: Lint extension
+        run: npm run lint
+
+      - name: Build Firefox (unsigned)
+        run: npm run build-firefox
+
+      - name: Build Chrome (unsigned)
+        run: npm run build-chrome
+
+      - name: List artifacts
+        run: ls -la artifacts/
+
+      - name: Rename artifacts with beta tag
+        run: |
+          BETA_VERSION="${{ steps.version.outputs.beta_version }}"
+          
+          # Rename Firefox artifact to xpi extension
+          mv artifacts/pixiv-templater-firefox.zip artifacts/pixiv-templater-firefox-${BETA_VERSION}.zip
+          
+          # Rename Chrome artifact
+          mv artifacts/pixiv-templater-chrome.zip artifacts/pixiv-templater-chrome-${BETA_VERSION}.zip
+          
+          echo "Renamed artifacts:"
+          ls -la artifacts/
+
+      - name: Create Pre-Release
+        run: |
+          BETA_VERSION="${{ steps.version.outputs.beta_version }}"
+          
+          # Get release notes
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            NOTES="${{ github.event.inputs.release_notes }}"
+          else
+            # Get last 5 commit messages for auto-generated notes
+            NOTES="Beta release from dev branch.\n\nRecent commits:\n$(git log -5 --pretty=format:'- %s')"
+          fi
+          
+          # Create release notes file
+          cat > release_notes.md <<EOF
+          ## 🧪 Beta Release ${BETA_VERSION}
+          
+          ${NOTES}
+          
+          ---
+          
+          ### ⚠️ Important Notes
+          
+          **This is a BETA version** and may contain:
+          - Latest features but unstable
+          - Known or unknown bugs
+          - Incomplete functionality
+          - Potential data loss
+
+          For a stable experience, use the [latest stable release](https://github.com/gabszap/pixiv-templater/releases/latest).
+          
+          ---
+          
+          ### Installation Instructions
+          
+          **Firefox:**
+          1. Download the ".zip" file (rename to .xpi if needed)
+          2. Go to \`about:addons\`
+          3. Click gear icon → "Install Add-on From File..."
+          4. Note: You need to disable signature verification in Regular Firefox, readme has a guide on how to do it.
+          
+          **Chrome:**
+          1. Download the .zip file and extract it
+          2. Go to \`chrome://extensions/\`
+          3. Enable "Developer mode"
+          4. Click "Load unpacked" and select the extracted folder
+          
+          ---
+          
+          ### Auto-Update
+          
+          ✅ **Firefox**: Auto-updates enabled - you'll receive notifications when new beta versions are released
+          ❌ **Chrome**: No auto-update - you'll need to manually download and reinstall new beta versions
+          EOF
+
+          # Create the pre-release
+          gh release create "v${BETA_VERSION}" \
+            ./artifacts/pixiv-templater-firefox-${BETA_VERSION}.zip \
+            ./artifacts/pixiv-templater-chrome-${BETA_VERSION}.zip \
+            --title "v${BETA_VERSION} (Beta)" \
+            --notes-file release_notes.md \
+            --prerelease
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate Beta updates.json
+        run: |
+          BETA_VERSION="${{ steps.version.outputs.beta_version }}"
+          mkdir -p dist-beta
+          cat > dist-beta/updates-beta.json <<EOF
+          {
+            "addons": {
+              "pixiv-templater@gabszap": {
+                "updates": [
+                  {
+                    "version": "$BETA_VERSION",
+                    "update_link": "https://github.com/gabszap/pixiv-templater/releases/download/v${BETA_VERSION}/pixiv-templater-firefox-${BETA_VERSION}.zip"
+                  }
+                ]
+              }
+            }
+          }
+          EOF
+
+      - name: Deploy Beta Metadata to Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist-beta
+          branch: gh-pages
+          target-folder: .
+          clean: false
+
+      - name: Upload artifacts as backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: beta-artifacts-${{ steps.version.outputs.beta_version }}
+          path: artifacts/*.zip
+          retention-days: 30

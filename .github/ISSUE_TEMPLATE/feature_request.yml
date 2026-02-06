@@ -1,0 +1,116 @@
+name: ✨ Feature Request
+description: Suggest a new feature or enhancement
+title: "[FEATURE] "
+labels: ["enhancement"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an idea to improve Pixiv Templater? We'd love to hear it!
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I have searched existing issues to avoid duplicates
+          required: true
+        - label: This feature does not already exist in the extension
+          required: true
+        - label: This is not a bug report (use bug report templates instead)
+          required: true
+
+  - type: dropdown
+    id: feature-type
+    attributes:
+      label: Feature Type
+      description: What kind of feature is this?
+      options:
+        - New Feature (something that doesn't exist yet)
+        - Enhancement (improve existing feature)
+        - UI/UX Improvement
+        - Performance Improvement
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Feature Description
+      description: Describe the feature you'd like to see
+      placeholder: |
+        A clear description of what you want to happen...
+        
+        Example: "I would like a button that allows me to..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve?
+      placeholder: |
+        Is your feature request related to a problem? 
+        
+        Example: "I'm always frustrated when I have to..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: How do you envision this working?
+      placeholder: |
+        Describe how you think this feature should work:
+        
+        1. User clicks on...
+        2. Then the extension does...
+        3. Finally, the result is...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any alternative solutions?
+      placeholder: |
+        What other approaches have you tried or thought about?
+        Why is your proposed solution better?
+    validations:
+      required: false
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case / User Story
+      description: Who would benefit from this and how?
+      placeholder: |
+        As a [type of user], I want [feature] so that [benefit].
+        
+        Example: "As an artist who posts daily, I want batch template import so that I can save time setting up templates for multiple series."
+    validations:
+      required: false
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: Mockups / Screenshots
+      description: If you have any mockups or examples from other tools, share them here
+      placeholder: Drag and drop images here or describe the UI you envision
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: additional
+    attributes:
+      label: Additional Context
+      options:
+        - label: I am willing to help implement this feature
+        - label: This feature is critical for my workflow
+        - label: I can provide more detailed specifications if needed
