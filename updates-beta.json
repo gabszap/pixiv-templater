@@ -1,0 +1,12 @@
+{
+  "addons": {
+    "pixiv-templater@gabszap": {
+      "updates": [
+        {
+          "version": "2.1.5.35",
+          "update_link": "https://github.com/gabszap/pixiv-templater/releases/download/v2.1.5-beta.35/pixiv-templater-firefox-2.1.5-beta.35.zip"
+        }
+      ]
+    }
+  }
+}
