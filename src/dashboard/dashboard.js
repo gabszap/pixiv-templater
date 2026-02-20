@@ -96,10 +96,11 @@
   async function loadVersion() {
     try {
       const manifest = chrome.runtime.getManifest();
+      const versionString = manifest.version_name || manifest.version;
       document.getElementById("header-version").textContent =
-        "v" + manifest.version;
+        "v" + versionString;
       document.getElementById("about-version").textContent =
-        t("common.version") + " " + manifest.version;
+        t("common.version") + " " + versionString;
     } catch (err) {
       console.error("Failed to load version:", err);
     }
@@ -185,7 +186,7 @@
     checkAITranslationWarning();
 
     // Load changelog when switching to changelog tab
-    $(document).on('click', '.tab[data-tab="changelog"]', function() {
+    $(document).on('click', '.tab[data-tab="changelog"]', function () {
       loadChangelog().catch((err) => console.error("[Options] Error loading changelog:", err));
     });
 
@@ -200,49 +201,57 @@
   // ============================
   // CHANGELOG POPUP
   // ============================
-  
+
   async function checkChangelogPopup() {
     try {
       const manifest = chrome.runtime.getManifest();
-      const currentVersion = manifest.version;
-      
+      const currentVersion = manifest.version_name || manifest.version;
+
       // Check if debug mode is enabled (for testing - always shows popup)
       const debugMode = await Storage.get("debug_mode", false);
-      
+
       if (debugMode) {
         console.log("[Dashboard] DEBUG MODE: Showing changelog popup for testing");
-        const response = await fetch('https://api.github.com/repos/gabszap/pixiv-templater/releases/latest');
+        const response = await fetch('https://api.github.com/repos/gabszap/pixiv-templater/releases');
         if (response.ok) {
-          const release = await response.json();
-          showChangelogPopup(release, currentVersion, true);
+          const releases = await response.json();
+          if (releases.length > 0) {
+            showChangelogPopup(releases[0], currentVersion, true);
+          }
         }
         return;
       }
-      
+
       // Check if user already dismissed this version
       const lastShownVersion = await Storage.get("changelog_popup_shown", "");
       const dontShowAgain = await Storage.get("changelog_popup_dismissed_" + currentVersion, false);
-      
+
       if (dontShowAgain || lastShownVersion === currentVersion) {
         console.log("[Dashboard] Changelog popup already shown for version", currentVersion);
         return;
       }
-      
-      // Fetch latest release from GitHub
-      const response = await fetch('https://api.github.com/repos/gabszap/pixiv-templater/releases/latest');
-      
+
+      // Fetch latest release from GitHub (getting all and picking the first one so pre-releases are included)
+      const response = await fetch('https://api.github.com/repos/gabszap/pixiv-templater/releases');
+
       if (!response.ok) {
         console.log("[Dashboard] Could not fetch latest release");
         return;
       }
-      
-      const release = await response.json();
+
+      const releases = await response.json();
+      if (!releases || releases.length === 0) {
+        console.log("[Dashboard] No releases found on GitHub");
+        return;
+      }
+
+      const release = releases[0];
       const releaseVersion = release.tag_name.replace(/^v/, '');
-      
+
       // Only show if there's a newer version or it's the current version
       // We show it to announce the current version's changes
       showChangelogPopup(release, currentVersion, false);
-      
+
     } catch (error) {
       console.error("[Dashboard] Error checking for changelog popup:", error);
     }
@@ -252,10 +261,10 @@
     const releaseVersion = release.tag_name.replace(/^v/, '');
     const isCurrent = releaseVersion === currentVersion;
     const isBeta = release.prerelease || releaseVersion.includes('beta');
-    
+
     // Build version tag
     let versionTagContent = `${release.tag_name}`;
-    
+
     if (isDebug) {
       versionTagContent += ` <span class="beta-badge">DEBUG MODE</span>`;
     } else if (isCurrent) {
@@ -263,32 +272,33 @@
     } else {
       versionTagContent += ` <span class="beta-badge" style="background: var(--primary-blue); color: white;">NEW</span>`;
     }
-    
+
     $("#changelog-popup-version").html(versionTagContent);
-    
+
     // Format and set body content
     const formattedBody = formatChangelogBody(release.body || '');
     $("#changelog-popup-body").html(formattedBody);
-    
+
     // Show modal
     $("#changelog-popup-modal").addClass("active");
-    
+
     // Mark as shown (only if not in debug mode)
     if (!isDebug) {
       Storage.set("changelog_popup_shown", currentVersion);
     }
-    
+
     console.log("[Dashboard] Changelog popup shown for version", releaseVersion, isDebug ? "(DEBUG MODE)" : "");
   }
 
   function closeChangelogPopup() {
-    const currentVersion = chrome.runtime.getManifest().version;
+    const manifest = chrome.runtime.getManifest();
+    const currentVersion = manifest.version_name || manifest.version;
     const dontShowAgain = $("#changelog-popup-dont-show").is(":checked");
-    
+
     if (dontShowAgain) {
       Storage.set("changelog_popup_dismissed_" + currentVersion, true);
     }
-    
+
     $("#changelog-popup-modal").removeClass("active");
   }
 
@@ -1201,38 +1211,38 @@
 
   async function loadChangelog() {
     console.log("[Options] Loading changelog...");
-    
+
     const $list = $("#changelog-list");
     const $loading = $("#changelog-loading");
     const $error = $("#changelog-error");
     const $empty = $("#changelog-empty");
-    
+
     // Show loading, hide others
     $list.hide();
     $error.hide();
     $empty.hide();
     $loading.show();
-    
+
     try {
       // Fetch releases from GitHub API
       const response = await fetch('https://api.github.com/repos/gabszap/pixiv-templater/releases');
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const releases = await response.json();
-      
+
       if (releases.length === 0) {
         $loading.hide();
         $empty.show();
         return;
       }
-      
+
       // Get current version
       const manifest = chrome.runtime.getManifest();
-      const currentVersion = manifest.version;
-      
+      const currentVersion = manifest.version_name || manifest.version;
+
       // Display current version info
       const versionInfoHtml = `
         <div class="current-version">
@@ -1244,10 +1254,10 @@
         </div>
       `;
       $("#current-version-info").html(versionInfoHtml);
-      
+
       // Render changelog entries
       $list.empty();
-      
+
       releases.forEach(release => {
         const isCurrent = release.tag_name === `v${currentVersion}` || release.tag_name === currentVersion;
         const isBeta = release.prerelease || release.tag_name.includes('beta');
@@ -1255,7 +1265,7 @@
           window.PixivTemplaterI18n?.getCurrentLanguage() === 'pt-br' ? 'pt-BR' : 'en-US',
           { year: 'numeric', month: 'long', day: 'numeric' }
         );
-        
+
         const $entry = $(`
           <div class="changelog-entry ${isCurrent ? 'current' : ''} ${isBeta ? 'beta' : 'stable'}">
             <div class="changelog-header">
@@ -1280,13 +1290,13 @@
             </div>
           </div>
         `);
-        
+
         $list.append($entry);
       });
-      
+
       $loading.hide();
       $list.show();
-      
+
       console.log("[Options] Changelog loaded:", releases.length, "releases");
     } catch (error) {
       console.error("[Options] Failed to load changelog:", error);
@@ -1299,23 +1309,23 @@
     if (!body || body.trim() === '') {
       return '<p class="no-notes">' + t('changelog.noNotes') + '</p>';
     }
-    
+
     // Remove shields.io badges and other images (they don't render in dashboard)
     let formatted = body
       .replace(/!\[([^\]]*)\]\((https:\/\/img\.shields\.io[^)]+)\)/gi, '')
       .replace(/!\[([^\]]*)\]\([^)]+\)/g, '');
-    
+
     // Escape HTML to prevent XSS
     formatted = formatted
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
-    
+
     // Format markdown headers
     formatted = formatted
       .replace(/^#{1,2}\s+(.+)$/gm, '<h4>$1</h4>')
       .replace(/^#{3,6}\s+(.+)$/gm, '<h5>$1</h5>');
-    
+
     // Format bold and italic
     formatted = formatted
       .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
@@ -1324,24 +1334,24 @@
       .replace(/___(.+?)___/g, '<strong><em>$1</em></strong>')
       .replace(/__(.+?)__/g, '<strong>$1</strong>')
       .replace(/_(.+?)_/g, '<em>$1</em>');
-    
+
     // Format code
     formatted = formatted
       .replace(/`([^`]+)`/g, '<code>$1</code>');
-    
+
     // Format links [text](url)
     formatted = formatted
       .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-    
+
     // Format lists
     // First, wrap consecutive list items in <ul>
     const lines = formatted.split('\n');
     let inList = false;
     let result = [];
-    
+
     for (let line of lines) {
       const trimmed = line.trim();
-      
+
       // Check if line is a list item
       if (trimmed.match(/^[-\*•]\s/)) {
         const content = trimmed.replace(/^[-\*•]\s+/, '');
@@ -1368,7 +1378,7 @@
           }
           inList = false;
         }
-        
+
         // Check if it's a heading (already processed) or just text
         if (trimmed.startsWith('<h')) {
           result.push(line);
@@ -1381,21 +1391,21 @@
         }
       }
     }
-    
+
     // Close any open list at the end
     if (inList) {
       const openTag = result.findLast(tag => tag === '<ul>' || tag === '<ol>');
       result.push(openTag === '<ol>' ? '</ol>' : '</ul>');
     }
-    
+
     // Join and clean up
     formatted = result.join('\n');
-    
+
     // Remove empty paragraphs and fix spacing
     formatted = formatted
       .replace(/<p><\/p>/g, '')
       .replace(/\n{3,}/g, '\n\n');
-    
+
     return formatted;
   }
 

@@ -55,31 +55,45 @@ jobs:
             echo "No beta suffix found, using full version: $BASE_VERSION"
           fi
           
-          # Count commits on dev branch for auto-incrementing beta number
-          COMMIT_COUNT=$(git rev-list --count HEAD)
-          
-          # Determine beta version
+          # Determine beta version strings
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             BETA_NUM="${{ github.event.inputs.beta_version }}"
           else
-            BETA_NUM="$COMMIT_COUNT"
+            # Fetch tags to find the latest beta for this base version
+            git fetch --tags
+            LATEST_BETA=$(git tag -l "v${BASE_VERSION}-beta.*" | sort -V | tail -n 1)
+            
+            if [ -z "$LATEST_BETA" ]; then
+              # Default to 1 if no beta exists for this ver yet
+              BETA_NUM="1"
+            else
+              # Extract the number from vX.Y.Z-beta.N
+              CURRENT_NUM=$(echo $LATEST_BETA | sed -E 's/.*-beta\.([0-9]+)$/\1/')
+              BETA_NUM=$((CURRENT_NUM + 1))
+            fi
           fi
           
-          BETA_VERSION="${BASE_VERSION}-beta.${BETA_NUM}"
-          echo "beta_version=$BETA_VERSION" >> $GITHUB_OUTPUT
-          echo "Created beta version: $BETA_VERSION"
+          # This is the string label e.g. 2.1.5-beta.123
+          BETA_NAME="${BASE_VERSION}-beta.${BETA_NUM}"
+          # This is the numeric only version for the manifest e.g. 2.1.5.123
+          BETA_NUMERIC="${BASE_VERSION}.${BETA_NUM}"
+
+          echo "beta_name=$BETA_NAME" >> $GITHUB_OUTPUT
+          echo "beta_numeric=$BETA_NUMERIC" >> $GITHUB_OUTPUT
+          echo "Created beta version name: $BETA_NAME (numeric: $BETA_NUMERIC)"
 
       - name: Update manifest versions for beta
         run: |
-          BETA_VERSION="${{ steps.version.outputs.beta_version }}"
+          BETA_NAME="${{ steps.version.outputs.beta_name }}"
+          BETA_NUMERIC="${{ steps.version.outputs.beta_numeric }}"
           
-          # Update Firefox manifest
-          jq --arg v "$BETA_VERSION" '.version = $v' manifest.json > tmp.json && mv tmp.json manifest.json
+          # Update Firefox manifest (adds/updates version and version_name)
+          jq --arg v "$BETA_NUMERIC" --arg vn "$BETA_NAME" '.version = $v | .version_name = $vn' manifest.json > tmp.json && mv tmp.json manifest.json
           
           # Update Chrome manifest
-          jq --arg v "$BETA_VERSION" '.version = $v' manifest.chrome.json > tmp.json && mv tmp.json manifest.chrome.json
+          jq --arg v "$BETA_NUMERIC" --arg vn "$BETA_NAME" '.version = $v | .version_name = $vn' manifest.chrome.json > tmp.json && mv tmp.json manifest.chrome.json
           
-          echo "Updated manifests to version: $BETA_VERSION"
+          echo "Updated manifests to version: $BETA_NUMERIC (name: $BETA_NAME)"
 
       - name: Lint extension
         run: npm run lint
@@ -95,76 +109,38 @@ jobs:
 
       - name: Rename artifacts with beta tag
         run: |
-          BETA_VERSION="${{ steps.version.outputs.beta_version }}"
+          BETA_NAME="${{ steps.version.outputs.beta_name }}"
           
           # Rename Firefox artifact to xpi extension
-          mv artifacts/pixiv-templater-firefox.zip artifacts/pixiv-templater-firefox-${BETA_VERSION}.zip
+          mv artifacts/pixiv-templater-firefox.zip artifacts/pixiv-templater-firefox-${BETA_NAME}.zip
           
           # Rename Chrome artifact
-          mv artifacts/pixiv-templater-chrome.zip artifacts/pixiv-templater-chrome-${BETA_VERSION}.zip
+          mv artifacts/pixiv-templater-chrome.zip artifacts/pixiv-templater-chrome-${BETA_NAME}.zip
           
           echo "Renamed artifacts:"
           ls -la artifacts/
 
       - name: Create Pre-Release
         run: |
-          BETA_VERSION="${{ steps.version.outputs.beta_version }}"
+          BETA_NAME="${{ steps.version.outputs.beta_name }}"
           
           # Get release notes
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             NOTES="${{ github.event.inputs.release_notes }}"
           else
-            # Get last 5 commit messages for auto-generated notes
-            NOTES="Beta release from dev branch.\n\nRecent commits:\n$(git log -5 --pretty=format:'- %s')"
+            # Get only the last commit message for concise notes
+            LAST_MSG=$(git log -1 --pretty=format:'- %s')
+            NOTES="Beta release from dev branch.\n\nLatest change:\n${LAST_MSG}"
           fi
           
-          # Create release notes file
-          cat > release_notes.md <<EOF
-          ## 🧪 Beta Release ${BETA_VERSION}
+          # Create release notes file using echo -e to evaluate newlines
+          echo -e "## 🧪 Beta Release ${BETA_NAME}\n\n![Downloads](https://img.shields.io/github/downloads/gabszap/pixiv-templater/v${BETA_NAME}/total?style=for-the-badge&logo=github&label=Downloads&color=green)\n\n${NOTES}\n\n---\n\n### ⚠️ Important Notes\n\n**This is a BETA version** and may contain:\n- Latest features but unstable\n- Known or unknown bugs\n- Incomplete functionality\n- Potential data loss\n\nFor a stable experience, use the [latest stable release](https://github.com/gabszap/pixiv-templater/releases/latest).\n\n---\n\n### Installation Instructions\n\n**Firefox:**\n1. Download the \".zip\" file (rename to .xpi if needed)\n2. Go to \`about:addons\`\n3. Click gear icon → \"Install Add-on From File...\"\n4. Note: You need to disable signature verification in Regular Firefox, readme has a guide on how to do it.\n\n**Chrome:**\n1. Download the .zip file and extract it\n2. Go to \`chrome://extensions/\`\n3. Enable \"Developer mode\"\n4. Click \"Load unpacked\" and select the extracted folder\n\n---\n\n### Auto-Update\n\n✅ **Firefox**: Auto-updates enabled - you'll receive notifications when new beta versions are released\n❌ **Chrome**: No auto-update - you'll need to manually download and reinstall new beta versions\n" > release_notes.md
           
-          ${NOTES}
-          
-          ---
-          
-          ### ⚠️ Important Notes
-          
-          **This is a BETA version** and may contain:
-          - Latest features but unstable
-          - Known or unknown bugs
-          - Incomplete functionality
-          - Potential data loss
-
-          For a stable experience, use the [latest stable release](https://github.com/gabszap/pixiv-templater/releases/latest).
-          
-          ---
-          
-          ### Installation Instructions
-          
-          **Firefox:**
-          1. Download the ".zip" file (rename to .xpi if needed)
-          2. Go to \`about:addons\`
-          3. Click gear icon → "Install Add-on From File..."
-          4. Note: You need to disable signature verification in Regular Firefox, readme has a guide on how to do it.
-          
-          **Chrome:**
-          1. Download the .zip file and extract it
-          2. Go to \`chrome://extensions/\`
-          3. Enable "Developer mode"
-          4. Click "Load unpacked" and select the extracted folder
-          
-          ---
-          
-          ### Auto-Update
-          
-          ✅ **Firefox**: Auto-updates enabled - you'll receive notifications when new beta versions are released
-          ❌ **Chrome**: No auto-update - you'll need to manually download and reinstall new beta versions
-          EOF
-
           # Create the pre-release
-          gh release create "v${BETA_VERSION}" \
-            ./artifacts/pixiv-templater-firefox-${BETA_VERSION}.zip \
-            ./artifacts/pixiv-templater-chrome-${BETA_VERSION}.zip \
-            --title "v${BETA_VERSION} (Beta)" \
+          gh release create "v${BETA_NAME}" \
+            ./artifacts/pixiv-templater-firefox-${BETA_NAME}.zip \
+            ./artifacts/pixiv-templater-chrome-${BETA_NAME}.zip \
+            --title "v${BETA_NAME} (Beta)" \
             --notes-file release_notes.md \
             --prerelease
         env:
@@ -172,7 +148,8 @@ jobs:
 
       - name: Generate Beta updates.json
         run: |
-          BETA_VERSION="${{ steps.version.outputs.beta_version }}"
+          BETA_NAME="${{ steps.version.outputs.beta_name }}"
+          BETA_NUMERIC="${{ steps.version.outputs.beta_numeric }}"
           mkdir -p dist-beta
           cat > dist-beta/updates-beta.json <<EOF
           {
@@ -180,8 +157,8 @@ jobs:
               "pixiv-templater@gabszap": {
                 "updates": [
                   {
-                    "version": "$BETA_VERSION",
-                    "update_link": "https://github.com/gabszap/pixiv-templater/releases/download/v${BETA_VERSION}/pixiv-templater-firefox-${BETA_VERSION}.zip"
+                    "version": "$BETA_NUMERIC",
+                    "update_link": "https://github.com/gabszap/pixiv-templater/releases/download/v${BETA_NAME}/pixiv-templater-firefox-${BETA_NAME}.zip"
                   }
                 ]
               }
@@ -200,6 +177,6 @@ jobs:
       - name: Upload artifacts as backup
         uses: actions/upload-artifact@v4
         with:
-          name: beta-artifacts-${{ steps.version.outputs.beta_version }}
+          name: beta-artifacts-${{ steps.version.outputs.beta_name }}
           path: artifacts/*.zip
           retention-days: 30
