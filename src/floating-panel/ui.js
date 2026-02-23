@@ -641,24 +641,82 @@
   // UI RENDERING FUNCTIONS
   // ============================
 
+  let activeCategory = "all";
+
   async function renderTemplateList() {
-    const templates = await window.PixivTemplater.loadTemplates();
-    const stats = await window.PixivTemplater.loadStats();
-    const $list = $("#template-list");
-    $list.empty();
+    try {
+      const templates = await window.PixivTemplater.loadTemplates();
+      const stats = await window.PixivTemplater.loadStats();
 
-    Object.keys(templates).forEach((name) => {
-      const template = templates[name];
-      const stat = stats[name];
-      const useCount = stat ? stat.count : 0;
-      let icon = template.emoji || "📝";
+      // Configurar Abas de Categoria
+      const categories = new Set();
+      Object.values(templates).forEach(t => {
+        if (t && t.category) categories.add(t.category);
+      });
 
-      const useBadge =
-        useCount > 0
-          ? ` <span style="background:#0096fa;color:white;padding:2px 6px;border-radius:8px;font-size:10px;font-weight:600;margin-left:4px;">${useCount}×</span>`
-          : "";
+      const $tabs = $("#template-categories-tabs");
+      $tabs.empty();
 
-      const $container = $(`
+      if (categories.size > 0) {
+        // Aba Todas
+        const $allTab = $('<div class="category-tab"></div>')
+          .text(t("common.allCategories") || "All")
+          .toggleClass("active", activeCategory === "all")
+          .on("click", () => {
+            activeCategory = "all";
+            renderTemplateList();
+          });
+        $tabs.append($allTab);
+
+        // Aba Sem Categoria (só exibir se houver templates sem cat)
+        const hasUncategorized = Object.values(templates).some(t => t && !t.category);
+        if (hasUncategorized) {
+          const $uncatTab = $('<div class="category-tab"></div>')
+            .text(t("common.uncategorized") || "Uncategorized")
+            .toggleClass("active", activeCategory === "uncategorized")
+            .on("click", () => {
+              activeCategory = "uncategorized";
+              renderTemplateList();
+            });
+          $tabs.append($uncatTab);
+        }
+
+        // Abas Específicas
+        Array.from(categories).sort().forEach(cat => {
+          const $tab = $('<div class="category-tab"></div>')
+            .text(cat)
+            .toggleClass("active", activeCategory === cat)
+            .on("click", () => {
+              activeCategory = cat;
+              renderTemplateList();
+            });
+          $tabs.append($tab);
+        });
+        $tabs.show();
+      } else {
+        $tabs.hide();
+      }
+
+      const $list = $("#template-list");
+      $list.empty();
+
+      Object.keys(templates).forEach((name) => {
+        const template = templates[name];
+
+        // Filtragem por Categoria
+        if (activeCategory === "uncategorized" && template.category) return;
+        if (activeCategory !== "all" && activeCategory !== "uncategorized" && template.category !== activeCategory) return;
+
+        const stat = stats[name];
+        const useCount = stat ? stat.count : 0;
+        let icon = template.emoji || "📝";
+
+        const useBadge =
+          useCount > 0
+            ? ` <span style="background:#0096fa;color:white;padding:2px 6px;border-radius:8px;font-size:10px;font-weight:600;margin-left:4px;">${useCount}×</span>`
+            : "";
+
+        const $container = $(`
                 <div class="template-item" data-template-name="${name}">
                     <span class="template-item-name">${icon} ${name}${useBadge}</span>
                     <div class="template-item-actions">
@@ -667,17 +725,20 @@
                 </div>
             `);
 
-      $container.removeClass("delete-mode selected");
+        $container.removeClass("delete-mode selected");
 
-      if (deleteMode) {
-        $container.addClass("delete-mode");
-      }
-      if (selectedTemplates.includes(name)) {
-        $container.addClass("selected");
-      }
+        if (deleteMode) {
+          $container.addClass("delete-mode");
+        }
+        if (selectedTemplates.includes(name)) {
+          $container.addClass("selected");
+        }
 
-      $list.append($container);
-    });
+        $list.append($container);
+      });
+    } catch (e) {
+      console.error("[Pixiv Templater] UI renderTemplateList Error:", e);
+    }
   }
 
 
@@ -748,6 +809,13 @@
         <h3>📄 ${t("common.title")}</h3>
         <div class="preview-content">${template.title || `<span class="preview-empty">(${t("common.empty")})</span>`}</div>
       </div>
+
+      ${template.category ? `
+      <div class="preview-section">
+        <h3><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px;"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg> ${t("preview.category")}</h3>
+        <div class="preview-content">${template.category}</div>
+      </div>
+      ` : ""}
 
       <div class="preview-section">
         <h3>📝 ${t("common.description")}</h3>

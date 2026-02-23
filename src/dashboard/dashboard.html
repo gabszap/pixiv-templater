@@ -31,6 +31,20 @@
                     <p class="version" id="header-version">v2.0.2</p>
                 </div>
                 <div class="header-actions">
+                    <span id="cloud-sync-indicator" class="cloud-sync-indicator off" title="Cloud: not synced">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="cloud-off-svg">
+                            <path d="m2 2 20 20" />
+                            <path d="M5.782 5.782A7 7 0 0 0 9 19h8.5a4.5 4.5 0 0 0 1.307-.193" />
+                            <path d="M21.532 16.5A4.5 4.5 0 0 0 17.5 10h-1.79A7 7 0 0 0 8.689 5.042" />
+                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="cloud-on-svg" style="display:none;">
+                            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+                        </svg>
+                    </span>
                     <button id="export-all" class="btn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -82,15 +96,15 @@
                 </svg>
                 <span data-i18n="dashboard.tabStats">Statistics</span>
             </button>
-            <button class="tab" data-tab="about">
+            <button class="tab" data-tab="advanced">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="lucide lucide-info-icon lucide-info">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M12 16v-4" />
-                    <path d="M12 8h.01" />
+                    class="lucide lucide-settings-icon lucide-settings">
+                    <path
+                        d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" />
+                    <circle cx="12" cy="12" r="3" />
                 </svg>
-                <span data-i18n="dashboard.tabAbout">About</span>
+                <span data-i18n="dashboard.tabSettings">Settings</span>
             </button>
             <button class="tab" data-tab="shortcuts">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -121,15 +135,15 @@
                 </svg>
                 <span data-i18n="dashboard.tabChangelog">Changelog</span>
             </button>
-            <button class="tab" data-tab="advanced">
+            <button class="tab" data-tab="about">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="lucide lucide-settings-icon lucide-settings">
-                    <path
-                        d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" />
-                    <circle cx="12" cy="12" r="3" />
+                    class="lucide lucide-info-icon lucide-info">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 16v-4" />
+                    <path d="M12 8h.01" />
                 </svg>
-                <span data-i18n="dashboard.tabSettings">Settings</span>
+                <span data-i18n="dashboard.tabAbout">About</span>
             </button>
         </nav>
 
@@ -148,6 +162,10 @@
                         </svg>
                         <span data-i18n="dashboard.newTemplate">New Template</span>
                     </button>
+                </div>
+
+                <div id="dashboard-category-tabs" class="dashboard-category-tabs" style="display: none;">
+                    <!-- Category filter tabs will be rendered dynamically -->
                 </div>
 
                 <div id="templates-list" class="templates-grid">
@@ -476,6 +494,121 @@
                     </div>
 
 
+                    <!-- Cloud Sync Section -->
+                    <div class="cloud-sync-section">
+                        <h2 style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="lucide lucide-cloud">
+                                <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+                            </svg>
+                            <span data-i18n="cloudSync.title">Cloud Backup (GitHub)</span>
+                        </h2>
+
+                        <div class="cloud-sync-token-section">
+                            <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-key">
+                                    <path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4" />
+                                    <path d="m21 2-9.6 9.6" />
+                                    <circle cx="7.5" cy="15.5" r="5.5" />
+                                </svg>
+                                <span data-i18n="cloudSync.tokenLabel">GitHub Personal Access Token</span>
+                            </h3>
+                            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 10px;"
+                                data-i18n="cloudSync.tokenHint">Needs only the "gist" scope.</p>
+                            <div class="token-input-wrapper">
+                                <input type="password" id="github-pat-input" class="token-input"
+                                    data-i18n-placeholder="cloudSync.tokenPlaceholder"
+                                    placeholder="Paste your token here..." autocomplete="off" />
+                                <button type="button" id="token-visibility-toggle" class="token-toggle-btn"
+                                    title="Show/Hide">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" class="lucide lucide-eye" id="token-eye-icon">
+                                        <path
+                                            d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+                                        <circle cx="12" cy="12" r="3" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <a href="https://github.com/gabszap/pixiv-templater/blob/main/docs/cloud-sync.md"
+                                target="_blank" class="token-help-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                                    <polyline points="15 3 21 3 21 9" />
+                                    <line x1="10" y1="14" x2="21" y2="3" />
+                                </svg>
+                                <span data-i18n="cloudSync.tokenHowTo">How to get a token</span>
+                            </a>
+                        </div>
+
+                        <div class="sync-actions">
+                            <button id="sync-push-btn" class="btn btn-primary sync-btn" disabled>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-cloud-upload">
+                                    <path d="M12 13v8" />
+                                    <path d="m4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+                                    <path d="m8 17 4-4 4 4" />
+                                </svg>
+                                <span data-i18n="cloudSync.push">Push to Cloud</span>
+                            </button>
+                            <button id="sync-pull-btn" class="btn btn-secondary sync-btn" disabled>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-cloud-download">
+                                    <path d="M12 13v8l-4-4" />
+                                    <path d="m12 21 4-4" />
+                                    <path d="M4.393 15.269A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+                                </svg>
+                                <span data-i18n="cloudSync.pull">Pull from Cloud</span>
+                            </button>
+                            <button id="sync-delete-btn" class="btn btn-danger sync-btn" disabled>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="lucide lucide-trash-2">
+                                    <path d="M3 6h18" />
+                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                    <line x1="10" y1="11" x2="10" y2="17" />
+                                    <line x1="14" y1="11" x2="14" y2="17" />
+                                </svg>
+                                <span data-i18n="cloudSync.delete">Delete Backup</span>
+                            </button>
+                        </div>
+
+                        <div class="sync-status-boxes">
+                            <div class="sync-status-box">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="sync-status-icon">
+                                    <path d="M12 13v8" />
+                                    <path d="m4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+                                    <path d="m8 17 4-4 4 4" />
+                                </svg>
+                                <span class="sync-status-label" data-i18n="cloudSync.lastPush">Last push:</span>
+                                <span id="sync-push-status-value" class="sync-status-value"
+                                    data-i18n="cloudSync.never">Never</span>
+                            </div>
+                            <div class="sync-status-box">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="sync-status-icon">
+                                    <path d="M12 13v8l-4-4" />
+                                    <path d="m12 21 4-4" />
+                                    <path d="M4.393 15.269A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+                                </svg>
+                                <span class="sync-status-label" data-i18n="cloudSync.lastPull">Last pull:</span>
+                                <span id="sync-pull-status-value" class="sync-status-value"
+                                    data-i18n="cloudSync.never">Never</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Advanced Settings (Collapsible) -->
                     <div class="advanced-collapsible-container">
                         <div class="advanced-header-toggle" id="advanced-settings-toggle">
@@ -542,6 +675,58 @@
                                         </label>
                                         <span id="debug-status" class="status-text"
                                             data-i18n="advanced.disabled">Disabled</span>
+                                    </div>
+                                </div>
+
+                                <div class="setting-item" id="test-panel-setting" style="display: none;">
+                                    <div class="setting-info">
+                                        <h3 style="display: flex; align-items: center; gap: 8px;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round"
+                                                class="lucide lucide-bug">
+                                                <path d="m8 2 1.88 1.88" />
+                                                <path d="M14.12 3.88 16 2" />
+                                                <path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1" />
+                                                <path
+                                                    d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6" />
+                                                <path d="M12 20v-9" />
+                                                <path d="M6.53 9C4.6 8.8 3 7.1 3 5" />
+                                                <path d="M6 13H2" />
+                                                <path d="M3 21c0-2.1 1.7-3.9 3.8-4" />
+                                                <path d="M20.97 5c0 2.1-1.6 3.8-3.5 4" />
+                                                <path d="M22 13h-4" />
+                                                <path d="M17.2 17c2.1.1 3.8 1.9 3.8 4" />
+                                            </svg>
+                                            <span data-i18n="advanced.debugPanelUI">Test Panel UI</span>
+                                        </h3>
+                                        <p data-i18n="advanced.debugPanelUIDesc">Preview the floating panel inside the
+                                            dashboard.</p>
+                                        <p class="setting-note" data-i18n="advanced.debugPanelUIWarning">⚠️ Visuals
+                                            might be distorted due to Dashboard CSS overrides. To test the real UI, go
+                                            to Pixiv.</p>
+                                    </div>
+                                    <div class="setting-control">
+                                        <button id="toggle-debug-panel-btn" class="btn btn-secondary">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round"
+                                                class="lucide lucide-bug">
+                                                <path d="m8 2 1.88 1.88" />
+                                                <path d="M14.12 3.88 16 2" />
+                                                <path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1" />
+                                                <path
+                                                    d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6" />
+                                                <path d="M12 20v-9" />
+                                                <path d="M6.53 9C4.6 8.8 3 7.1 3 5" />
+                                                <path d="M6 13H2" />
+                                                <path d="M3 21c0-2.1 1.7-3.9 3.8-4" />
+                                                <path d="M20.97 5c0 2.1-1.6 3.8-3.5 4" />
+                                                <path d="M22 13h-4" />
+                                                <path d="M17.2 17c2.1.1 3.8 1.9 3.8 4" />
+                                            </svg>
+                                            <span data-i18n="dashboard.toggleDebugPanel">Toggle Panel</span>
+                                        </button>
                                     </div>
                                 </div>
 
@@ -716,6 +901,13 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="template-category" data-i18n="form.category">Category</label>
+                        <input type="text" id="template-category" list="categories-list"
+                            data-i18n-placeholder="form.categoryPlaceholder" placeholder="E.g.: Genshin Impact">
+                        <datalist id="categories-list"></datalist>
+                    </div>
+
+                    <div class="form-group">
                         <label for="template-title" data-i18n="form.workTitle">Work Title</label>
                         <input type="text" id="template-title" data-i18n-placeholder="form.workTitlePlaceholder"
                             placeholder="Title that will appear on the work">
@@ -724,7 +916,7 @@
                     <div class="form-group">
                         <div class="emoji-label-container">
                             <label for="template-emoji" data-i18n="form.emoji">Template Emoji</label>
-                            <button type="button" id="emoji-toggle-btn" class="emoji-toggle-btn"
+                            <button type="button" id="emoji-toggle-btn" class="emoji-toggle-btn collapsed"
                                 title="Minimize/Expand">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -733,7 +925,7 @@
                                 </svg>
                             </button>
                         </div>
-                        <div class="emoji-selector-container" id="emoji-selector-container">
+                        <div class="emoji-selector-container collapsed" id="emoji-selector-container">
                             <div class="emoji-preview" id="emoji-preview">📝</div>
                             <div id="emoji-picker-container"></div>
                         </div>
@@ -936,7 +1128,67 @@
         </div>
     </div>
 
+    <!-- Sync Confirmation Modal -->
+    <div id="sync-confirm-modal" class="modal">
+        <div class="modal-content" style="max-width: 440px;">
+            <div class="modal-header">
+                <h2 id="sync-confirm-title">Confirm</h2>
+                <button type="button" class="modal-close" id="sync-confirm-close">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 6 6 18" />
+                        <path d="m6 6 12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="sync-confirm-message" style="font-size: 15px; color: var(--text-secondary); line-height: 1.7;">
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button id="sync-confirm-cancel" class="btn btn-secondary" data-i18n="common.cancel">Cancel</button>
+                <button id="sync-confirm-ok" class="btn btn-primary">OK</button>
+            </div>
+        </div>
+    </div>
+
     <script src="../utils/debug-logger.js"></script>
+    <div id="toast-container"></div>
+
+    <!-- Pixiv Templater UI (Debug Mode / Preview in Dashboard) -->
+    <div id="pixiv-templater" style="display: none; position: fixed; top: 80px; right: 20px; z-index: 9999;">
+        <div id="pixiv-templater-header">
+            <div class="header-left">
+                <span class="header-title-with-icon">
+                    <svg width="26" height="26" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        style="vertical-align: middle;">
+                        <rect width="128" height="128" rx="28" fill="white"" fill-opacity=" 0.2" />
+                        <rect x="34" y="28" width="60" height="72" rx="4" fill="white" />
+                        <rect x="40" y="34" width="48" height="12" rx="2" fill="#0096FA" fill-opacity="0.3" />
+                        <rect x="40" y="52" width="14" height="42" rx="2" fill="#0096FA" fill-opacity="0.3" />
+                        <rect x="58" y="52" width="30" height="42" rx="2" fill="#0096FA" fill-opacity="0.5" />
+                    </svg>
+                    <span data-i18n="header.templates">Templates</span>
+                </span>
+            </div>
+            <div class="header-right">
+                <span class="keyboard-hint" id="shortcuts-hint"><svg xmlns="http://www.w3.org/2000/svg" width="24"
+                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-circle-question-mark-icon lucide-circle-question-mark">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M9.09 9a3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                        <path d="M12 17h.01" />
+                    </svg></span>
+            </div>
+            <span id="pixiv-templater-toggle">−</span>
+        </div>
+        <div id="pixiv-templater-content">
+            <div id="template-categories-tabs" class="categories-tabs"></div>
+            <div id="template-list"></div>
+        </div>
+    </div>
+
     <script src="../../libs/jquery.js"></script>
     <script src="dashboard.js"></script>
 </body>

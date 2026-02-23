@@ -32,6 +32,7 @@
   let editingTemplateName = null;
   let recordingInput = null;
   let currentShortcuts = {};
+  let dashboardActiveCategory = "all";
 
   // Default shortcuts
   const DEFAULT_SHORTCUTS = {
@@ -181,6 +182,7 @@
     await loadShortcuts();
     await loadStats();
     await loadAdvancedSettings();
+    await initCloudSync();
 
     // Check for AI translation warning
     checkAITranslationWarning();
@@ -373,6 +375,76 @@
       loadAdvancedSettings().catch((err) =>
         console.error("[Options] Error loading advanced settings:", err),
       );
+      updateStorageInfo().catch((err) =>
+        console.error("[Options] Error updating storage info:", err),
+      );
+    }
+  }
+
+  // ============================
+  // DEBUG PANEL OVERLAY
+  // ============================
+
+  async function toggleDebugPanel() {
+    const $panel = $("#pixiv-templater");
+
+    if ($panel.is(":visible")) {
+      $panel.css("display", "none");
+    } else {
+      $panel.css("display", "block");
+
+      // Ensure the UI script works locally
+      if (!window.PixivTemplaterUI) {
+        // Mock PixivTemplater to load from our Storage
+        window.PixivTemplater = {
+          loadTemplates: async () => {
+            const templatesJson = await Storage.get("templates", "{}");
+            try { return JSON.parse(templatesJson); } catch (e) { return {}; }
+          },
+          loadStats: async () => {
+            const statsData = await Storage.get("template_stats", "{}");
+            try { return JSON.parse(statsData); } catch (e) { return {}; }
+          },
+          applyTemplate: async (template) => {
+            console.log("[Debug Panel] Applied template:", template);
+          },
+          trackTemplateUsage: async (name) => {
+            console.log("[Debug Panel] Tracked usage:", name);
+          },
+          Storage: {
+            get: async (key, defaultVal) => defaultVal,
+            set: async (key, val) => { }
+          }
+        };
+
+        // Inject ui.js dynamically if not already loaded
+        try {
+          const script = document.createElement("script");
+          script.src = "../floating-panel/ui.js";
+          script.onload = () => {
+            if (window.PixivTemplaterUI) {
+              window.PixivTemplaterUI.initialize();
+            }
+          };
+          document.head.appendChild(script);
+
+          // Inject ui.css scoped to prevent bleeding into dashboard
+          const cssResponse = await fetch("../floating-panel/ui.css");
+          const cssText = await cssResponse.text();
+          const style = document.createElement("style");
+          style.id = "debug-panel-css";
+          // Wrap all ui.css rules inside @scope to prevent them from affecting dashboard
+          style.textContent = `@scope (#pixiv-templater) { ${cssText} }`;
+          document.head.appendChild(style);
+        } catch (e) {
+          console.error("Failed to load floating panel scripts", e);
+        }
+      } else {
+        // Just re-render
+        if (window.PixivTemplaterUI) {
+          window.PixivTemplaterUI.renderTemplateList();
+        }
+      }
     }
   }
 
@@ -389,6 +461,9 @@
     $("#import-input").on("change", (e) =>
       handleImportFile(e).catch((err) => console.error(err)),
     );
+
+    // Toggle Debug Panel
+    $("#toggle-debug-panel-btn").on("click", toggleDebugPanel);
 
     // Template actions
     $("#new-template").on("click", handleNewTemplate);
@@ -455,6 +530,19 @@
     $("#clear-all-data-btn").on("click", () =>
       handleClearAllData().catch((err) => console.error(err)),
     );
+
+    // Cloud Sync
+    $("#github-pat-input").on("change", saveGithubToken);
+    $("#github-pat-input").on("blur", saveGithubToken);
+    $("#token-visibility-toggle").on("click", toggleTokenVisibility);
+    $("#sync-push-btn").on("click", () => syncPush().catch(err => console.error(err)));
+    $("#sync-pull-btn").on("click", () => syncPull().catch(err => console.error(err)));
+    $("#sync-delete-btn").on("click", () => syncDelete().catch(err => console.error(err)));
+    $("#sync-confirm-close").on("click", closeSyncConfirm);
+    $("#sync-confirm-cancel").on("click", closeSyncConfirm);
+    $("#sync-confirm-modal").on("click", function (e) {
+      if (e.target === this) closeSyncConfirm();
+    });
 
     // Settings (new)
     $("#language-select").on("change", handleLanguageChange);
@@ -557,6 +645,45 @@
       templates = {};
     }
 
+    const categories = new Set();
+    Object.values(templates).forEach(t => {
+      if (t.category) categories.add(t.category);
+    });
+    const $dataList = $("#categories-list");
+    $dataList.empty();
+    categories.forEach(cat => {
+      $dataList.append($("<option>").attr("value", cat));
+    });
+
+    // Render dashboard category filter tabs
+    const $categoryTabs = $("#dashboard-category-tabs");
+    $categoryTabs.empty();
+    if (categories.size > 0) {
+      $categoryTabs.show();
+
+      // "All" tab
+      const $allTab = $(`<button class="dashboard-cat-tab ${dashboardActiveCategory === "all" ? "active" : ""}">${t("common.allCategories")}</button>`);
+      $allTab.on("click", () => { dashboardActiveCategory = "all"; loadTemplates(); });
+      $categoryTabs.append($allTab);
+
+      // "Uncategorized" tab
+      const hasUncategorized = Object.values(templates).some(t => !t.category);
+      if (hasUncategorized) {
+        const $uncatTab = $(`<button class="dashboard-cat-tab ${dashboardActiveCategory === "uncategorized" ? "active" : ""}">${t("common.uncategorized")}</button>`);
+        $uncatTab.on("click", () => { dashboardActiveCategory = "uncategorized"; loadTemplates(); });
+        $categoryTabs.append($uncatTab);
+      }
+
+      // Category tabs
+      categories.forEach(cat => {
+        const $tab = $(`<button class="dashboard-cat-tab ${dashboardActiveCategory === cat ? "active" : ""}">${cat}</button>`);
+        $tab.on("click", () => { dashboardActiveCategory = cat; loadTemplates(); });
+        $categoryTabs.append($tab);
+      });
+    } else {
+      $categoryTabs.hide();
+    }
+
     const stats = await loadStatsData();
     const $list = $("#templates-list");
 
@@ -577,6 +704,11 @@
 
     Object.keys(templates).forEach((name) => {
       const template = templates[name];
+
+      // Category filtering
+      if (dashboardActiveCategory === "uncategorized" && template.category) return;
+      if (dashboardActiveCategory !== "all" && dashboardActiveCategory !== "uncategorized" && template.category !== dashboardActiveCategory) return;
+
       const stat = stats[name];
       const useCount = stat ? stat.count : 0;
       let icon = template.emoji || "📝";
@@ -625,6 +757,7 @@
           <div class="template-card-info">
             <div>${ageRatingLabels[template.ageRating] || t("modal.ageRatingGeneral")}</div>
             <div>${t("common.tagsCount", { count: template.tags.length })}</div>
+            ${template.category ? `<div><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 2px;"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg> ${template.category}</div>` : ""}
           </div>
           <div class="template-card-tags">
             ${template.tags
@@ -709,6 +842,7 @@
     currentTags = [];
     $("#modal-title").text(t("modal.newTemplate"));
     $("#template-form")[0].reset();
+    $("#template-category").val("");
     renderTags();
     $("#template-emoji").val("📝");
     $("#emoji-preview").text("📝");
@@ -760,6 +894,7 @@
       title: $("#template-title").val().trim(),
       caption: $("#template-caption").val().trim(),
       tags: currentTags,
+      category: $("#template-category").val().trim(),
       ageRating: ageRating,
       adultContent: $("#template-adult-content").is(":checked"),
       matureContent: matureContent,
@@ -786,6 +921,7 @@
 
     $("#modal-title").text(t("modal.editTemplate"));
     $("#template-name").val(name);
+    $("#template-category").val(template.category || "");
     $("#template-title").val(template.title || "");
     $("#template-caption").val(template.caption || "");
     $("#template-age-rating").val(template.ageRating || "general");
@@ -850,6 +986,11 @@
 
     // Title Section
     $container.append(createSection(`📄 ${t("common.title")}`, template.title));
+
+    // Category Section
+    if (template.category) {
+      $container.append(createSection(`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px;"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg> ${t("preview.category")}`, template.category));
+    }
 
     // Description Section
     $container.append(createSection(`📝 ${t("common.description")}`, template.caption));
@@ -1037,6 +1178,404 @@
     };
     reader.readAsText(file);
     e.target.value = "";
+  }
+
+  // ============================
+  // CLOUD SYNC (GITHUB GIST)
+  // ============================
+
+  const GIST_FILENAME = "pixiv-templater-backup.json";
+  const GIST_API = "https://api.github.com/gists";
+
+  async function initCloudSync() {
+    const token = await Storage.get("github_pat", "");
+    const gistId = await Storage.get("gist_id", "");
+    const lastPush = await Storage.get("last_push", "");
+    const lastPull = await Storage.get("last_pull", "");
+
+    if (token) {
+      $("#github-pat-input").val(token);
+    }
+
+    updateSyncButtonsState(!!token);
+    updateSyncStatusValue("#sync-push-status-value", lastPush);
+    updateSyncStatusValue("#sync-pull-status-value", lastPull);
+    updateCloudIndicator();
+    console.log("[CloudSync] Initialized", { hasToken: !!token, hasGist: !!gistId });
+  }
+
+  async function saveGithubToken() {
+    const token = $("#github-pat-input").val().trim();
+    await Storage.set("github_pat", token);
+    updateSyncButtonsState(!!token);
+    console.log("[CloudSync] Token saved:", token ? "***" : "(empty)");
+  }
+
+  function toggleTokenVisibility() {
+    const $input = $("#github-pat-input");
+    const isPassword = $input.attr("type") === "password";
+    $input.attr("type", isPassword ? "text" : "password");
+
+    const $icon = $("#token-eye-icon");
+    if (isPassword) {
+      $icon.html(`
+        <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/>
+        <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/>
+        <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/>
+        <path d="m2 2 20 20"/>
+      `);
+    } else {
+      $icon.html(`
+        <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
+        <circle cx="12" cy="12" r="3"/>
+      `);
+    }
+  }
+
+  function updateSyncButtonsState(hasToken) {
+    $("#sync-push-btn, #sync-pull-btn, #sync-delete-btn").prop("disabled", !hasToken);
+  }
+
+  function updateSyncStatusValue(selector, dateStr, isError) {
+    const $value = $(selector);
+    $value.removeClass("success error");
+
+    if (isError) {
+      $value.addClass("error");
+      $value.text(dateStr);
+    } else if (dateStr) {
+      const lang = window.PixivTemplaterI18n?.getCurrentLanguage();
+      let localeCode = "en-US";
+      if (lang === "pt-br") localeCode = "pt-BR";
+      else if (lang === "jp") localeCode = "ja-JP";
+      else if (lang === "zh-cn") localeCode = "zh-CN";
+
+      const date = new Date(dateStr).toLocaleString(localeCode, {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      $value.addClass("success");
+      $value.text(date);
+    } else {
+      $value.text(t("cloudSync.never") || "Never");
+    }
+
+    // Toggle cloud indicator in header
+    updateCloudIndicator();
+  }
+
+  function updateCloudIndicator() {
+    Storage.get("gist_id", "").then(gistId => {
+      const $el = $("#cloud-sync-indicator");
+      if (gistId) {
+        $el.removeClass("off").addClass("on").attr("title", "Cloud: synced");
+        $el.find(".cloud-off-svg").hide();
+        $el.find(".cloud-on-svg").show();
+      } else {
+        $el.removeClass("on").addClass("off").attr("title", "Cloud: not synced");
+        $el.find(".cloud-on-svg").hide();
+        $el.find(".cloud-off-svg").show();
+      }
+    });
+  }
+
+  function setSyncLoading(buttonId, loading) {
+    const $btn = $(buttonId);
+    if (loading) {
+      $btn.addClass("loading").prop("disabled", true);
+    } else {
+      $btn.removeClass("loading");
+      const hasToken = !!$("#github-pat-input").val().trim();
+      updateSyncButtonsState(hasToken);
+    }
+  }
+
+  function showSyncToast(message, type = "success") {
+    const $toast = $(`
+      <div class="sync-toast ${type}" style="
+        position: fixed; bottom: 24px; right: 24px; z-index: 10000;
+        padding: 14px 24px; border-radius: 10px; font-size: 14px; font-weight: 600;
+        color: white; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        animation: fadeIn 0.3s ease; display: flex; align-items: center; gap: 10px;
+        background: ${type === "success" ? "linear-gradient(135deg, #10b981, #059669)" :
+        type === "error" ? "linear-gradient(135deg, #ef4444, #dc2626)" :
+          "linear-gradient(135deg, #0096fa, #005fa3)"};
+      ">
+        ${type === "success" ? "✅" : type === "error" ? "❌" : "ℹ️"} ${message}
+      </div>
+    `);
+    $("body").append($toast);
+    setTimeout(() => $toast.fadeOut(300, () => $toast.remove()), 3500);
+  }
+
+  // Sync confirm modal helper
+  let _syncConfirmResolve = null;
+
+  function showSyncConfirm(title, message, okLabel, isDanger) {
+    return new Promise((resolve) => {
+      _syncConfirmResolve = resolve;
+      $("#sync-confirm-title").text(title);
+      $("#sync-confirm-message").text(message);
+      const $ok = $("#sync-confirm-ok");
+      $ok.text(okLabel || "OK");
+      $ok.removeClass("btn-primary btn-danger").addClass(isDanger ? "btn-danger" : "btn-primary");
+      $ok.off("click").on("click", () => {
+        _syncConfirmResolve = null;
+        $("#sync-confirm-modal").removeClass("active");
+        resolve(true);
+      });
+      $("#sync-confirm-modal").addClass("active");
+    });
+  }
+
+  function closeSyncConfirm() {
+    $("#sync-confirm-modal").removeClass("active");
+    if (_syncConfirmResolve) { _syncConfirmResolve(false); _syncConfirmResolve = null; }
+  }
+
+  async function syncPush() {
+    const token = await Storage.get("github_pat", "");
+    if (!token) {
+      alert(t("cloudSync.tokenRequired") || "Please enter your GitHub token first.");
+      return;
+    }
+
+    setSyncLoading("#sync-push-btn", true);
+
+    try {
+      const templatesJson = await Storage.get("templates", "{}");
+      const statsJson = await Storage.get("template_stats", "{}");
+      const shortcutsJson = await Storage.get("shortcuts", "{}");
+      const manifest = chrome.runtime.getManifest();
+
+      const payload = {
+        version: manifest.version,
+        exportedAt: new Date().toISOString(),
+        templates: JSON.parse(templatesJson),
+        stats: JSON.parse(statsJson),
+        shortcuts: JSON.parse(shortcutsJson),
+      };
+
+      const gistId = await Storage.get("gist_id", "");
+      let response;
+
+      const body = {
+        description: "Pixiv Templater Backup (do not edit)",
+        public: false,
+        files: {
+          [GIST_FILENAME]: {
+            content: JSON.stringify(payload, null, 2),
+          },
+        },
+      };
+
+      if (gistId) {
+        // Update existing gist
+        response = await fetch(`${GIST_API}/${gistId}`, {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/vnd.github+json",
+          },
+          body: JSON.stringify(body),
+        });
+
+        // If gist was deleted externally, create a new one
+        if (response.status === 404) {
+          console.log("[CloudSync] Gist not found, creating new one...");
+          await Storage.set("gist_id", "");
+          response = await fetch(GIST_API, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+              Accept: "application/vnd.github+json",
+            },
+            body: JSON.stringify(body),
+          });
+        }
+      } else {
+        // Create new gist
+        response = await fetch(GIST_API, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/vnd.github+json",
+          },
+          body: JSON.stringify(body),
+        });
+      }
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      const now = new Date().toISOString();
+      await Storage.set("gist_id", data.id);
+      await Storage.set("last_push", now);
+      updateSyncStatusValue("#sync-push-status-value", now);
+      showSyncToast(t("cloudSync.pushSuccess") || "Backup uploaded successfully!");
+      console.log("[CloudSync] Push successful:", data.id);
+
+    } catch (error) {
+      console.error("[CloudSync] Push error:", error);
+      updateSyncStatusValue("#sync-push-status-value", `${t("cloudSync.error") || "Sync error:"} ${error.message}`, true);
+      showSyncToast(`${t("cloudSync.error") || "Sync error:"} ${error.message}`, "error");
+    } finally {
+      setSyncLoading("#sync-push-btn", false);
+    }
+  }
+
+  async function syncPull() {
+    const token = await Storage.get("github_pat", "");
+    if (!token) {
+      alert(t("cloudSync.tokenRequired") || "Please enter your GitHub token first.");
+      return;
+    }
+
+    const gistId = await Storage.get("gist_id", "");
+    if (!gistId) {
+      alert(t("cloudSync.noBackup") || "No backup found. Push your data first.");
+      return;
+    }
+
+    if (!(await showSyncConfirm(
+      t("cloudSync.pull") || "Pull from Cloud",
+      t("cloudSync.confirmPull") || "Restore from cloud? This will overwrite your local templates.",
+      t("cloudSync.pull") || "Restore",
+      false
+    ))) {
+      return;
+    }
+
+    setSyncLoading("#sync-pull-btn", true);
+
+    try {
+      const response = await fetch(`${GIST_API}/${gistId}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/vnd.github+json",
+        },
+      });
+
+      if (response.status === 404) {
+        await Storage.set("gist_id", "");
+        throw new Error(t("cloudSync.noBackup") || "Backup not found on GitHub. It may have been deleted.");
+      }
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      const file = data.files[GIST_FILENAME];
+
+      if (!file || !file.content) {
+        throw new Error("Backup file not found in Gist.");
+      }
+
+      const backup = JSON.parse(file.content);
+
+      // Merge templates (cloud overwrites local, but local-only templates are kept)
+      if (backup.templates) {
+        const localJson = await Storage.get("templates", "{}");
+        const localTemplates = JSON.parse(localJson);
+        const merged = { ...localTemplates, ...backup.templates };
+        await Storage.set("templates", JSON.stringify(merged));
+      }
+
+      // Overwrite stats and shortcuts from cloud
+      if (backup.stats) {
+        await Storage.set("template_stats", JSON.stringify(backup.stats));
+      }
+      if (backup.shortcuts) {
+        await Storage.set("shortcuts", JSON.stringify(backup.shortcuts));
+      }
+
+      const now = new Date().toISOString();
+      await Storage.set("last_pull", now);
+      updateSyncStatusValue("#sync-pull-status-value", now);
+
+      // Reload everything
+      await loadTemplates();
+      await loadStats();
+      await loadShortcuts();
+
+      showSyncToast(t("cloudSync.pullSuccess") || "Backup restored successfully!");
+      console.log("[CloudSync] Pull successful, version:", backup.version);
+
+    } catch (error) {
+      console.error("[CloudSync] Pull error:", error);
+      updateSyncStatusValue("#sync-pull-status-value", `${t("cloudSync.error") || "Sync error:"} ${error.message}`, true);
+      showSyncToast(`${t("cloudSync.error") || "Sync error:"} ${error.message}`, "error");
+    } finally {
+      setSyncLoading("#sync-pull-btn", false);
+    }
+  }
+
+  async function syncDelete() {
+    const token = await Storage.get("github_pat", "");
+    if (!token) {
+      alert(t("cloudSync.tokenRequired") || "Please enter your GitHub token first.");
+      return;
+    }
+
+    const gistId = await Storage.get("gist_id", "");
+    if (!gistId) {
+      alert(t("cloudSync.noBackup") || "No backup found.");
+      return;
+    }
+
+    if (!(await showSyncConfirm(
+      t("cloudSync.delete") || "Delete Backup",
+      t("cloudSync.confirmDelete") || "Delete cloud backup? This cannot be undone.",
+      t("cloudSync.delete") || "Delete",
+      true
+    ))) {
+      return;
+    }
+
+    setSyncLoading("#sync-delete-btn", true);
+
+    try {
+      const response = await fetch(`${GIST_API}/${gistId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/vnd.github+json",
+        },
+      });
+
+      // 204 = success, 404 = already deleted
+      if (response.status !== 204 && response.status !== 404) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || `HTTP ${response.status}`);
+      }
+
+      await Storage.set("gist_id", "");
+      await Storage.set("last_push", "");
+      await Storage.set("last_pull", "");
+      updateSyncStatusValue("#sync-push-status-value", "");
+      updateSyncStatusValue("#sync-pull-status-value", "");
+
+      showSyncToast(t("cloudSync.deleteSuccess") || "Backup deleted.");
+      console.log("[CloudSync] Gist deleted:", gistId);
+
+    } catch (error) {
+      console.error("[CloudSync] Delete error:", error);
+      showSyncToast(`${t("cloudSync.error") || "Sync error:"} ${error.message}`, "error");
+    } finally {
+      setSyncLoading("#sync-delete-btn", false);
+    }
   }
 
   // ============================
@@ -1525,6 +2064,12 @@
     $("#debug-mode-toggle").prop("checked", debugMode);
     updateDebugStatus(debugMode);
 
+    if (debugMode) {
+      $("#test-panel-setting").show();
+    } else {
+      $("#test-panel-setting").hide();
+    }
+
     // Load auto-translate tags status
     const autoTranslate = await Storage.get("auto_translate_tags", true);
     $("#auto-translate-toggle").prop("checked", autoTranslate);
@@ -1603,6 +2148,13 @@
     const enabled = $(e.target).is(":checked");
     await Storage.set("debug_mode", enabled);
     updateDebugStatus(enabled);
+
+    if (enabled) {
+      $("#test-panel-setting").show();
+    } else {
+      $("#test-panel-setting").hide();
+      $("#pixiv-templater").css("display", "none");
+    }
 
     // Notify the logger if available
     if (window.PixivTemplaterLogger) {

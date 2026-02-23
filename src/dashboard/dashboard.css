@@ -327,6 +327,235 @@ body {
     font-size: 16px;
 }
 
+/* Cloud Sync Section */
+.cloud-sync-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    margin-bottom: 24px;
+}
+
+.cloud-sync-section h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.cloud-sync-token-section {
+    margin-bottom: 4px;
+}
+
+.cloud-sync-token-section h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.token-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    position: relative;
+}
+
+.token-input {
+    flex: 1;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 10px 40px 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-family: monospace;
+    transition: all var(--transition-base);
+    width: 100%;
+}
+
+.token-input:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(0, 150, 250, 0.15);
+}
+
+.token-toggle-btn {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: color var(--transition-fast);
+}
+
+.token-toggle-btn:hover {
+    color: var(--primary-blue);
+}
+
+.token-help-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--primary-blue);
+    text-decoration: none;
+    transition: opacity var(--transition-fast);
+}
+
+.token-help-link:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
+
+.sync-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.sync-btn {
+    flex: 1;
+    min-width: 140px;
+    justify-content: center;
+}
+
+.sync-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.sync-btn.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.sync-btn.loading svg {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.sync-status-boxes {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.sync-status-box {
+    flex: 1;
+    padding: 14px 18px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+}
+
+.sync-status-icon {
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.cloud-sync-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.06);
+    transition: all var(--transition-base);
+    cursor: default;
+}
+
+.cloud-sync-indicator.off {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.cloud-sync-indicator.on {
+    color: #4ade80;
+    border-color: rgba(74, 222, 128, 0.3);
+    background: rgba(74, 222, 128, 0.08);
+}
+
+.sync-status-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.sync-status-value {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.sync-status-value.success {
+    color: var(--success-color);
+}
+
+.sync-status-value.error {
+    color: var(--danger-color);
+}
+
+/* Dashboard Category Filter Tabs */
+.dashboard-category-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.dashboard-cat-tab {
+    padding: 6px 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-cat-tab:hover {
+    background: var(--bg-hover);
+    border-color: var(--primary-blue);
+    color: var(--primary-blue);
+}
+
+.dashboard-cat-tab.active {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 2px 8px rgba(0, 150, 250, 0.3);
+}
+
 /* Templates Grid */
 .templates-grid {
     display: grid;

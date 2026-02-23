@@ -28,7 +28,8 @@
         "usedCount": "回使用",
         "adultContentYes": "はい (性的な表現あり)",
         "adultContentNo": "いいえ",
-        "apply": "テンプレートを適用"
+        "apply": "テンプレートを適用",
+        "category": "カテゴリ:"
     },
     "stats": {
         "title": "📊 使用統計",
@@ -132,7 +133,10 @@
         "storageInfoDesc": "ブラウザ内で拡張機能が使用している容量です。",
         "storageTemplates": "テンプレート:",
         "storageStats": "統計:",
-        "storageTotal": "合計:"
+        "storageTotal": "合計:",
+        "debugPanelUI": "パネルUIテスト",
+        "debugPanelUIDesc": "ダッシュボード内でフローティングパネルをプレビューします。",
+        "debugPanelUIWarning": "⚠️ ダッシュボードのCSSが干渉するため、表示が崩れる場合があります。実際のUIをテストするには、Pixivにアクセスしてください。"
     },
     "about": {
         "title": "について",
@@ -164,6 +168,8 @@
         "workTitle": "作品タイトル",
         "workTitlePlaceholder": "作品に表示されるタイトル",
         "emoji": "テンプレートの絵文字",
+        "category": "カテゴリー",
+        "categoryPlaceholder": "例: 原神, コミッション",
         "description": "キャプション",
         "descriptionPlaceholder": "作品の説明（Pixiv形式をサポート）",
         "tags": "タグ *",
@@ -251,6 +257,8 @@
         "aiGenerated": "AI生成",
         "empty": "空",
         "none": "なし",
+        "uncategorized": "未分類",
+        "allCategories": "すべて",
         "lastUsed": "最終使用日",
         "cancel": "キャンセル",
         "close": "閉じる",
@@ -279,5 +287,28 @@
         "popupTitle": "新機能",
         "dontShowAgain": "このバージョンの変更を再度表示しない",
         "viewAllChanges": "すべての変更を見る"
+    },
+    "cloudSync": {
+        "title": "クラウドバックアップ (GitHub)",
+        "tokenLabel": "GitHub パーソナルアクセストークン",
+        "tokenPlaceholder": "トークンをここに貼り付け...",
+        "tokenHint": "「gist」スコープのみが必要です。",
+        "tokenHowTo": "トークンの取得方法",
+        "push": "クラウドに送信",
+        "pull": "クラウドから復元",
+        "delete": "バックアップを削除",
+        "lastPush": "最終送信:",
+        "lastPull": "最終復元:",
+        "never": "未同期",
+        "pushing": "アップロード中...",
+        "pulling": "ダウンロード中...",
+        "pushSuccess": "バックアップのアップロードに成功しました！",
+        "pullSuccess": "バックアップの復元に成功しました！",
+        "deleteSuccess": "バックアップを削除しました。",
+        "tokenRequired": "まずGitHubトークンを入力してください。",
+        "noBackup": "バックアップが見つかりません。まずデータを送信してください。",
+        "confirmDelete": "クラウドバックアップを削除しますか？この操作は取り消せません。",
+        "confirmPull": "クラウドから復元しますか？クラウドのテンプレートがローカルの同名テンプレートを上書きしますが、ローカルのみのテンプレートは保持されます。",
+        "error": "同期エラー:"
     }
 }

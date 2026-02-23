@@ -28,7 +28,8 @@
         "usedCount": "used",
         "adultContentYes": "Yes (slightly sexual content)",
         "adultContentNo": "No",
-        "apply": "Apply Template"
+        "apply": "Apply Template",
+        "category": "Category:"
     },
     "stats": {
         "title": "📊 Usage Statistics",
@@ -132,7 +133,10 @@
         "storageInfoDesc": "Space used by the extension in the browser.",
         "storageTemplates": "Templates:",
         "storageStats": "Statistics:",
-        "storageTotal": "Total:"
+        "storageTotal": "Total:",
+        "debugPanelUI": "Test Panel UI",
+        "debugPanelUIDesc": "Preview the floating panel inside the dashboard.",
+        "debugPanelUIWarning": "⚠️ Visuals might be distorted due to Dashboard CSS overrides. To test the real UI, go to Pixiv."
     },
     "about": {
         "title": "About",
@@ -164,6 +168,8 @@
         "workTitle": "Work Title",
         "workTitlePlaceholder": "Title that will appear on the work",
         "emoji": "Template Emoji",
+        "category": "Category",
+        "categoryPlaceholder": "E.g.: Genshin Impact",
         "description": "Description",
         "descriptionPlaceholder": "Work description (supports Pixiv formatting)",
         "tags": "Tags *",
@@ -251,6 +257,8 @@
         "aiGenerated": "AI-generated",
         "empty": "empty",
         "none": "none",
+        "uncategorized": "Uncategorized",
+        "allCategories": "All",
         "lastUsed": "Last used",
         "cancel": "Cancel",
         "close": "Close",
@@ -279,5 +287,28 @@
         "popupTitle": "What's New",
         "dontShowAgain": "Don't show again for this version",
         "viewAllChanges": "View All Changes"
+    },
+    "cloudSync": {
+        "title": "Cloud Backup (GitHub)",
+        "tokenLabel": "GitHub Personal Access Token",
+        "tokenPlaceholder": "Paste your token here...",
+        "tokenHint": "Needs only the \"gist\" scope.",
+        "tokenHowTo": "How to get a token",
+        "push": "Push to Cloud",
+        "pull": "Pull from Cloud",
+        "delete": "Delete Backup",
+        "lastPush": "Last push:",
+        "lastPull": "Last pull:",
+        "never": "Never",
+        "pushing": "Uploading...",
+        "pulling": "Downloading...",
+        "pushSuccess": "Backup uploaded successfully!",
+        "pullSuccess": "Backup restored successfully!",
+        "deleteSuccess": "Backup deleted.",
+        "tokenRequired": "Please enter your GitHub token first.",
+        "noBackup": "No backup found. Push your data first.",
+        "confirmDelete": "Delete cloud backup? This cannot be undone.",
+        "confirmPull": "Restore from cloud? Templates from the cloud will overwrite matching local ones, but local-only templates will be kept.",
+        "error": "Sync error:"
     }
 }

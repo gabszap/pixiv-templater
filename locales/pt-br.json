@@ -28,7 +28,8 @@
         "usedCount": "usado",
         "adultContentYes": "Sim (conteúdo levemente sexual)",
         "adultContentNo": "Não",
-        "apply": "Aplicar Template"
+        "apply": "Aplicar Template",
+        "category": "Categoria:"
     },
     "stats": {
         "title": "📊 Estatísticas de Uso",
@@ -132,7 +133,10 @@
         "storageInfoDesc": "Espaço utilizado pela extensão no navegador.",
         "storageTemplates": "Templates:",
         "storageStats": "Estatísticas:",
-        "storageTotal": "Total:"
+        "storageTotal": "Total:",
+        "debugPanelUI": "Testar UI do Painel",
+        "debugPanelUIDesc": "Visualize o painel flutuante dentro do dashboard.",
+        "debugPanelUIWarning": "⚠️ Os visuais podem estar distorcidos devido a conflitos de CSS do Dashboard. Para testar a UI real, vá ao Pixiv."
     },
     "about": {
         "title": "Sobre",
@@ -164,6 +168,8 @@
         "workTitle": "Título da Obra",
         "workTitlePlaceholder": "Título que aparecerá na obra",
         "emoji": "Emoji do Template",
+        "category": "Categoria",
+        "categoryPlaceholder": "Ex: Genshin Impact",
         "description": "Descrição",
         "descriptionPlaceholder": "Descrição da obra (suporta formatação do Pixiv)",
         "tags": "Tags *",
@@ -251,6 +257,8 @@
         "aiGenerated": "Gerado por IA",
         "empty": "vazio",
         "none": "nenhuma",
+        "uncategorized": "Sem Categoria",
+        "allCategories": "Todas",
         "lastUsed": "Último uso",
         "cancel": "Cancelar",
         "close": "Fechar",
@@ -279,5 +287,28 @@
         "popupTitle": "Novidades",
         "dontShowAgain": "Não mostrar novamente para esta versão",
         "viewAllChanges": "Ver Todas as Mudanças"
+    },
+    "cloudSync": {
+        "title": "Backup na Nuvem (GitHub)",
+        "tokenLabel": "Token de Acesso Pessoal do GitHub",
+        "tokenPlaceholder": "Cole seu token aqui...",
+        "tokenHint": "Precisa apenas do escopo \"gist\".",
+        "tokenHowTo": "Como obter um token",
+        "push": "Enviar para Nuvem",
+        "pull": "Restaurar da Nuvem",
+        "delete": "Remover Backup",
+        "lastPush": "Último envio:",
+        "lastPull": "Última restauração:",
+        "never": "Nunca",
+        "pushing": "Enviando...",
+        "pulling": "Baixando...",
+        "pushSuccess": "Backup enviado com sucesso!",
+        "pullSuccess": "Backup restaurado com sucesso!",
+        "deleteSuccess": "Backup removido.",
+        "tokenRequired": "Insira seu token do GitHub primeiro.",
+        "noBackup": "Nenhum backup encontrado. Envie seus dados primeiro.",
+        "confirmDelete": "Remover backup da nuvem? Esta ação não pode ser desfeita.",
+        "confirmPull": "Restaurar da nuvem? Templates da nuvem sobrescreverão os locais equivalentes, mas templates que só existem localmente serão mantidos.",
+        "error": "Erro de sync:"
     }
 }

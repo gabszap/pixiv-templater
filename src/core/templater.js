@@ -603,7 +603,7 @@
   async function initialize() {
     // Silent - version already logged at module load
 
-    // Wait for page to be ready
+    // Wait for page to be ready (Pixiv upload form)
     const checkReady = setInterval(async () => {
       if ($('input[name="title"]').length > 0) {
         clearInterval(checkReady);
