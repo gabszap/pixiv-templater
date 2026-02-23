@@ -260,17 +260,20 @@
   function showChangelogPopup(release, currentVersion, isDebug) {
     const releaseVersion = release.tag_name.replace(/^v/, '');
     const isCurrent = releaseVersion === currentVersion;
-    const isBeta = release.prerelease || releaseVersion.includes('beta');
+    const isBeta = release.prerelease || releaseVersion.includes('beta') || releaseVersion.includes('dev');
 
     // Build version tag
     let versionTagContent = `${release.tag_name}`;
 
     if (isDebug) {
-      versionTagContent += ` <span class="beta-badge">DEBUG MODE</span>`;
+      versionTagContent += ` <span class="beta-badge" style="background: var(--warning-color); color: white; margin-left:8px; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">${t('changelog.debugMode') || 'DEBUG MODE'}</span>`;
     } else if (isCurrent) {
-      versionTagContent += ` <span class="${isBeta ? 'beta-badge' : 'stable-badge'}">${isBeta ? 'BETA' : 'STABLE'}</span>`;
+      versionTagContent += ` <span class="beta-badge" style="background: var(--primary-blue); color: white; margin-left:8px; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">${t('changelog.current') || 'CURRENT'}</span>`;
+      if (isBeta) {
+        versionTagContent += ` <span class="beta-badge" style="background: var(--warning-color); color: white; margin-left:4px; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">${t('changelog.beta') || 'BETA'}</span>`;
+      }
     } else {
-      versionTagContent += ` <span class="beta-badge" style="background: var(--primary-blue); color: white;">NEW</span>`;
+      versionTagContent += ` <span class="beta-badge" style="background: var(--primary-blue); color: white; margin-left:8px; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">${t('changelog.new') || 'NEW'}</span>`;
     }
 
     $("#changelog-popup-version").html(versionTagContent);
@@ -278,6 +281,22 @@
     // Format and set body content
     const formattedBody = formatChangelogBody(release.body || '');
     $("#changelog-popup-body").html(formattedBody);
+
+    // Set up View Release button
+    if (release && release.html_url) {
+      $("#changelog-popup-view-release").off("click").on("click", function (e) {
+        e.preventDefault();
+        window.open(release.html_url, "_blank");
+        closeChangelogPopup();
+      });
+    } else {
+      $("#changelog-popup-view-release").off("click").on("click", function (e) {
+        e.preventDefault();
+        closeChangelogPopup();
+        switchTab('changelog');
+        loadChangelog().catch((err) => console.error("[Options] Error loading changelog:", err));
+      });
+    }
 
     // Show modal
     $("#changelog-popup-modal").addClass("active");
@@ -306,16 +325,25 @@
   // AI TRANSLATION WARNING
   // ============================
 
-  function checkAITranslationWarning() {
+  async function checkAITranslationWarning() {
     if (!window.PixivTemplaterI18n) return;
 
     const currentLang = window.PixivTemplaterI18n.getCurrentLanguage();
     const aiLanguages = ["jp", "zh-cn"];
 
-    if (aiLanguages.includes(currentLang)) {
+    // Check if user already dismissed it
+    const dismissed = await Storage.get("ai_warning_dismissed");
+
+    if (aiLanguages.includes(currentLang) && !dismissed) {
       $("#warning-modal-message").text(t("messages.aiTranslationWarning"));
       $("#warning-modal").addClass("active");
     }
+
+    // Bind the Got It / Close button only once
+    $("#warning-modal-ok, #warning-modal .modal-close").off("click").on("click", async function () {
+      await Storage.set("ai_warning_dismissed", true);
+      $("#warning-modal").removeClass("active");
+    });
   }
 
   // ============================
@@ -444,12 +472,6 @@
     $("#changelog-popup-modal").on("click", function (e) {
       if (e.target === this) closeChangelogPopup();
     });
-    $("#changelog-popup-view-all").on("click", function (e) {
-      e.preventDefault();
-      closeChangelogPopup();
-      switchTab('changelog');
-      loadChangelog().catch((err) => console.error("[Options] Error loading changelog:", err));
-    });
   }
 
   // ============================
@@ -524,6 +546,7 @@
 
   async function loadTemplates() {
     const templatesJson = await Storage.get("templates", "{}");
+    const isDebugMode = await Storage.get("debug_mode", false);
     console.log("[Options] Loading templates, raw JSON:", templatesJson);
 
     let templates;
@@ -645,6 +668,37 @@
         e.stopPropagation();
         await deleteTemplate(name);
       });
+
+      if (isDebugMode) {
+        $card.css("cursor", "crosshair");
+        $card.attr("title", "DEBUG: Clicar para simular uso nas estatísticas");
+        $card.on("click", async function (e) {
+          if ($(e.target).closest(".template-action").length) return;
+          console.log("[Options] DEBUG: Contando click (simulação de uso) para estatísticas:", name);
+
+          try {
+            const statsJson = await Storage.get("template_stats", "{}");
+            let stats = JSON.parse(statsJson);
+
+            if (!stats[name]) {
+              stats[name] = { count: 0, lastUsed: null };
+            }
+            stats[name].count++;
+            stats[name].lastUsed = Date.now();
+
+            await Storage.set("template_stats", JSON.stringify(stats));
+
+            // Reload templates to visually update the count
+            await loadTemplates();
+            // Optional: also reload stats tab if we are on it
+            if ($(".tab[data-tab='stats']").hasClass("active")) {
+              loadStats().catch(err => console.error(err));
+            }
+          } catch (err) {
+            console.error("[Options] Erro ao salvar estatísticas de debug:", err);
+          }
+        });
+      }
 
       $list.append($card);
     });
@@ -1123,20 +1177,20 @@
     const avgUses =
       templatesUsed > 0 ? (totalUses / templatesUsed).toFixed(1) : 0;
     $("#stats-summary").html(`
-      <div class="stat-card" style="background: linear-gradient(135deg, #0096fa 0%, #00d4ff 100%);">
-        <div class="stat-number">${totalUses}</div>
+      <div class="stat-card glass hover-glow" style="--card-color: #0096fa; background: linear-gradient(135deg, rgba(0, 150, 250, 0.15) 0%, rgba(0, 212, 255, 0.15) 100%);">
+        <div class="stat-number gradient-text" style="--gradient: linear-gradient(135deg, #0096fa 0%, #00d4ff 100%);">${totalUses}</div>
         <div class="stat-label">${t("stats.totalUses")}</div>
       </div>
-      <div class="stat-card" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">
-        <div class="stat-number">${templatesUsed}</div>
+      <div class="stat-card glass hover-glow" style="--card-color: #8b5cf6; background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(167, 139, 250, 0.15) 100%);">
+        <div class="stat-number gradient-text" style="--gradient: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">${templatesUsed}</div>
         <div class="stat-label">${t("stats.templatesUsed")}</div>
       </div>
-      <div class="stat-card" style="background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);">
-        <div class="stat-number">${avgUses}</div>
+      <div class="stat-card glass hover-glow" style="--card-color: #ec4899; background: linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(244, 114, 182, 0.15) 100%);">
+        <div class="stat-number gradient-text" style="--gradient: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);">${avgUses}</div>
         <div class="stat-label">${t("stats.averageUses")}</div>
       </div>
-      <div class="stat-card" style="background: linear-gradient(135deg, #10b981 0%, #34d399 100%);">
-        <div class="stat-number">${templateNames.length}</div>
+      <div class="stat-card glass hover-glow" style="--card-color: #10b981; background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(52, 211, 153, 0.15) 100%);">
+        <div class="stat-number gradient-text" style="--gradient: linear-gradient(135deg, #10b981 0%, #34d399 100%);">${templateNames.length}</div>
         <div class="stat-label">${t("stats.totalTemplates")}</div>
       </div>
     `);
@@ -1151,16 +1205,28 @@
     const maxCount = statsArray.length > 0 ? statsArray[0].count : 1;
 
     statsArray.forEach((stat, index) => {
-      const rank =
-        index === 0
-          ? "🥇"
-          : index === 1
-            ? "🥈"
-            : index === 2
-              ? "🥉"
-              : `#${index + 1}`;
+      let rankHtml = "";
+      let rankClass = "";
+      if (index === 0) {
+        rankHtml = "1";
+        rankClass = "rank-gold";
+      } else if (index === 1) {
+        rankHtml = "2";
+        rankClass = "rank-silver";
+      } else if (index === 2) {
+        rankHtml = "3";
+        rankClass = "rank-bronze";
+      } else {
+        rankHtml = `#${index + 1}`;
+        rankClass = "rank-default";
+      }
 
-      const localeCode = window.PixivTemplaterI18n?.getCurrentLanguage() === "pt-br" ? "pt-BR" : "en-US";
+      const lang = window.PixivTemplaterI18n?.getCurrentLanguage();
+      let localeCode = "en-US";
+      if (lang === "pt-br") localeCode = "pt-BR";
+      else if (lang === "jp") localeCode = "ja-JP";
+      else if (lang === "zh-cn") localeCode = "zh-CN";
+
       const lastUsed = stat.lastUsed
         ? new Date(stat.lastUsed).toLocaleString(localeCode, {
           day: "2-digit",
@@ -1176,20 +1242,30 @@
         Math.max(5, (stat.count / maxCount) * 100),
       );
 
+      // Animation delay for staggered load effect
+      const animationDelay = (index * 0.05).toFixed(2);
+
       $list.append(`
-        <div class="stat-item">
-          <div class="stat-progress-bar" style="width: ${percentage}%"></div>
+        <div class="stat-item glass-item fade-in-up" style="animation-delay: ${animationDelay}s">
+          <div class="stat-progress-bar" data-width="${percentage}%"></div>
           <div class="stat-item-left">
-            <div class="stat-rank">${rank}</div>
+            <div class="stat-rank ${rankClass}">${rankHtml}</div>
             <div>
               <div class="stat-name">${stat.name}</div>
               <div class="stat-details">${t("common.lastUsed")}: ${lastUsed}</div>
             </div>
           </div>
-          <div class="stat-count">${stat.count}</div>
+          <div class="stat-count glow-count">${stat.count}</div>
         </div>
       `);
     });
+
+    // Trigger progress bar animations after appending elements to DOM
+    setTimeout(() => {
+      $(".stat-progress-bar").each(function () {
+        $(this).css("width", $(this).attr("data-width"));
+      });
+    }, 100);
   }
 
   async function handleResetStats() {
@@ -1244,10 +1320,11 @@
       const currentVersion = manifest.version_name || manifest.version;
 
       // Display current version info
+      const isCurrentBeta = currentVersion.includes('beta') || currentVersion.includes('dev');
       const versionInfoHtml = `
         <div class="current-version">
-          <div class="version-badge ${currentVersion.includes('beta') ? 'beta' : 'stable'}">
-            ${currentVersion.includes('beta') ? 'BETA' : 'STABLE'}
+          <div class="version-badge ${isCurrentBeta ? 'beta' : 'stable'}">
+            ${isCurrentBeta ? (t('changelog.beta') || 'BETA') : (t('changelog.stable') || 'STABLE')}
           </div>
           <div class="version-number">${currentVersion}</div>
           <div class="version-label">${t('changelog.currentVersion')}</div>
@@ -1255,12 +1332,19 @@
       `;
       $("#current-version-info").html(versionInfoHtml);
 
+      // Update the main card background color based on version type
+      if (isCurrentBeta) {
+        $("#current-version-info").removeClass("stable").addClass("beta");
+      } else {
+        $("#current-version-info").removeClass("beta").addClass("stable");
+      }
+
       // Render changelog entries
       $list.empty();
 
       releases.forEach(release => {
         const isCurrent = release.tag_name === `v${currentVersion}` || release.tag_name === currentVersion;
-        const isBeta = release.prerelease || release.tag_name.includes('beta');
+        const isBeta = release.prerelease || release.tag_name.includes('beta') || release.tag_name.includes('dev');
         const releaseDate = new Date(release.published_at).toLocaleDateString(
           window.PixivTemplaterI18n?.getCurrentLanguage() === 'pt-br' ? 'pt-BR' : 'en-US',
           { year: 'numeric', month: 'long', day: 'numeric' }
@@ -1272,7 +1356,7 @@
               <div class="changelog-version">
                 <span class="version-tag">${release.tag_name}</span>
                 ${isCurrent ? '<span class="current-badge">' + t('changelog.current') + '</span>' : ''}
-                ${isBeta ? '<span class="beta-badge">BETA</span>' : ''}
+                ${isBeta ? '<span class="beta-badge">' + (t('changelog.beta') || 'BETA') + '</span>' : ''}
               </div>
               <div class="changelog-date">${releaseDate}</div>
             </div>

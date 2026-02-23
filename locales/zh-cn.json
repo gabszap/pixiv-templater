@@ -89,6 +89,7 @@
         "tabStats": "统计",
         "tabAbout": "关于",
         "tabShortcuts": "快捷键",
+        "tabChangelog": "更新日志",
         "tabSettings": "设置",
         "manageTemplates": "管理模板",
         "newTemplate": "新建模板",
@@ -254,6 +255,29 @@
         "cancel": "取消",
         "close": "关闭",
         "save": "保存",
-        "deleteConfirm": "DELETE"
+        "deleteConfirm": "DELETE",
+        "gotIt": "知道了！ 👍"
+    },
+    "changelog": {
+        "title": "更新日志",
+        "refresh": "刷新",
+        "viewOnGitHub": "在 GitHub 上查看",
+        "loading": "正在加载更新日志...",
+        "error": "加载更新日志失败",
+        "errorHint": "请检查您的网络连接或稍后再试。",
+        "retry": "重试",
+        "noReleases": "未找到发布版本",
+        "noReleasesHint": "目前没有可用的发布版本。",
+        "currentVersion": "当前版本",
+        "current": "当前",
+        "new": "最新",
+        "beta": "测试版",
+        "stable": "稳定版",
+        "debugMode": "调试模式",
+        "viewRelease": "查看发布版本",
+        "noNotes": "无发布说明",
+        "popupTitle": "新功能",
+        "dontShowAgain": "不再显示此版本的更新",
+        "viewAllChanges": "查看所有更改"
     }
 }
