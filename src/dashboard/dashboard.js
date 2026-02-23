@@ -1895,7 +1895,7 @@
               <div class="changelog-version">
                 <span class="version-tag">${release.tag_name}</span>
                 ${isCurrent ? '<span class="current-badge">' + t('changelog.current') + '</span>' : ''}
-                ${isBeta ? '<span class="beta-badge">' + (t('changelog.beta') || 'BETA') + '</span>' : ''}
+                ${isBeta ? '<span class="beta-badge">' + (t('changelog.beta') || 'BETA') + '</span>' : '<span class="stable-badge">' + (t('changelog.stable') || 'STABLE') + '</span>'}
               </div>
               <div class="changelog-date">${releaseDate}</div>
             </div>

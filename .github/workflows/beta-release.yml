@@ -128,9 +128,14 @@ jobs:
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             NOTES="${{ github.event.inputs.release_notes }}"
           else
-            # Get only the last commit message for concise notes
-            LAST_MSG=$(git log -1 --pretty=format:'- %s')
-            NOTES="Beta release from dev branch.\n\nLatest change:\n${LAST_MSG}"
+            # Get the full commit message (subject + body)
+            LAST_SUBJECT=$(git log -1 --pretty=format:'%s')
+            LAST_BODY=$(git log -1 --pretty=format:'%b')
+            if [ -n "$LAST_BODY" ]; then
+              NOTES="Beta release from dev branch.\n\nLatest change:\n- ${LAST_SUBJECT}\n\n${LAST_BODY}"
+            else
+              NOTES="Beta release from dev branch.\n\nLatest change:\n- ${LAST_SUBJECT}"
+            fi
           fi
           
           # Create release notes file using echo -e to evaluate newlines

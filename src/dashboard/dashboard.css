@@ -2010,25 +2010,24 @@ option {
 
 .changelog-entry:hover {
     box-shadow: var(--shadow-md);
-    border-color: var(--primary-blue);
-}
-
-.changelog-entry.current {
-    border: 2px solid var(--primary-blue);
-    box-shadow: 0 0 20px rgba(0, 150, 250, 0.3);
-}
-
-.changelog-entry.current.beta {
-    border: 2px solid #f59e0b !important;
-    box-shadow: 0 0 20px rgba(245, 158, 11, 0.3) !important;
-}
-
-.changelog-entry.beta {
-    border-left: 4px solid #f59e0b;
 }
 
 .changelog-entry.stable {
-    border-left: 4px solid #10b981;
+    border: 1px solid #10b981;
+}
+
+.changelog-entry.beta {
+    border: 1px solid #f59e0b;
+}
+
+.changelog-entry.current.stable {
+    border: 2px solid #10b981;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+.changelog-entry.current.beta {
+    border: 2px solid #f59e0b;
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
 }
 
 .changelog-header {
@@ -2068,6 +2067,16 @@ option {
     padding: 2px 8px;
     background: #f59e0b;
     color: #1f2937;
+    border-radius: 12px;
+    text-transform: uppercase;
+}
+
+.stable-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    background: #10b981;
+    color: white;
     border-radius: 12px;
     text-transform: uppercase;
 }
